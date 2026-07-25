@@ -37,7 +37,6 @@ const rssUrl = new URL(siteConfig.discovery.rssPath, Astro.site);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <meta name="author" content={siteConfig.author.name} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
@@ -73,19 +72,7 @@ const rssUrl = new URL(siteConfig.discovery.rssPath, Astro.site);
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <title>{documentTitle}</title>
-    <script is:inline>
-      (() => {
-        try {
-          const storedTheme = localStorage.getItem('praxis-theme');
-          if (storedTheme === 'light' || storedTheme === 'dark') {
-            document.documentElement.dataset.theme = storedTheme;
-          }
-        } catch {
-          // Storage access can be blocked; the CSS/system preference remains usable.
-        }
-        document.documentElement.classList.add('js');
-      })();
-    </script>
+    <script is:inline src="/scripts/theme-init.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">{uiCopy.accessibility.skipToContent}</a>

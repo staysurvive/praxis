@@ -10,7 +10,7 @@ import {
   renderContentEntry,
   toContentSummary,
 } from '../../lib/content';
-import { getContentPath, getContentUrl } from '../../lib/content/domain';
+import { getContentPath, getContentUrl, isPublicStatus } from '../../lib/content/domain';
 import { formatDateKey } from '../../lib/date';
 import { normalizePracticeEvents, toPracticeSourceEntry } from '../../lib/practice';
 
@@ -32,7 +32,7 @@ export async function getStaticPaths() {
 const { contentId } = Astro.props;
 const entry = await getEntryByContentId(contentId);
 
-if (!entry || entry.data.status === 'draft') {
+if (!entry || !isPublicStatus(entry.data.status)) {
   throw new Error(`无法为公开路由找到内容：${contentId}`);
 }
 

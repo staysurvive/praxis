@@ -55,6 +55,11 @@ test('public pages expose canonical and social discovery metadata', async ({ pag
     'href',
     'https://praxis.example/rss.xml',
   );
+  await expect(page.locator('script:not([src])')).toHaveCount(0);
+  await expect(page.locator('style')).toHaveCount(0);
+  await expect(page.locator('meta[name="generator"]')).toHaveCount(0);
+  await expect(page.locator('script[src="/scripts/theme-init.js"]')).toHaveCount(1);
+  await expect(page.locator('script[src="/scripts/theme-toggle.js"]')).toHaveCount(1);
   await expect(page.getByRole('link', { name: 'RSS', exact: true })).toHaveAttribute(
     'href',
     '/rss.xml',
@@ -123,6 +128,22 @@ test('theme control persists an explicit dark theme', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', /light|dark/);
   const storedTheme = await page.evaluate(() => localStorage.getItem('praxis-theme'));
   expect(storedTheme === 'light' || storedTheme === 'dark').toBe(true);
+});
+
+test('theme control tracks system theme changes without an explicit preference', async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+
+  const toggle = page.getByRole('button', { name: '切换到深色主题' });
+  await expect(toggle).toHaveAttribute('title', '切换到深色主题');
+
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(page.getByRole('button', { name: '切换到浅色主题' })).toHaveAttribute(
+    'title',
+    '切换到浅色主题',
+  );
 });
 
 test('a 320px viewport has no page-level horizontal overflow', async ({ page }) => {

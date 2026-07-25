@@ -4,6 +4,8 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
+import { resolveSiteUrl } from './config/site-url';
+
 /** @param {string} page */
 function isIndexablePage(page) {
   const { pathname } = new URL(page);
@@ -17,9 +19,12 @@ function isIndexablePage(page) {
 }
 
 export default defineConfig({
-  site: process.env.SITE_URL ?? 'https://praxis.example',
+  site: resolveSiteUrl(process.env.SITE_URL),
   output: 'static',
   trailingSlash: 'never',
+  build: {
+    inlineStylesheets: 'never',
+  },
   integrations: [mdx(), sitemap({ filter: isIndexablePage })],
   vite: {
     plugins: [tailwindcss()],

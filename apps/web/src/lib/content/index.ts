@@ -2,7 +2,7 @@ import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
 import { uiCopy } from '../../config/copy';
-import { getContentUrl } from './domain';
+import { getContentUrl, isPublicStatus } from './domain';
 import type { ContentType, Stage, Status } from './domain';
 import type { ContentFrontmatter } from './schema';
 
@@ -28,7 +28,7 @@ function matchesFilter(entry: ContentCollectionEntry, filter: ContentFilter): bo
   const { data } = entry;
 
   return (
-    (filter.includeDrafts || data.status !== 'draft') &&
+    (filter.includeDrafts || isPublicStatus(data.status)) &&
     (!filter.type || data.type === filter.type) &&
     (!filter.stage || data.stage === filter.stage) &&
     (!filter.status || data.status === filter.status) &&

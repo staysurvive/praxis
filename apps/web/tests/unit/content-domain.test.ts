@@ -5,6 +5,7 @@ import {
   getContentPath,
   getContentTypeFromPath,
   getContentUrl,
+  isPublicStatus,
 } from '../../src/lib/content/domain';
 
 describe('type-first URL contract', () => {
@@ -21,5 +22,12 @@ describe('type-first URL contract', () => {
     for (const type of contentTypes) {
       expect(getContentTypeFromPath(getContentPath(type))).toBe(type);
     }
+  });
+
+  it('keeps draft content out of every public projection', () => {
+    expect(isPublicStatus('draft')).toBe(false);
+    expect(isPublicStatus('ongoing')).toBe(true);
+    expect(isPublicStatus('completed')).toBe(true);
+    expect(isPublicStatus('reflected')).toBe(true);
   });
 });

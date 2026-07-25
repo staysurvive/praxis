@@ -36,6 +36,10 @@ export function isContentType(value: string): value is ContentType {
   return contentTypes.some((type) => type === value);
 }
 
+export function isPublicStatus(status: Status): boolean {
+  return status !== 'draft';
+}
+
 export function getContentTypeFromPath(path: string): ContentType | undefined {
   return pathToContentType[path];
 }

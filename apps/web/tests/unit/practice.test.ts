@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import type { PracticeSourceEntry } from '../../src/lib/practice';
+import { contentSchema } from '../../src/lib/content/schema';
 import {
   buildHeatmapCalendar,
   buildPracticeDataset,
+  buildPublicPracticeDataset,
   normalizePracticeEvents,
 } from '../../src/lib/practice';
+import { createContentFixture } from '../fixtures/content';
 
 const baseEntry: PracticeSourceEntry = {
   contentId: 'praxis-project-0001',
@@ -72,6 +75,20 @@ describe('practice event normalization', () => {
 
     expect(dataset.totalEvents).toBe(1);
     expect(dataset.events.every((event) => event.date !== withUpdatedAt.updatedAt)).toBe(true);
+  });
+
+  it('excludes draft content from the public heatmap dataset', () => {
+    const published = contentSchema.parse(createContentFixture('project'));
+    const draft = contentSchema.parse({
+      ...createContentFixture('note'),
+      status: 'draft',
+      contentId: 'fixture-note-draft',
+    });
+
+    const dataset = buildPublicPracticeDataset([published, draft]);
+
+    expect(dataset.contentCount).toBe(1);
+    expect(dataset.events.every((event) => event.contentId !== draft.contentId)).toBe(true);
   });
 
   it('builds a fixed 53-week calendar ending around the requested date', () => {

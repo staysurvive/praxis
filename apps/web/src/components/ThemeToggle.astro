@@ -22,35 +22,7 @@ import { uiCopy } from '../config/copy';
   </svg>
 </button>
 
-<script>
-  const button = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
-
-  function resolvedTheme(): 'light' | 'dark' {
-    const explicit = document.documentElement.dataset.theme;
-    if (explicit === 'light' || explicit === 'dark') return explicit;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-
-  function updateButtonLabel(): void {
-    if (!button) return;
-    const current = resolvedTheme();
-    const nextLabel = current === 'dark' ? button.dataset.lightLabel : button.dataset.darkLabel;
-    if (nextLabel) button.setAttribute('aria-label', nextLabel);
-  }
-
-  button?.addEventListener('click', () => {
-    const next = resolvedTheme() === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = next;
-    try {
-      localStorage.setItem('praxis-theme', next);
-    } catch {
-      // Theme persistence is optional; the CSS/system preference remains the fallback.
-    }
-    updateButtonLabel();
-  });
-
-  updateButtonLabel();
-</script>
+<script is:inline src="/scripts/theme-toggle.js"></script>
 
 <style>
   .theme-toggle {

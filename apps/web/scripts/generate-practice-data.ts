@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 
 import { contentSchema } from '../src/lib/content/schema';
-import { buildPracticeDataset, toPracticeSourceEntry } from '../src/lib/practice';
+import { buildPublicPracticeDataset } from '../src/lib/practice';
+import type { ContentFrontmatter } from '../src/lib/content/schema';
 
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repositoryRoot = path.resolve(webRoot, '../..');
@@ -30,7 +31,7 @@ async function findContentFiles(directory: string): Promise<string[]> {
 
 async function main(): Promise<void> {
   const files = await findContentFiles(contentRoot);
-  const parsedEntries = [];
+  const parsedEntries: ContentFrontmatter[] = [];
   const contentIds = new Set<string>();
   const urls = new Set<string>();
 
@@ -59,10 +60,10 @@ async function main(): Promise<void> {
     }
     urls.add(urlKey);
 
-    parsedEntries.push(toPracticeSourceEntry(parsed.data));
+    parsedEntries.push(parsed.data);
   }
 
-  const dataset = buildPracticeDataset(parsedEntries);
+  const dataset = buildPublicPracticeDataset(parsedEntries);
   await mkdir(path.dirname(outputFile), { recursive: true });
   await writeFile(outputFile, `${JSON.stringify(dataset, null, 2)}\n`, 'utf8');
 

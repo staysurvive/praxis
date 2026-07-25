@@ -1,3 +1,4 @@
+import { isPublicStatus } from './content/domain';
 import type { ContentType, PracticeKind, Stage } from './content/domain';
 import type { ContentFrontmatter, PracticeLogEntry } from './content/schema';
 
@@ -132,6 +133,14 @@ export function buildPracticeDataset(entries: readonly PracticeSourceEntry[]): P
     events,
     days,
   };
+}
+
+export function buildPublicPracticeDataset(
+  entries: readonly ContentFrontmatter[],
+): PracticeDataset {
+  return buildPracticeDataset(
+    entries.filter((entry) => isPublicStatus(entry.status)).map(toPracticeSourceEntry),
+  );
 }
 
 function parseDateKey(dateKey: string): Date {
