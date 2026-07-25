@@ -1,0 +1,214 @@
+---
+import ContentCard from '../components/ContentCard.astro';
+import PracticeHeatmap from '../components/PracticeHeatmap.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { homeContent } from '../config/home';
+import { uiCopy } from '../config/copy';
+import { siteConfig } from '../config/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getLatestEntries } from '../lib/content';
+import { practiceDataset } from '../lib/practice-data';
+
+const latestEntries = await getLatestEntries(3);
+const currentProject = latestEntries.find((entry) => entry.type === 'project');
+---
+
+<BaseLayout title={siteConfig.title}>
+  <section class="hero-section">
+    <div
+      class="page-shell grid gap-12 pt-20 pb-16 md:pt-32 md:pb-24 lg:grid-cols-[minmax(0,1.35fr)_minmax(17rem,0.65fr)] lg:items-end"
+    >
+      <div>
+        <p class="eyebrow mb-7">{homeContent.hero.eyebrow}</p>
+        <h1 class="display-title">{homeContent.hero.title}</h1>
+      </div>
+      <div class="hero-copy lg:pb-3">
+        <p class="hero-lead">{homeContent.hero.lead}</p>
+        <p class="body-copy mt-6">{homeContent.hero.description}</p>
+        {
+          currentProject && (
+            <a class="text-link mt-7" href={currentProject.url}>
+              {uiCopy.actions.viewProject}
+            </a>
+          )
+        }
+      </div>
+    </div>
+    <div class="page-shell pb-12 md:pb-20">
+      <p class="hero-manifesto">{siteConfig.motto}</p>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="page-shell">
+      <SectionHeading
+        eyebrow={homeContent.philosophy.eyebrow}
+        title={homeContent.philosophy.title}
+        description={homeContent.philosophy.description}
+      />
+
+      <div class="philosophy-grid mt-16 grid gap-0 lg:grid-cols-3">
+        {
+          homeContent.philosophy.stages.map((stage) => (
+            <article>
+              <div class="flex items-start justify-between gap-5">
+                <span class="philosophy-index">{stage.index}</span>
+                <span class="philosophy-subtitle">{stage.subtitle}</span>
+              </div>
+              <h3>{stage.title}</h3>
+              <p>{stage.description}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div
+      class="page-shell grid gap-10 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:items-start"
+    >
+      <div>
+        <p class="eyebrow mb-5">{homeContent.now.eyebrow}</p>
+        <h2 class="now-title">{homeContent.now.title}</h2>
+      </div>
+      <div class="now-card surface-card">
+        <p>{homeContent.now.description}</p>
+        {currentProject && <ContentCard entry={currentProject} featured />}
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="page-shell">
+      <PracticeHeatmap dataset={practiceDataset} />
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="page-shell">
+      <SectionHeading
+        eyebrow={homeContent.latest.eyebrow}
+        title={homeContent.latest.title}
+        description={homeContent.latest.description}
+      />
+      <div class="mt-14">
+        {latestEntries.map((entry) => <ContentCard entry={entry} />)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero-section {
+    min-height: calc(100svh - var(--header-height));
+  }
+
+  .hero-copy {
+    max-width: 32rem;
+  }
+
+  .hero-lead,
+  .hero-copy :global(.body-copy) {
+    margin-bottom: 0;
+  }
+
+  .hero-lead {
+    margin-top: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.45rem, 2.5vw, 2.15rem);
+    line-height: 1.45;
+  }
+
+  .hero-manifesto {
+    margin: 0;
+    color: var(--color-text-faint);
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 2vw, 1.45rem);
+    letter-spacing: 0.08em;
+    writing-mode: horizontal-tb;
+  }
+
+  .philosophy-grid {
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .philosophy-grid article {
+    padding: clamp(1.6rem, 4vw, 3rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .philosophy-index,
+  .philosophy-subtitle {
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .philosophy-index {
+    color: var(--color-accent);
+  }
+
+  .philosophy-subtitle {
+    color: var(--color-text-faint);
+  }
+
+  .philosophy-grid h3 {
+    margin: clamp(3rem, 7vw, 6.5rem) 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3.6rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+  }
+
+  .philosophy-grid p {
+    margin: 1rem 0 0;
+    color: var(--color-text-muted);
+    line-height: 1.9;
+  }
+
+  .now-title {
+    max-width: 13ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.1rem, 4.5vw, 4rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1.18;
+  }
+
+  .now-card {
+    padding: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .now-card > p {
+    max-width: 44rem;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.9;
+  }
+
+  .now-card :global(.content-card--featured) {
+    margin-top: 2rem;
+    padding: 2rem 0 0;
+    border-width: 1px 0 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  @media (min-width: 64rem) {
+    .philosophy-grid article {
+      min-height: 31rem;
+      border-right: 1px solid var(--color-border);
+      border-bottom: 0;
+    }
+
+    .philosophy-grid article:last-child {
+      border-right: 0;
+    }
+  }
+</style>

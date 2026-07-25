@@ -1,0 +1,45 @@
+---
+import { uiCopy } from '../config/copy';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404" description={uiCopy.errors.notFoundDescription} canonicalPath="/404">
+  <section
+    class="error-page page-shell grid min-h-[72svh] content-center gap-10 py-20 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1.35fr)] lg:items-center"
+  >
+    <p class="error-code" aria-hidden="true">404</p>
+    <div>
+      <p class="eyebrow mb-5">Not found</p>
+      <h1>{uiCopy.errors.notFoundTitle}</h1>
+      <p>{uiCopy.errors.notFoundDescription}</p>
+      <a class="text-link mt-8" href="/">{uiCopy.actions.backHome}</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .error-code {
+    margin: 0;
+    color: var(--color-accent-soft);
+    font-family: var(--font-display);
+    font-size: clamp(8rem, 28vw, 22rem);
+    line-height: 0.7;
+  }
+
+  h1 {
+    max-width: 12ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 500;
+    letter-spacing: -0.05em;
+    line-height: 1.08;
+  }
+
+  div > p:last-of-type {
+    max-width: 34rem;
+    margin: 1.5rem 0 0;
+    color: var(--color-text-muted);
+    line-height: 1.9;
+  }
+</style>

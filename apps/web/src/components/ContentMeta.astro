@@ -1,0 +1,26 @@
+---
+import type { ContentSummary } from '../lib/content';
+import { formatDateKey } from '../lib/date';
+
+interface Props {
+  entry: ContentSummary;
+  showStatus?: boolean;
+}
+
+const { entry, showStatus = true } = Astro.props;
+---
+
+<div class="flex flex-wrap items-center gap-2" aria-label={`${entry.typeLabel}内容信息`}>
+  <span class="meta-pill">{entry.typeLabel}</span>
+  <span class="meta-pill">{entry.stageLabel}</span>
+  {showStatus && <span class="meta-pill">{entry.statusLabel}</span>}
+  <time class="content-date" datetime={entry.publishedAt}>{formatDateKey(entry.publishedAt)}</time>
+</div>
+
+<style>
+  .content-date {
+    margin-left: 0.25rem;
+    color: var(--color-text-faint);
+    font-size: 0.78rem;
+  }
+</style>

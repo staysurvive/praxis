@@ -1,0 +1,30 @@
+{
+  "name": "@praxis/web",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "generate:practice": "tsx scripts/generate-practice-data.ts",
+    "predev": "npm run generate:practice",
+    "dev": "astro dev",
+    "prebuild": "npm run generate:practice",
+    "build": "astro build",
+    "preview": "astro preview",
+    "lint": "eslint .",
+    "pretypecheck": "npm run generate:practice",
+    "typecheck": "astro check",
+    "test:unit": "vitest run",
+    "test:e2e": "npm run build && playwright test",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^7.0.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.1.3",
+    "gray-matter": "^4.0.3",
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.4.3"
+  }
+}

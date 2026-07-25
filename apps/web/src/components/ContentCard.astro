@@ -1,0 +1,65 @@
+---
+import { uiCopy } from '../config/copy';
+import type { ContentSummary } from '../lib/content';
+import ContentMeta from './ContentMeta.astro';
+
+interface Props {
+  entry: ContentSummary;
+  featured?: boolean;
+}
+
+const { entry, featured = false } = Astro.props;
+---
+
+<article class:list={['content-card', featured && 'content-card--featured']}>
+  <ContentMeta entry={entry} showStatus={featured} />
+  <div class="mt-7 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+    <div>
+      <h3 class="content-title">
+        <a href={entry.url}>{entry.title}</a>
+      </h3>
+      <p class="content-summary">{entry.summary}</p>
+    </div>
+    <a class="text-link whitespace-nowrap" href={entry.url}>{uiCopy.actions.readMore}</a>
+  </div>
+</article>
+
+<style>
+  .content-card {
+    padding-block: clamp(2rem, 4vw, 3.2rem);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .content-card--featured {
+    padding: clamp(1.6rem, 4vw, 3rem);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .content-title {
+    max-width: 24ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.55rem, 3.2vw, 2.6rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.22;
+  }
+
+  .content-title a {
+    text-decoration: none;
+  }
+
+  .content-title a:hover {
+    color: var(--color-accent-strong);
+  }
+
+  .content-summary {
+    max-width: 48rem;
+    margin: 1rem 0 0;
+    color: var(--color-text-muted);
+    line-height: 1.85;
+  }
+</style>

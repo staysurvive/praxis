@@ -1,0 +1,112 @@
+---
+import { uiCopy } from '../config/copy';
+import type { NormalizedPracticeEvent } from '../lib/practice';
+import { formatDateKey } from '../lib/date';
+
+interface Props {
+  events: NormalizedPracticeEvent[];
+}
+
+const { events } = Astro.props;
+const orderedEvents = [...events].reverse();
+---
+
+<section class="practice-timeline" aria-labelledby="practice-timeline-title">
+  <header class="timeline-heading">
+    <p class="eyebrow">{uiCopy.timeline.eyebrow}</p>
+    <h2 id="practice-timeline-title">{uiCopy.timeline.title}</h2>
+    <p>{uiCopy.timeline.description}</p>
+  </header>
+
+  <ol>
+    {
+      orderedEvents.map((event) => (
+        <li>
+          <span class="timeline-dot" aria-hidden="true" />
+          <div class="timeline-meta">
+            <span>{uiCopy.practiceKinds[event.kind]}</span>
+            <time datetime={event.date}>{formatDateKey(event.date)}</time>
+          </div>
+          <p>{event.note ?? uiCopy.practiceKinds[event.kind]}</p>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .practice-timeline {
+    padding-block: clamp(4rem, 8vw, 7rem);
+  }
+
+  .timeline-heading {
+    max-width: 38rem;
+  }
+
+  .timeline-heading h2,
+  .timeline-heading p {
+    margin: 0;
+  }
+
+  .timeline-heading h2 {
+    margin-top: 0.9rem;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 500;
+  }
+
+  .timeline-heading > p:last-child {
+    margin-top: 1rem;
+    color: var(--color-text-muted);
+  }
+
+  ol {
+    max-width: 48rem;
+    margin: 3rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    position: relative;
+    padding: 0 0 2.4rem 2rem;
+    border-left: 1px solid var(--color-border);
+  }
+
+  li:last-child {
+    padding-bottom: 0;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    top: 0.25rem;
+    left: -0.36rem;
+    width: 0.68rem;
+    height: 0.68rem;
+    border: 2px solid var(--color-page);
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 1px var(--color-accent);
+  }
+
+  .timeline-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem 1rem;
+    align-items: baseline;
+    color: var(--color-text-faint);
+    font-size: 0.76rem;
+  }
+
+  .timeline-meta span {
+    color: var(--color-accent);
+    font-weight: 750;
+    letter-spacing: 0.08em;
+  }
+
+  li p {
+    margin: 0.55rem 0 0;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+  }
+</style>

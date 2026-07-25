@@ -1,0 +1,19 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  description?: string;
+}
+
+const { eyebrow, title, description } = Astro.props;
+---
+
+<header
+  class="section-heading grid gap-6 lg:grid-cols-[minmax(0,0.72fr)_minmax(18rem,0.48fr)] lg:items-end"
+>
+  <div>
+    <p class="eyebrow mb-4">{eyebrow}</p>
+    <h2 class="section-title">{title}</h2>
+  </div>
+  {description && <p class="body-copy m-0 lg:justify-self-end">{description}</p>}
+</header>

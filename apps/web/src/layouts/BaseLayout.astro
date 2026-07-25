@@ -1,0 +1,65 @@
+---
+import '../styles/global.css';
+
+import { uiCopy } from '../config/copy';
+import { siteConfig } from '../config/site';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonicalPath?: string;
+}
+
+const {
+  title,
+  description = siteConfig.description,
+  canonicalPath = Astro.url.pathname,
+} = Astro.props;
+const documentTitle = title === siteConfig.title ? title : `${title} · ${siteConfig.name}`;
+const canonicalUrl = new URL(canonicalPath, Astro.site);
+---
+
+<!doctype html>
+<html lang={siteConfig.locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f3f1eb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#11110f" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content={siteConfig.name} />
+    <meta property="og:title" content={documentTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>{documentTitle}</title>
+    <script is:inline>
+      (() => {
+        try {
+          const storedTheme = localStorage.getItem('praxis-theme');
+          if (storedTheme === 'light' || storedTheme === 'dark') {
+            document.documentElement.dataset.theme = storedTheme;
+          }
+        } catch {
+          // Storage access can be blocked; the CSS/system preference remains usable.
+        }
+        document.documentElement.classList.add('js');
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">{uiCopy.accessibility.skipToContent}</a>
+    <SiteHeader currentPath={Astro.url.pathname} />
+    <main id="main-content">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>

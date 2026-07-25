@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# Astro build and generated state
+apps/web/.astro/
+apps/web/dist/
+apps/web/src/generated/
+apps/web/playwright-report/
+apps/web/test-results/
+
+# local environment and logs
+.env
+.env.*
+!.env.example
+*.log
+
+# editors and operating systems
+.DS_Store
+.idea/

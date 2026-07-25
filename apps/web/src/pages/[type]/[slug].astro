@@ -1,0 +1,161 @@
+---
+import ContentMeta from '../../components/ContentMeta.astro';
+import JourneyPanel from '../../components/JourneyPanel.astro';
+import PracticeTimeline from '../../components/PracticeTimeline.astro';
+import { uiCopy } from '../../config/copy';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  getContentEntries,
+  getEntryByContentId,
+  renderContentEntry,
+  toContentSummary,
+} from '../../lib/content';
+import { getContentPath, getContentUrl } from '../../lib/content/domain';
+import { formatDateKey } from '../../lib/date';
+import { normalizePracticeEvents, toPracticeSourceEntry } from '../../lib/practice';
+
+interface Props {
+  contentId: string;
+}
+
+export async function getStaticPaths() {
+  const entries = await getContentEntries();
+  return entries.map((entry) => ({
+    params: {
+      type: getContentPath(entry.data.type),
+      slug: entry.data.slug,
+    },
+    props: { contentId: entry.data.contentId },
+  }));
+}
+
+const { contentId } = Astro.props;
+const entry = await getEntryByContentId(contentId);
+
+if (!entry || entry.data.status === 'draft') {
+  throw new Error(`无法为公开路由找到内容：${contentId}`);
+}
+
+const summary = toContentSummary(entry);
+const { Content } = await renderContentEntry(entry);
+const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data)]);
+---
+
+<BaseLayout title={summary.title} description={summary.summary} canonicalPath={summary.url}>
+  <article>
+    <header class="content-hero">
+      <div class="page-shell pt-16 pb-16 md:pt-24 md:pb-24">
+        <a class="content-back" href={getContentUrl(summary.type)}>
+          ← {summary.typeLabel}
+        </a>
+        <div
+          class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(16rem,0.45fr)] lg:items-end"
+        >
+          <div>
+            <ContentMeta entry={summary} />
+            <h1>{summary.title}</h1>
+          </div>
+          <p class="summary">{summary.summary}</p>
+        </div>
+      </div>
+    </header>
+
+    <div
+      class="page-shell grid gap-12 py-16 md:py-24 lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-start"
+    >
+      <div class="article-prose">
+        <Content />
+      </div>
+      <aside class="content-aside">
+        <dl>
+          <div>
+            <dt>{uiCopy.detail.contentId}</dt>
+            <dd>{summary.contentId}</dd>
+          </div>
+          <div>
+            <dt>{uiCopy.detail.updatedAt}</dt>
+            <dd><time datetime={summary.updatedAt}>{formatDateKey(summary.updatedAt)}</time></dd>
+          </div>
+          <div>
+            <dt>{uiCopy.detail.tags}</dt>
+            <dd class="flex flex-wrap gap-2">
+              {summary.tags.map((tag) => <span class="meta-pill">{tag}</span>)}
+            </dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+
+    <div class="page-shell">
+      <JourneyPanel journey={summary.journey} />
+      <PracticeTimeline events={practiceEvents} />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .content-hero {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .content-back {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  h1 {
+    max-width: 18ch;
+    margin: 2rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 7vw, 6.2rem);
+    font-weight: 500;
+    letter-spacing: -0.055em;
+    line-height: 1.04;
+  }
+
+  .summary {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.9;
+  }
+
+  .content-aside {
+    position: sticky;
+    top: 2rem;
+  }
+
+  .content-aside dl,
+  .content-aside dd {
+    margin: 0;
+  }
+
+  .content-aside dl > div {
+    padding-block: 1.15rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .content-aside dt {
+    margin-bottom: 0.55rem;
+    color: var(--color-text-faint);
+    font-size: 0.7rem;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .content-aside dd {
+    overflow-wrap: anywhere;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 63.99rem) {
+    .content-aside {
+      position: static;
+      order: -1;
+    }
+  }
+</style>

@@ -1,0 +1,113 @@
+---
+import { uiCopy } from '../config/copy';
+---
+
+<button
+  class="theme-toggle"
+  type="button"
+  data-theme-toggle
+  data-light-label={uiCopy.actions.switchToLight}
+  data-dark-label={uiCopy.actions.switchToDark}
+  aria-label={uiCopy.actions.switchTheme}
+  title={uiCopy.actions.switchTheme}
+>
+  <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="3.5"></circle>
+    <path
+      d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56"
+    ></path>
+  </svg>
+  <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"></path>
+  </svg>
+</button>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+
+  function resolvedTheme(): 'light' | 'dark' {
+    const explicit = document.documentElement.dataset.theme;
+    if (explicit === 'light' || explicit === 'dark') return explicit;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function updateButtonLabel(): void {
+    if (!button) return;
+    const current = resolvedTheme();
+    const nextLabel = current === 'dark' ? button.dataset.lightLabel : button.dataset.darkLabel;
+    if (nextLabel) button.setAttribute('aria-label', nextLabel);
+  }
+
+  button?.addEventListener('click', () => {
+    const next = resolvedTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem('praxis-theme', next);
+    } catch {
+      // Theme persistence is optional; the CSS/system preference remains the fallback.
+    }
+    updateButtonLabel();
+  });
+
+  updateButtonLabel();
+</script>
+
+<style>
+  .theme-toggle {
+    display: none;
+    width: 2.55rem;
+    height: 2.55rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      background var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+  }
+
+  :global(.js) .theme-toggle {
+    display: inline-flex;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-raised);
+    transform: translateY(-1px);
+  }
+
+  .theme-icon {
+    width: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+  }
+
+  .theme-icon--moon {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark']) .theme-icon--sun {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark']) .theme-icon--moon {
+    display: block;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .theme-icon--sun {
+      display: none;
+    }
+
+    :global(:root:not([data-theme='light'])) .theme-icon--moon {
+      display: block;
+    }
+  }
+</style>

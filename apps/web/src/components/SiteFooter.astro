@@ -1,0 +1,46 @@
+---
+import { siteConfig } from '../config/site';
+import { uiCopy } from '../config/copy';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="page-shell grid gap-5 py-8 sm:grid-cols-2 sm:items-end">
+    <div>
+      <p class="footer-name">{siteConfig.name}</p>
+      <p class="footer-motto">{siteConfig.motto}</p>
+    </div>
+    <p class="footer-meta sm:text-right">© {year} · {uiCopy.footer.builtFromPractice}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .footer-name,
+  .footer-motto,
+  .footer-meta {
+    margin: 0;
+  }
+
+  .footer-name {
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+  }
+
+  .footer-motto,
+  .footer-meta {
+    color: var(--color-text-faint);
+    font-size: 0.8rem;
+  }
+
+  .footer-motto {
+    margin-top: 0.35rem;
+    font-family: var(--font-display);
+  }
+</style>

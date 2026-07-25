@@ -1,0 +1,51 @@
+---
+import { uiCopy } from '../config/copy';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = uiCopy.empty.title, description = uiCopy.empty.description } = Astro.props;
+---
+
+<div class="empty-state surface-card">
+  <span class="empty-mark" aria-hidden="true">○</span>
+  <div>
+    <h2>{title}</h2>
+    <p>{description}</p>
+  </div>
+</div>
+
+<style>
+  .empty-state {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    padding: clamp(1.5rem, 4vw, 2.6rem);
+  }
+
+  .empty-mark {
+    color: var(--color-accent);
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    font-weight: 500;
+  }
+
+  p {
+    max-width: 40rem;
+    margin-top: 0.65rem;
+    color: var(--color-text-muted);
+  }
+</style>

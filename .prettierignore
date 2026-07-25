@@ -1,0 +1,11 @@
+node_modules/
+.git/
+.trellis/
+.agents/
+.codex/
+apps/web/.astro/
+apps/web/dist/
+apps/web/src/generated/
+apps/web/playwright-report/
+apps/web/test-results/
+package-lock.json
