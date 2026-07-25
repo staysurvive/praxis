@@ -2,15 +2,18 @@
 
 ## Current repository state
 
-The first Praxis foundation slice is implemented in `apps/web` as an Astro + TypeScript + MDX static site. The root
+The Praxis v0.1 release candidate is implemented in `apps/web` as an Astro + TypeScript + MDX static site. The root
 `content/` directory remains the authored source of truth, while `infra/` documents the existing Docker Compose +
-Caddy deployment boundary. These guidelines describe the executable patterns already present in the codebase.
+Caddy deployment boundary. Static RSS, Sitemap, robots, social metadata, and release-gate checks are part of the public
+Web contract; they do not introduce a backend.
 
 Authoritative planning references:
 
 - `.trellis/tasks/07-24-praxis-foundation/prd.md`
 - `.trellis/tasks/07-24-praxis-foundation/design.md`
 - `.trellis/tasks/07-24-praxis-foundation/implement.md`
+- `.trellis/tasks/07-25-praxis-v0-1-public-release/prd.md`
+- `.trellis/tasks/07-25-praxis-v0-1-public-release/design.md`
 
 ## Guide index
 
@@ -45,7 +48,7 @@ apps/web/src/lib/content/index.ts           # typed queries and summaries
 apps/web/src/lib/practice.ts                # explicit event normalization
 apps/web/scripts/generate-practice-data.ts  # deterministic build artifact
 apps/web/src/components/                    # typed presentational Astro components
-apps/web/src/pages/                         # home, type index, detail, 404, JSON endpoint
+apps/web/src/pages/                         # HTML routes plus RSS, robots, and generated JSON
 infra/Dockerfile.web                        # static artifact image
 ```
 

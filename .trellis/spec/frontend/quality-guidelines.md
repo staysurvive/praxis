@@ -14,6 +14,8 @@ smoke tests, and static build. The foundation task names them `format:check`, `l
 - Browser smoke: home → a type index → the real Praxis project detail, plus a missing route/404.
 - Accessibility: keyboard navigation, visible focus, landmarks/headings, reduced motion, color-independent heatmap
   summary, and basic automated checks in both themes.
+- Responsive: run the normal mobile project and a 320px regression; the document must not scroll horizontally. A wide
+  heatmap may scroll only inside `.heatmap-scroll`.
 - Build: deterministic offline activity JSON and a static artifact that can be served without FastAPI/PostgreSQL.
 
 ## Forbidden patterns
@@ -46,8 +48,13 @@ docker build -f infra/Dockerfile.web -t praxis-web-check .
 ```
 
 The current browser suite is `apps/web/tests/e2e/site.spec.ts`; it covers the homepage, type-first navigation, empty
-states, branded 404, theme persistence, no-JavaScript reading, mobile Chromium, and Axe checks. Unit fixtures in
-`apps/web/tests/fixtures/content.ts` cover all four content types without publishing those fixtures.
+states, branded 404, theme persistence, no-JavaScript reading, 320px/mobile Chromium, Light/Dark Axe checks, keyboard
+focus, reduced motion, and public discovery endpoints. Unit fixtures in `apps/web/tests/fixtures/content.ts` cover all
+four content types without publishing those fixtures.
+
+> **Narrow viewport gotcha**: do not apply a fixed `min-width: 20rem` to `html`. At a 320px outer viewport, the
+> vertical scrollbar reduces the document client width below 20rem and creates page-level horizontal scrolling. Let
+> the document shrink; use an explicit small-screen header layout and keep the heatmap's overflow on its own container.
 
 ### Validation and error matrix
 
