@@ -1,0 +1,34 @@
+{
+  "id": "00-bootstrap-guidelines",
+  "name": "00-bootstrap-guidelines",
+  "title": "Bootstrap Guidelines",
+  "description": "Fill in project development guidelines for AI agents",
+  "status": "in_progress",
+  "dev_type": "docs",
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "staysurvive",
+  "assignee": "staysurvive",
+  "createdAt": "2026-07-24",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": null,
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "07-24-praxis-foundation"
+  ],
+  "parent": null,
+  "relatedFiles": [
+    ".trellis/spec/backend/",
+    ".trellis/spec/frontend/",
+    ".trellis/tasks/07-24-praxis-foundation/prd.md",
+    ".trellis/tasks/07-24-praxis-foundation/design.md",
+    ".trellis/tasks/07-24-praxis-foundation/implement.md"
+  ],
+  "notes": "First-time setup task created by trellis init (fullstack project)",
+  "meta": {}
+}
