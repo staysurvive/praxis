@@ -39,6 +39,80 @@ test('missing routes use the branded 404', async ({ page }) => {
 
   expect(response?.status()).toBe(404);
   await expect(page.getByRole('heading', { name: '这一页尚未抵达' })).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+});
+
+test('public pages expose canonical and social discovery metadata', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://praxis.example/',
+  );
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary');
+  await expect(page.locator('link[type="application/rss+xml"]')).toHaveAttribute(
+    'href',
+    'https://praxis.example/rss.xml',
+  );
+  await expect(page.getByRole('link', { name: 'RSS', exact: true })).toHaveAttribute(
+    'href',
+    '/rss.xml',
+  );
+
+  await page.goto('/projects/praxis-foundation');
+
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://praxis.example/projects/praxis-foundation',
+  );
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
+  await expect(page.locator('meta[property="article:published_time"]')).toHaveAttribute(
+    'content',
+    '2026-07-24',
+  );
+  await expect(page.locator('meta[property="article:modified_time"]')).toHaveAttribute(
+    'content',
+    '2026-07-25',
+  );
+  await expect(page.locator('meta[property="article:tag"]')).toHaveCount(4);
+});
+
+test('RSS, Sitemap, and robots expose only public canonical routes', async ({ request }) => {
+  const rssResponse = await request.get('/rss.xml');
+  expect(rssResponse.ok()).toBe(true);
+  const rss = await rssResponse.text();
+  expect(rss).toContain('<language>zh-CN</language>');
+  expect(rss).toContain('<link>https://praxis.example/projects/praxis-foundation</link>');
+  expect(rss.match(/<item>/g)).toHaveLength(1);
+
+  const sitemapIndexResponse = await request.get('/sitemap-index.xml');
+  expect(sitemapIndexResponse.ok()).toBe(true);
+  const sitemapIndex = await sitemapIndexResponse.text();
+  expect(sitemapIndex).toContain('https://praxis.example/sitemap-0.xml');
+
+  const sitemapResponse = await request.get('/sitemap-0.xml');
+  expect(sitemapResponse.ok()).toBe(true);
+  const sitemap = await sitemapResponse.text();
+  for (const path of [
+    '',
+    '/blog',
+    '/notes',
+    '/journal',
+    '/projects',
+    '/projects/praxis-foundation',
+  ]) {
+    expect(sitemap).toContain(`<loc>https://praxis.example${path}</loc>`);
+  }
+  for (const excludedPath of ['/404', '/rss.xml', '/robots.txt', '/generated/']) {
+    expect(sitemap).not.toContain(excludedPath);
+  }
+
+  const robotsResponse = await request.get('/robots.txt');
+  expect(robotsResponse.ok()).toBe(true);
+  expect(await robotsResponse.text()).toBe(
+    'User-agent: *\nAllow: /\nSitemap: https://praxis.example/sitemap-index.xml\n',
+  );
 });
 
 test('theme control persists an explicit dark theme', async ({ page }) => {
@@ -51,11 +125,43 @@ test('theme control persists an explicit dark theme', async ({ page }) => {
   expect(storedTheme === 'light' || storedTheme === 'dark').toBe(true);
 });
 
+test('a 320px viewport has no page-level horizontal overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto('/');
+
+  const dimensions = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+
+  expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
+});
+
+test('keyboard focus and reduced-motion preferences remain usable', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+
+  const skipLink = page.getByRole('link', { name: '跳到主要内容' });
+  await page.keyboard.press('Tab');
+  await expect(skipLink).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/#main-content$/);
+
+  const transitionDuration = await page
+    .locator('a[href="/blog"]')
+    .evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration));
+  expect(transitionDuration).toBeLessThanOrEqual(0.00001);
+});
+
 test('home and detail pages pass a basic automated accessibility scan', async ({ page }) => {
-  for (const path of ['/', '/projects/praxis-foundation']) {
-    await page.goto(path);
-    const results = await new AxeBuilder({ page }).analyze();
-    expect(results.violations).toEqual([]);
+  for (const colorScheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme });
+
+    for (const path of ['/', '/projects/praxis-foundation']) {
+      await page.goto(path);
+      const results = await new AxeBuilder({ page }).analyze();
+      expect(results.violations).toEqual([]);
+    }
   }
 });
 

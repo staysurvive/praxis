@@ -34,9 +34,9 @@ export const homeContent = {
   },
   now: {
     eyebrow: 'Now',
-    title: '正在把 Praxis 从方案变成可以长期使用的站点。',
+    title: '正在为 Praxis v0.1 准备正式部署。',
     description:
-      '当前重点是完成内容模型、编辑型首页、实践热力图、双主题与静态部署闭环。所有进展都会回写到同一条 Praxis 项目记录中。',
+      '公开分享所需的首页、内容、实践热力图、SEO、RSS、Sitemap 与质量门禁已经通过本地验收。下一步是确认公开署名和正式域名，再接入现有 Caddy 与 Docker Compose。',
   },
   latest: {
     eyebrow: 'Latest content',

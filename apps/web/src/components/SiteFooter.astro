@@ -11,7 +11,11 @@ const year = new Date().getFullYear();
       <p class="footer-name">{siteConfig.name}</p>
       <p class="footer-motto">{siteConfig.motto}</p>
     </div>
-    <p class="footer-meta sm:text-right">© {year} · {uiCopy.footer.builtFromPractice}</p>
+    <p class="footer-meta sm:text-right">
+      <a class="footer-link" href={siteConfig.discovery.rssPath}>{uiCopy.footer.rss}</a>
+      <span aria-hidden="true">·</span>
+      <span>© {year} · {uiCopy.footer.builtFromPractice}</span>
+    </p>
   </div>
 </footer>
 
@@ -42,5 +46,15 @@ const year = new Date().getFullYear();
   .footer-motto {
     margin-top: 0.35rem;
     font-family: var(--font-display);
+  }
+
+  .footer-link {
+    color: var(--color-text-muted);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .footer-link:hover {
+    color: var(--color-text);
   }
 </style>

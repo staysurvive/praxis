@@ -41,7 +41,15 @@ const { Content } = await renderContentEntry(entry);
 const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data)]);
 ---
 
-<BaseLayout title={summary.title} description={summary.summary} canonicalPath={summary.url}>
+<BaseLayout
+  title={summary.title}
+  description={summary.summary}
+  canonicalPath={summary.url}
+  seoType="article"
+  publishedAt={summary.publishedAt}
+  updatedAt={summary.updatedAt}
+  tags={summary.tags}
+>
   <article>
     <header class="content-hero">
       <div class="page-shell pt-16 pb-16 md:pt-24 md:pb-24">

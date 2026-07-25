@@ -49,6 +49,7 @@ export const uiCopy = {
   },
   footer: {
     builtFromPractice: 'Built from real practice.',
+    rss: 'RSS',
   },
   journey: {
     question: '问题',

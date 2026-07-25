@@ -21,7 +21,7 @@ function isActive(href: string): boolean {
       <span class="brand-motto">{siteConfig.theme}</span>
     </a>
 
-    <div class="flex items-center justify-end gap-3 sm:gap-5">
+    <div class="header-actions flex items-center justify-end gap-3 sm:gap-5">
       <nav aria-label={uiCopy.accessibility.primaryNavigation}>
         <ul class="nav-list flex flex-wrap items-center justify-end gap-x-3 gap-y-1 sm:gap-x-5">
           {
@@ -124,6 +124,33 @@ function isActive(href: string): boolean {
     .site-header :global(.page-shell) {
       align-items: flex-start;
       padding-block: 1rem;
+    }
+  }
+
+  @media (max-width: 23rem) {
+    .site-header :global(.page-shell) {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.75rem 1rem;
+      align-items: center;
+    }
+
+    .header-actions {
+      display: contents;
+    }
+
+    .header-actions nav {
+      grid-row: 2;
+      grid-column: 1 / -1;
+    }
+
+    .header-actions nav ul {
+      justify-content: flex-start;
+    }
+
+    .header-actions > div {
+      grid-row: 1;
+      grid-column: 2;
     }
   }
 </style>

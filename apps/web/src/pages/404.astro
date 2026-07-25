@@ -3,7 +3,12 @@ import { uiCopy } from '../config/copy';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="404" description={uiCopy.errors.notFoundDescription} canonicalPath="/404">
+<BaseLayout
+  title="404"
+  description={uiCopy.errors.notFoundDescription}
+  canonicalPath="/404"
+  noindex
+>
   <section
     class="error-page page-shell grid min-h-[72svh] content-center gap-10 py-20 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1.35fr)] lg:items-center"
   >

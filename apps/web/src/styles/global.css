@@ -9,7 +9,6 @@
   }
 
   html {
-    min-width: 20rem;
     scroll-behavior: smooth;
     background: var(--color-page);
   }

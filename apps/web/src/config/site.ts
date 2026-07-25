@@ -9,6 +9,10 @@ export const siteConfig = {
   motto: '知而思，思而行，行而成。',
   locale: uiCopy.locale,
   timeZone: 'Asia/Shanghai',
+  discovery: {
+    rssPath: '/rss.xml',
+    sitemapPath: '/sitemap-index.xml',
+  },
   author: {
     name: 'Praxis',
     bio: '一个关于长期思考、真实行动与持续复盘的个人实践站。',
