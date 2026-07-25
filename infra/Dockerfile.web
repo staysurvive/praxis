@@ -11,6 +11,7 @@ COPY content content
 
 ARG SITE_URL=https://praxis.example
 ENV SITE_URL=$SITE_URL
+ENV ASTRO_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
@@ -18,4 +19,4 @@ FROM busybox:1.37
 
 COPY --from=build /workspace/apps/web/dist /site
 
-CMD ["sh", "-c", "rm -rf /output/* && cp -R /site/. /output/"]
+CMD ["sh", "-c", "find /output -mindepth 1 -maxdepth 1 -exec rm -rf -- {} + && cp -R /site/. /output/"]

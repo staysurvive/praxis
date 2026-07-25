@@ -19,6 +19,7 @@
     "typecheck": "npm run typecheck --workspace @praxis/web",
     "test:unit": "npm run test:unit --workspace @praxis/web",
     "test:e2e": "npm run test:e2e --workspace @praxis/web",
+    "audit:deps": "npm audit --registry=https://registry.npmjs.org",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run test:unit"
   },
   "devDependencies": {

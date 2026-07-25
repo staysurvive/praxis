@@ -1,0 +1,17 @@
+.git/
+.agents/
+.codex/
+.trellis/
+docs/
+node_modules/
+**/node_modules/
+
+.env
+.env.*
+*.log
+
+apps/web/.astro/
+apps/web/dist/
+apps/web/playwright-report/
+apps/web/test-results/
+apps/web/src/generated/

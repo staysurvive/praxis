@@ -24,6 +24,7 @@ npm run dev
 
 ```powershell
 npm run check
+npm run audit:deps
 npm run test:e2e
 npm run build
 ```
