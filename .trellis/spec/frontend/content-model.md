@@ -67,9 +67,11 @@ implemented for the first vertical slice so future content types do not create a
 
 ### 2. Signatures
 
-The shared access layer in `apps/web/src/lib/content/index.ts` exposes:
+The shared publication policy in `apps/web/src/lib/content/domain.ts` and access layer in
+`apps/web/src/lib/content/index.ts` expose:
 
 ```typescript
+isPublicStatus(status: Status): boolean;
 listEntries(filter?: ContentFilter): Promise<ContentSummary[]>;
 getEntryBySlug(type: ContentType, slug: string): Promise<ContentCollectionEntry | undefined>;
 getEntryByContentId(contentId: string): Promise<ContentCollectionEntry | undefined>;
@@ -80,6 +82,7 @@ The activity layer in `apps/web/src/lib/practice.ts` exposes:
 ```typescript
 normalizePracticeEvents(entries: readonly PracticeSourceEntry[]): NormalizedPracticeEvent[];
 buildPracticeDataset(entries: readonly PracticeSourceEntry[]): PracticeDataset;
+buildPublicPracticeDataset(entries: readonly ContentFrontmatter[]): PracticeDataset;
 ```
 
 ### 3. Contracts (content, artifact, environment)
@@ -88,6 +91,8 @@ buildPracticeDataset(entries: readonly PracticeSourceEntry[]): PracticeDataset;
 - Normalized events contain `contentId`, `type`, `stage`, date-only `YYYY-MM-DD`, `kind`, optional `note`, and `source`.
 - The generated file is `apps/web/src/generated/practice-activity.json` (ignored and reproducible) and is emitted as
   `/generated/practice-activity.json` in the static artifact.
+- `isPublicStatus` is the single publication policy for routes, queries, RSS, and Practice projections. Draft entries
+  still participate in duplicate identity/URL validation, but their dates, notes, and counters never enter public JSON.
 - `SITE_URL` is optional at build time; `apps/web/astro.config.mjs` falls back to `https://praxis.example`.
 
 ### 4. Validation & Error Matrix
@@ -98,6 +103,7 @@ buildPracticeDataset(entries: readonly PracticeSourceEntry[]): PracticeDataset;
 | `updatedAt < publishedAt` | `contentSchema.superRefine` | Build fails with field issue |
 | Duplicate event or repeated initial publish | `contentSchema.superRefine` | Build fails before route generation |
 | Duplicate `contentId` or type/slug across files | `generate-practice-data.ts` | Build fails with relative file path |
+| Draft content with practice events | `isPublicStatus` + `buildPublicPracticeDataset` | Entry is absent from public routes, RSS, heatmap totals, events, and JSON |
 | Missing type content | shared index route + `EmptyState` | Safe empty state, no fabricated entry |
 
 ### 5. Good / Base / Bad cases
@@ -105,23 +111,25 @@ buildPracticeDataset(entries: readonly PracticeSourceEntry[]): PracticeDataset;
 - Good: `content/projects/praxis.mdx` keeps one `contentId`, accumulates `journey`, and records meaningful `practiceLog`
   events.
 - Base: an entry with only `publishedAt` produces exactly one synthetic `publish` event.
-- Bad: changing `updatedAt` for a typo fix changes no activity count; adding two identical events is rejected.
+- Bad: changing `updatedAt` for a typo fix changes no activity count; adding two identical events is rejected; sending
+  all parsed entries directly to `buildPracticeDataset` can leak draft metadata.
 
 ### 6. Tests required (with assertion points)
 
 - `apps/web/tests/unit/content-schema.test.ts`: valid all-type fixtures pass; invalid dates, IDs, and duplicate events
   fail with a Zod issue.
 - `apps/web/tests/unit/practice.test.ts`: automatic publish, explicit publish de-duplication, multiple same-day events,
-  and updatedAt-only changes preserve expected counts.
-- `apps/web/tests/unit/content-domain.test.ts`: type-first URL mapping and shared registry behavior remain stable.
+  updatedAt-only changes, and draft exclusion preserve expected public counts.
+- `apps/web/tests/unit/content-domain.test.ts`: type-first URL mapping, shared registry behavior, and the public-status
+  policy remain stable.
 - `apps/web/tests/e2e/site.spec.ts`: homepage → `/projects` → real detail, empty `/blog`, 404, no-JS reading, and Axe.
 
 ### 7. Wrong vs Correct
 
 ```typescript
-// Wrong: derive activity from every metadata update.
-const events = entries.map((entry) => ({ date: entry.updatedAt, kind: 'practice' }));
+// Wrong: derive activity from every metadata update or publish draft entries.
+const dataset = buildPracticeDataset(entries.map(toPracticeSourceEntry));
 
-// Correct: normalize only publishedAt plus explicit practiceLog records.
-const events = normalizePracticeEvents(entries);
+// Correct: filter by the shared publication policy, then normalize only real events.
+const dataset = buildPublicPracticeDataset(entries);
 ```

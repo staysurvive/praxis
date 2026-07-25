@@ -4,7 +4,8 @@
 
 The root project must expose equivalent commands for formatting, linting, strict type-checking, unit tests, browser
 smoke tests, and static build. The foundation task names them `format:check`, `lint`, `typecheck`, `test:unit`,
-`test:e2e`, `build`, and `check`.
+`test:e2e`, `build`, and `check`. Dependency auditing is an explicit networked gate through `audit:deps`, not part of
+the offline-capable `check` command.
 
 ## Test coverage
 
@@ -17,6 +18,8 @@ smoke tests, and static build. The foundation task names them `format:check`, `l
 - Responsive: run the normal mobile project and a 320px regression; the document must not scroll horizontally. A wide
   heatmap may scroll only inside `.heatmap-scroll`.
 - Build: deterministic offline activity JSON and a static artifact that can be served without FastAPI/PostgreSQL.
+- Security: drafts are absent from every public projection; production HTML has no inline scripts or styles; `SITE_URL`
+  rejects unsafe origins; Caddy returns a real 404 with security headers; the final export image has no known CVEs.
 
 ## Forbidden patterns
 
@@ -42,9 +45,11 @@ npm run format:check
 npm run lint
 npm run typecheck
 npm run test:unit
+npm run audit:deps
 npm run build
 npm run test:e2e
 docker build -f infra/Dockerfile.web -t praxis-web-check .
+docker scout cves local://praxis-web-check
 ```
 
 The current browser suite is `apps/web/tests/e2e/site.spec.ts`; it covers the homepage, type-first navigation, empty
@@ -62,7 +67,10 @@ four content types without publishing those fixtures.
 |---|---|---|
 | Invalid frontmatter/date/type | `contentSchema` / build generator | Build fails with source path and field issue |
 | Duplicate `contentId` or type/slug | `generate-practice-data.ts` | Build fails before static output |
+| Draft contains private practice notes | `buildPublicPracticeDataset` | Notes and counters are absent from public JSON/UI |
+| Unsafe `SITE_URL` | `resolveSiteUrl` | Astro config load fails before generating metadata |
 | Unknown public path | `404.astro` | Branded 404 with safe navigation copy |
+| Unknown path behind Caddy | `handle_errors` | Branded document with HTTP 404, never a soft 404 |
 | Empty type or activity list | `EmptyState.astro` / `PracticeHeatmap.astro` | Intentional empty state, no fake content |
 | Future API outage | isolated API island | Static Markdown/detail content remains readable |
 

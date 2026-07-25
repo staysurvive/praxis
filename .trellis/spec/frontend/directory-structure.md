@@ -6,14 +6,15 @@ The foundation slice now follows this boundary without a monorepo orchestrator:
 
 ```text
 apps/web/
-├── public/                  # copied assets and generated static JSON
+├── config/                  # build-config validation helpers
+├── public/                  # copied assets and CSP-safe browser scripts
+├── scripts/                 # deterministic build-time generators
 ├── src/
 │   ├── components/          # reusable presentational Astro components
 │   ├── config/              # site settings and typed UI copy
 │   ├── layouts/             # document and content layouts
 │   ├── lib/                 # content access, URL, and practice aggregation logic
 │   ├── pages/               # route entry points only
-│   ├── scripts/             # build-time generation and tiny browser scripts
 │   ├── styles/              # tokens, theme layers, and global base styles
 │   └── content.config.ts    # collection/loader schema for root content/
 ├── tests/                   # unit, fixture, and browser test support
@@ -33,7 +34,9 @@ The generated activity file is intentionally ignored at `apps/web/src/generated/
 - `src/components/` renders typed props and does not make network calls.
 - `src/config/` owns `zh-CN` copy, navigation metadata, and site defaults; repeated labels do not live in component markup.
 - `src/styles/` owns semantic CSS tokens and theme primitives; component styles remain local to the component when practical.
-- `public/generated/` contains disposable build output only. Authored content never belongs there.
+- `config/` owns build configuration validation such as the canonical `SITE_URL`; it must not become a second UI config tree.
+- `public/scripts/` is reserved for small external scripts required by the production CSP. Authored content never belongs there.
+- `src/generated/` and `dist/generated/` contain reproducible derived output only. Authored content never belongs there.
 - `content/` is not moved under `src/` merely to simplify imports; use the official Astro content loader/adapter.
 - `apps/api/` is reserved for a future FastAPI service and is not part of the first Web implementation.
 
@@ -49,3 +52,5 @@ The generated activity file is intentionally ignored at `apps/web/src/generated/
 - A second content collection for each `type`.
 - A `utils/` dumping ground when a helper belongs to content, routing, styling, or copy ownership.
 - Importing page-only code into the content model or design-token layer.
+- Letting `.env`, `.git`, local dependencies, reports, or generated output enter the Docker build context; keep
+  `.dockerignore` aligned with `infra/Dockerfile.web`.

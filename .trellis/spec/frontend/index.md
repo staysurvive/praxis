@@ -5,7 +5,8 @@
 The Praxis v0.1 release candidate is implemented in `apps/web` as an Astro + TypeScript + MDX static site. The root
 `content/` directory remains the authored source of truth, while `infra/` documents the existing Docker Compose +
 Caddy deployment boundary. Static RSS, Sitemap, robots, social metadata, and release-gate checks are part of the public
-Web contract; they do not introduce a backend.
+Web contract; draft-safe public projections, strict origin validation, CSP-compatible browser scripts, and hardened
+static serving are part of that same boundary and do not introduce a backend.
 
 Authoritative planning references:
 
