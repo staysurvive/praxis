@@ -13,12 +13,34 @@ Praxis 是一个以“知行合一”为核心理念的个人实践站。正文�
 - `apps/api` 保留给未来 FastAPI，不在首版实现
 - `infra/` 提供复用现有 Docker Compose + Caddy 的部署示例
 
-## 开发
+## 本地启动
+
+### 环境要求
+
+- Node.js `>= 22.12.0`
+- npm（随 Node.js 安装）
+
+所有命令均在仓库根目录执行。
+
+### 首次运行
 
 ```powershell
-npm install
+npm ci
 npm run dev
 ```
+
+开发服务器启动后访问：<http://localhost:4321/>
+
+`npm run dev` 会先扫描根目录 `content/`，生成 Practice Heatmap 所需的本地数据，然后启动 Astro 开发服务器。修改页面、组件或内容后，浏览器会自动刷新。
+
+### 生产构建与预览
+
+```powershell
+npm run build
+npm run preview
+```
+
+生产文件会生成到 `apps/web/dist/`。本地预览默认同样使用 <http://localhost:4321/>；如果开发服务器仍在运行，请先停止开发服务器再执行预览。
 
 ## 验证
 
