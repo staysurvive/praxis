@@ -152,3 +152,64 @@ Applied the magazine-style editorial redesign across apps/web, verified with che
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: 产品章程落地:内容事件、截图工具正规化、charter 持久化
+
+**Date**: 2026-07-26
+**Task**: 产品章程落地:内容事件、截图工具正规化、charter 持久化
+**Branch**: `main`
+
+### Summary
+
+对齐产品章程与仓库现状:裁决 React 缓引入与 roadmap 随内容两项偏差并写入 docs/charter.md;praxis.mdx 记录安全加固实践事件;shoot.mjs 正规化为 npm run shots;check + e2e 全绿。
+
+### Main Changes
+
+## 背景
+
+用户发布了 Praxis 产品章程(CTO/PM/设计/Reviewer 四重角色、产品>UX>维护>质量>效率的优先级、8 步工作模式),并授权由 Claude 自主决策推进。本会话完成章程与仓库现状的对齐审计,并落地三项收尾工作。
+
+## 决策
+
+- **React**:章程允许少量交互组件,但裁决为「未来授权而非现在义务」——保持零框架,直到出现原生脚本难以维护的复杂交互。
+- **roadmap 内容类型**:内容先行——第一篇真实 roadmap 内容出现时再扩展 `domain.ts` 注册表,空路由违背「只展示已发生的实践」。
+- 两项裁决连同章程全文持久化到 `docs/charter.md`,CLAUDE.md 增加指针。
+
+## 变更(commit)
+
+- `0c7839e` content:praxis.mdx 增加 2026-07-26 安全加固 practice 事件,updatedAt 升至 07-26,e2e 的 article:modified_time 断言同步。热力图数据集从 7 事件/2 天增长到 8 事件/3 天。
+- `0d9d32e` chore(web):游离的 shoot.mjs 正规化为 `scripts/capture-screenshots.mjs` + `npm run shots`,shots/ 产物目录进 .gitignore。评审辅助工具,不进 CI。
+- `58675ff` docs:新增 `docs/charter.md`(定位、优先级、事实源红线、视觉原则、8 步流程、两项已裁决偏差),CLAUDE.md 指向它。
+
+## 验证
+
+- `npm run check` 全绿(format/lint/typecheck 0 errors/31 单测)。
+- `npm run test:e2e` 26/26 通过(chromium + mobile-chromium),含更新后的 modified_time 断言。
+- `npm run shots` 冒烟通过,截图正常产出。
+
+## 遗留
+
+- Docker 基镜像 digest pin 仍被网络阻塞(auth.docker.io 持续超时),Dockerfile 内已留命令,待联网环境执行。
+- v0.1 生产部署段(署名/域名/Caddy 接入/上线检查)依赖用户提供外部信息,checklist 保持未勾选。
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0c7839e` | (see git log) |
+| `0d9d32e` | (see git log) |
+| `58675ff` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
