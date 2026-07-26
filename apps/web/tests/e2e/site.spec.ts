@@ -1,3 +1,6 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import path from 'node:path';
+
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
@@ -81,6 +84,8 @@ test('public pages expose canonical and social discovery metadata', async ({ pag
     '2026-07-25',
   );
   await expect(page.locator('meta[property="article:tag"]')).toHaveCount(4);
+  await expect(page.locator('script:not([src])')).toHaveCount(0);
+  await expect(page.locator('style')).toHaveCount(0);
 });
 
 test('RSS, Sitemap, and robots expose only public canonical routes', async ({ request }) => {
@@ -195,4 +200,38 @@ test('core content remains readable without JavaScript', async ({ browser }) => 
   await expect(page.getByText('为什么开始 Praxis')).toBeVisible();
 
   await context.close();
+});
+
+function collectHtmlFiles(directory: string): string[] {
+  const found: string[] = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      found.push(...collectHtmlFiles(full));
+    } else if (entry.name.endsWith('.html')) {
+      found.push(full);
+    }
+  }
+  return found;
+}
+
+test('no built HTML page ships inline script or style (CSP contract)', () => {
+  const distDir = path.resolve(process.cwd(), 'dist');
+  const htmlFiles = collectHtmlFiles(distDir);
+  expect(htmlFiles.length).toBeGreaterThan(0);
+
+  const offenders: string[] = [];
+  for (const file of htmlFiles) {
+    const html = readFileSync(file, 'utf8');
+    const relative = path.relative(distDir, file);
+    // A <script> tag with no src= is inline JavaScript.
+    if (/<script(?![^>]*\bsrc=)[^>]*>/i.test(html)) {
+      offenders.push(`${relative}: inline <script>`);
+    }
+    if (/<style[\s>]/i.test(html)) {
+      offenders.push(`${relative}: inline <style>`);
+    }
+  }
+
+  expect(offenders).toEqual([]);
 });
