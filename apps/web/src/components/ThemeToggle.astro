@@ -27,19 +27,19 @@ import { uiCopy } from '../config/copy';
 <style>
   .theme-toggle {
     display: none;
-    width: 2.55rem;
-    height: 2.55rem;
+    width: 2.5rem;
+    height: 2.5rem;
     align-items: center;
     justify-content: center;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-pill);
-    background: var(--color-surface);
+    background: transparent;
     color: var(--color-text);
     cursor: pointer;
     transition:
       border-color var(--duration-fast) var(--ease-out),
       background var(--duration-fast) var(--ease-out),
-      transform var(--duration-fast) var(--ease-out);
+      color var(--duration-fast) var(--ease-out);
   }
 
   :global(.js) .theme-toggle {
@@ -47,9 +47,9 @@ import { uiCopy } from '../config/copy';
   }
 
   .theme-toggle:hover {
-    border-color: var(--color-border-strong);
-    background: var(--color-surface-raised);
-    transform: translateY(-1px);
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-page);
   }
 
   .theme-icon {
@@ -58,7 +58,7 @@ import { uiCopy } from '../config/copy';
     stroke: currentColor;
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-width: 1.7;
+    stroke-width: 1.5;
   }
 
   .theme-icon--moon {

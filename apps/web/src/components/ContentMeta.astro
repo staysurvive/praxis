@@ -1,4 +1,5 @@
 ---
+import type { Status } from '../lib/content/domain';
 import type { ContentSummary } from '../lib/content';
 import { formatDateKey } from '../lib/date';
 
@@ -8,19 +9,50 @@ interface Props {
 }
 
 const { entry, showStatus = true } = Astro.props;
+
+const statusGlyphs: Record<Status, string> = {
+  draft: '○',
+  ongoing: '●',
+  completed: '■',
+  reflected: '▲',
+};
 ---
 
-<div class="flex flex-wrap items-center gap-2" aria-label={`${entry.typeLabel}内容信息`}>
-  <span class="meta-pill">{entry.typeLabel}</span>
-  <span class="meta-pill">{entry.stageLabel}</span>
-  {showStatus && <span class="meta-pill">{entry.statusLabel}</span>}
-  <time class="content-date" datetime={entry.publishedAt}>{formatDateKey(entry.publishedAt)}</time>
+<div class="meta-line" aria-label={`${entry.typeLabel}内容信息`}>
+  <span class="meta-type">{entry.typeLabel}</span>
+  <span class="meta-sep" aria-hidden="true">·</span>
+  <span class="meta-stage">{entry.stageLabel}</span>
+  {
+    showStatus && (
+      <>
+        <span class="meta-sep" aria-hidden="true">
+          ·
+        </span>
+        <span class="meta-status">
+          <span aria-hidden="true">{statusGlyphs[entry.status]}</span> {entry.statusLabel}
+        </span>
+      </>
+    )
+  }
+  <span class="meta-sep" aria-hidden="true">·</span>
+  <time class="meta-date" datetime={entry.publishedAt}>{formatDateKey(entry.publishedAt)}</time>
 </div>
 
 <style>
-  .content-date {
-    margin-left: 0.25rem;
+  .meta-type {
+    color: var(--color-text);
+  }
+
+  .meta-stage {
+    color: var(--color-accent);
+  }
+
+  .meta-status,
+  .meta-date {
     color: var(--color-text-faint);
-    font-size: 0.78rem;
+  }
+
+  .meta-date {
+    letter-spacing: 0.04em;
   }
 </style>

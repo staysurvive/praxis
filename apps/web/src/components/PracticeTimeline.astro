@@ -11,7 +11,7 @@ const { events } = Astro.props;
 const orderedEvents = [...events].reverse();
 ---
 
-<section class="practice-timeline" aria-labelledby="practice-timeline-title">
+<section class="practice-timeline rule-scotch" aria-labelledby="practice-timeline-title">
   <header class="timeline-heading">
     <p class="eyebrow">{uiCopy.timeline.eyebrow}</p>
     <h2 id="practice-timeline-title">{uiCopy.timeline.title}</h2>
@@ -27,7 +27,7 @@ const orderedEvents = [...events].reverse();
             <span>{uiCopy.practiceKinds[event.kind]}</span>
             <time datetime={event.date}>{formatDateKey(event.date)}</time>
           </div>
-          <p>{event.note ?? uiCopy.practiceKinds[event.kind]}</p>
+          {event.note && <p>{event.note}</p>}
         </li>
       ))
     }
@@ -49,10 +49,11 @@ const orderedEvents = [...events].reverse();
   }
 
   .timeline-heading h2 {
-    margin-top: 0.9rem;
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 4vw, 3.2rem);
-    font-weight: 500;
+    margin-top: 1rem;
+    font-family: var(--font-serif);
+    font-size: var(--text-title-1);
+    font-weight: 400;
+    letter-spacing: var(--track-cjk-display);
   }
 
   .timeline-heading > p:last-child {
@@ -69,7 +70,7 @@ const orderedEvents = [...events].reverse();
 
   li {
     position: relative;
-    padding: 0 0 2.4rem 2rem;
+    padding: 0 0 2.4rem 2.25rem;
     border-left: 1px solid var(--color-border);
   }
 
@@ -79,14 +80,13 @@ const orderedEvents = [...events].reverse();
 
   .timeline-dot {
     position: absolute;
-    top: 0.25rem;
-    left: -0.36rem;
-    width: 0.68rem;
-    height: 0.68rem;
-    border: 2px solid var(--color-page);
+    top: 0.35rem;
+    left: -0.28rem;
+    width: 0.5rem;
+    height: 0.5rem;
     border-radius: 50%;
     background: var(--color-accent);
-    box-shadow: 0 0 0 1px var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-page);
   }
 
   .timeline-meta {
@@ -95,18 +95,23 @@ const orderedEvents = [...events].reverse();
     gap: 0.7rem 1rem;
     align-items: baseline;
     color: var(--color-text-faint);
-    font-size: 0.76rem;
+    font-size: var(--text-kicker);
   }
 
   .timeline-meta span {
     color: var(--color-accent);
-    font-weight: 750;
-    letter-spacing: 0.08em;
+    font-weight: 500;
+    letter-spacing: var(--track-meta);
+  }
+
+  .timeline-meta time {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
   }
 
   li p {
     margin: 0.55rem 0 0;
     color: var(--color-text-muted);
-    line-height: 1.8;
+    line-height: 1.85;
   }
 </style>

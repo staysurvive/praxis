@@ -51,17 +51,15 @@ const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data
   tags={summary.tags}
 >
   <article>
-    <header class="content-hero">
+    <header class="content-hero rule-scotch--bottom">
       <div class="page-shell pt-16 pb-16 md:pt-24 md:pb-24">
-        <a class="content-back" href={getContentUrl(summary.type)}>
-          ← {summary.typeLabel}
-        </a>
+        <a class="content-back" href={getContentUrl(summary.type)}>{summary.typeLabel}</a>
         <div
           class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(16rem,0.45fr)] lg:items-end"
         >
           <div>
             <ContentMeta entry={summary} />
-            <h1>{summary.title}</h1>
+            <h1 class="display-title display-title--secondary">{summary.title}</h1>
           </div>
           <p class="summary">{summary.summary}</p>
         </div>
@@ -69,7 +67,7 @@ const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data
     </header>
 
     <div
-      class="page-shell grid gap-12 py-16 md:py-24 lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-start"
+      class="page-shell grid gap-12 py-16 md:py-24 lg:grid-cols-[minmax(0,1fr)_var(--rail-width)] lg:items-start lg:gap-[clamp(3rem,6vw,5rem)]"
     >
       <div class="article-prose">
         <Content />
@@ -86,8 +84,19 @@ const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data
           </div>
           <div>
             <dt>{uiCopy.detail.tags}</dt>
-            <dd class="flex flex-wrap gap-2">
-              {summary.tags.map((tag) => <span class="meta-pill">{tag}</span>)}
+            <dd>
+              {
+                summary.tags.map((tag, index) => (
+                  <>
+                    {index > 0 && (
+                      <span class="tag-sep" aria-hidden="true">
+                        {' · '}
+                      </span>
+                    )}
+                    <span class="tag-item">{tag}</span>
+                  </>
+                ))
+              }
             </dd>
           </div>
         </dl>
@@ -102,29 +111,40 @@ const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data
 </BaseLayout>
 
 <style>
-  .content-hero {
-    border-bottom: 1px solid var(--color-border);
-  }
-
   .content-back {
-    color: var(--color-text-muted);
-    font-size: 0.8rem;
-    font-weight: 700;
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    color: var(--color-text-faint);
+    font-size: var(--text-meta);
+    font-weight: 500;
+    letter-spacing: var(--track-meta);
     text-decoration: none;
   }
 
+  .content-back::before {
+    content: '←';
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+
+  .content-back:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .content-back:hover::before {
+    transform: translateX(-0.25rem);
+  }
+
   h1 {
-    max-width: 18ch;
-    margin: 2rem 0 0;
-    font-family: var(--font-display);
-    font-size: clamp(2.8rem, 7vw, 6.2rem);
-    font-weight: 500;
-    letter-spacing: -0.055em;
-    line-height: 1.04;
+    margin: 1.75rem 0 0;
   }
 
   .summary {
     margin: 0;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--color-border);
     color: var(--color-text-muted);
     font-size: 1.05rem;
     line-height: 1.9;
@@ -140,6 +160,10 @@ const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data
     margin: 0;
   }
 
+  .content-aside dl {
+    border-bottom: 1px solid var(--color-border);
+  }
+
   .content-aside dl > div {
     padding-block: 1.15rem;
     border-top: 1px solid var(--color-border);
@@ -148,16 +172,21 @@ const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data
   .content-aside dt {
     margin-bottom: 0.55rem;
     color: var(--color-text-faint);
-    font-size: 0.7rem;
-    font-weight: 750;
-    letter-spacing: 0.08em;
+    font-size: var(--text-kicker);
+    font-weight: 500;
+    letter-spacing: var(--track-label);
     text-transform: uppercase;
   }
 
   .content-aside dd {
     overflow-wrap: anywhere;
     color: var(--color-text-muted);
-    font-size: 0.8rem;
+    font-size: var(--text-meta);
+    line-height: 1.8;
+  }
+
+  .tag-sep {
+    color: var(--color-text-faint);
   }
 
   @media (max-width: 63.99rem) {

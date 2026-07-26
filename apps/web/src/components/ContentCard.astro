@@ -13,7 +13,7 @@ const { entry, featured = false } = Astro.props;
 
 <article class:list={['content-card', featured && 'content-card--featured']}>
   <ContentMeta entry={entry} showStatus={featured} />
-  <div class="mt-7 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+  <div class="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
     <div>
       <h3 class="content-title">
         <a href={entry.url}>{entry.title}</a>
@@ -26,40 +26,42 @@ const { entry, featured = false } = Astro.props;
 
 <style>
   .content-card {
-    padding-block: clamp(2rem, 4vw, 3.2rem);
+    padding-block: clamp(2rem, 4vw, 3rem);
     border-top: 1px solid var(--color-border);
   }
 
   .content-card--featured {
-    padding: clamp(1.6rem, 4vw, 3rem);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-soft);
+    padding: 2rem 0 0;
+    border-top: 1px solid var(--color-border);
   }
 
   .content-title {
-    max-width: 24ch;
+    max-width: 28ch;
     margin: 0;
-    font-family: var(--font-display);
-    font-size: clamp(1.55rem, 3.2vw, 2.6rem);
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    line-height: 1.22;
+    font-family: var(--font-serif);
+    font-size: var(--text-title-2);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.4;
+    text-wrap: balance;
   }
 
   .content-title a {
     text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out);
   }
 
   .content-title a:hover {
     color: var(--color-accent-strong);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
   }
 
   .content-summary {
-    max-width: 48rem;
-    margin: 1rem 0 0;
+    max-width: 46rem;
+    margin: 0.9rem 0 0;
     color: var(--color-text-muted);
-    line-height: 1.85;
+    line-height: 1.9;
   }
 </style>

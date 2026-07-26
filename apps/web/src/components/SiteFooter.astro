@@ -5,25 +5,25 @@ import { uiCopy } from '../config/copy';
 const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer">
-  <div class="page-shell grid gap-5 py-8 sm:grid-cols-2 sm:items-end">
+<footer class="site-footer rule-scotch">
+  <div class="page-shell grid gap-5 py-10 sm:grid-cols-2 sm:items-end">
     <div>
       <p class="footer-name">{siteConfig.name}</p>
       <p class="footer-motto">{siteConfig.motto}</p>
     </div>
     <p class="footer-meta sm:text-right">
       <a class="footer-link" href={siteConfig.discovery.rssPath}>{uiCopy.footer.rss}</a>
-      <span aria-hidden="true">·</span>
-      <span>© {year} · {uiCopy.footer.builtFromPractice}</span>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <a class="footer-link" href={siteConfig.discovery.sitemapPath}>{uiCopy.footer.sitemap}</a>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <span>© {year}</span>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <span>{uiCopy.footer.builtFromPractice}</span>
     </p>
   </div>
 </footer>
 
 <style>
-  .site-footer {
-    border-top: 1px solid var(--color-border);
-  }
-
   .footer-name,
   .footer-motto,
   .footer-meta {
@@ -31,30 +31,37 @@ const year = new Date().getFullYear();
   }
 
   .footer-name {
-    font-size: 0.76rem;
-    font-weight: 800;
-    letter-spacing: 0.17em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
   }
 
   .footer-motto,
   .footer-meta {
     color: var(--color-text-faint);
-    font-size: 0.8rem;
+    font-size: 0.8125rem;
   }
 
   .footer-motto {
-    margin-top: 0.35rem;
-    font-family: var(--font-display);
+    margin-top: 0.4rem;
+    font-family: var(--font-serif);
+    letter-spacing: 0.06em;
+  }
+
+  .footer-sep {
+    padding-inline: 0.2rem;
   }
 
   .footer-link {
     color: var(--color-text-muted);
-    font-weight: 700;
+    font-weight: 500;
     text-decoration: none;
   }
 
   .footer-link:hover {
     color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
   }
 </style>

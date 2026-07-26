@@ -50,6 +50,7 @@ export const uiCopy = {
   footer: {
     builtFromPractice: 'Built from real practice.',
     rss: 'RSS',
+    sitemap: 'Sitemap',
   },
   journey: {
     question: '问题',
@@ -77,7 +78,7 @@ export const uiCopy = {
       journal: '与当下经验相关的短记录，保留实践发生时的语境。',
       project: '从问题、行动到成果持续演进的长期项目。',
     } satisfies Record<ContentType, string>,
-    count: (count: number) => `${count} 条真实内容`,
+    countUnit: '条真实内容',
   },
   detail: {
     contentId: 'Content ID',

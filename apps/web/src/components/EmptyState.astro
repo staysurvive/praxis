@@ -9,27 +9,23 @@ interface Props {
 const { title = uiCopy.empty.title, description = uiCopy.empty.description } = Astro.props;
 ---
 
-<div class="empty-state surface-card">
-  <span class="empty-mark" aria-hidden="true">○</span>
-  <div>
-    <h2>{title}</h2>
-    <p>{description}</p>
-  </div>
+<div class="empty-state">
+  <span class="empty-mark" aria-hidden="true"></span>
+  <h2>{title}</h2>
+  <p>{description}</p>
 </div>
 
 <style>
   .empty-state {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 1.25rem;
-    align-items: start;
-    padding: clamp(1.5rem, 4vw, 2.6rem);
+    padding-block: 0 var(--space-5);
+    border-bottom: 1px solid var(--color-border);
   }
 
   .empty-mark {
-    color: var(--color-accent);
-    font-size: 1.8rem;
-    line-height: 1;
+    display: block;
+    width: 2rem;
+    height: 1px;
+    background: var(--color-accent);
   }
 
   h2,
@@ -38,14 +34,17 @@ const { title = uiCopy.empty.title, description = uiCopy.empty.description } = A
   }
 
   h2 {
-    font-family: var(--font-display);
-    font-size: 1.45rem;
-    font-weight: 500;
+    margin-top: 1rem;
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 400;
+    letter-spacing: var(--track-cjk-display);
   }
 
   p {
     max-width: 40rem;
-    margin-top: 0.65rem;
+    margin-top: 0.75rem;
     color: var(--color-text-muted);
+    line-height: 1.9;
   }
 </style>

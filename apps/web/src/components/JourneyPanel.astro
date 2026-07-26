@@ -18,7 +18,7 @@ const sections = journey
 
 {
   sections.length > 0 && (
-    <section class="journey-panel" aria-labelledby="journey-title">
+    <section class="journey-panel rule-scotch" aria-labelledby="journey-title">
       <div class="journey-intro">
         <p class="eyebrow">{uiCopy.journeyPanel.eyebrow}</p>
         <h2 id="journey-title">{uiCopy.journeyPanel.title}</h2>
@@ -46,8 +46,6 @@ const sections = journey
     display: grid;
     gap: clamp(2.5rem, 6vw, 5rem);
     padding-block: clamp(4rem, 8vw, 7rem);
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
   }
 
   .journey-intro {
@@ -60,10 +58,11 @@ const sections = journey
   }
 
   .journey-intro h2 {
-    margin-top: 0.9rem;
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 4vw, 3.2rem);
-    font-weight: 500;
+    margin-top: 1rem;
+    font-family: var(--font-serif);
+    font-size: var(--text-title-1);
+    font-weight: 400;
+    letter-spacing: var(--track-cjk-display);
   }
 
   .journey-intro > p:last-child {
@@ -77,7 +76,7 @@ const sections = journey
 
   .journey-item {
     display: grid;
-    grid-template-columns: 3rem minmax(0, 1fr);
+    grid-template-columns: 3.5rem minmax(0, 1fr);
     gap: 1rem;
     padding-block: 1.7rem;
     border-bottom: 1px solid var(--color-border);
@@ -85,9 +84,9 @@ const sections = journey
 
   .journey-index {
     color: var(--color-accent);
-    font-size: 0.75rem;
-    font-weight: 750;
-    letter-spacing: 0.1em;
+    font-family: var(--font-serif);
+    font-size: 0.875rem;
+    letter-spacing: var(--track-meta);
   }
 
   .journey-item h3,
@@ -96,13 +95,14 @@ const sections = journey
   }
 
   .journey-item h3 {
-    font-size: 0.82rem;
-    font-weight: 750;
-    letter-spacing: 0.08em;
+    color: var(--color-text);
+    font-size: var(--text-meta);
+    font-weight: 500;
+    letter-spacing: var(--track-meta);
   }
 
   .journey-item p {
-    max-width: 48rem;
+    max-width: 44rem;
     margin-top: 0.65rem;
     color: var(--color-text-muted);
     line-height: 1.9;

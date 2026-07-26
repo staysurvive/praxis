@@ -22,45 +22,46 @@ const { type } = Astro.props;
 const entries = await listEntries({ type });
 const title = uiCopy.contentTypes[type];
 const description = uiCopy.listing.descriptions[type];
+const countLabel = uiCopy.listing.countUnit;
 ---
 
 <BaseLayout title={title} description={description}>
-  <section class="listing-hero">
+  <section class="listing-hero rule-scotch--bottom">
     <div
-      class="page-shell grid gap-10 pt-20 pb-16 md:pt-28 md:pb-24 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.45fr)] lg:items-end"
+      class="page-shell grid gap-10 pt-20 pb-16 md:pt-28 md:pb-24 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.42fr)] lg:items-end"
     >
       <div>
         <p class="eyebrow mb-5">{uiCopy.listing.eyebrow}</p>
-        <h1>{title}</h1>
+        <h1 class="display-title display-title--wide">{title}</h1>
       </div>
       <div>
         <p class="description">{description}</p>
-        <p class="count mt-5">{uiCopy.listing.count(entries.length)}</p>
+        <p class="count mt-5">
+          <span class="count-numeral">{entries.length}</span>
+          {countLabel}
+        </p>
       </div>
     </div>
   </section>
 
-  <section class="page-section">
+  <section class="listing-body">
     <div class="page-shell">
-      {entries.length > 0 ? entries.map((entry) => <ContentCard entry={entry} />) : <EmptyState />}
+      {
+        entries.length > 0 ? (
+          <div class="listing-list">
+            {entries.map((entry) => (
+              <ContentCard entry={entry} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState />
+        )
+      }
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .listing-hero {
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: clamp(4rem, 11vw, 9rem);
-    font-weight: 500;
-    letter-spacing: -0.06em;
-    line-height: 0.92;
-  }
-
   .description,
   .count {
     margin-bottom: 0;
@@ -75,6 +76,30 @@ const description = uiCopy.listing.descriptions[type];
 
   .count {
     color: var(--color-text-faint);
-    font-size: 0.78rem;
+    font-size: var(--text-kicker);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+  }
+
+  .count-numeral {
+    margin-right: 0.35rem;
+    color: var(--color-text);
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  .listing-body {
+    padding-block: clamp(3rem, 6vw, 5rem) clamp(4.5rem, 9vw, 8rem);
+  }
+
+  .listing-list {
+    border-bottom: var(--rule-hair);
+  }
+
+  .listing-list :global(.content-card:first-child) {
+    border-top: 0;
+    padding-top: 0;
   }
 </style>
