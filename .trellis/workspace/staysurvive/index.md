@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 4
+- **Total Sessions**: 5
 - **Last Active**: 2026-07-26
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~215 | Active |
+| `journal-1.md` | ~272 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 5 | 2026-07-26 | 第二篇真实内容：先审后信（安全审查实践笔记） | `2b500ee` | `main` |
 | 4 | 2026-07-26 | 产品章程落地:内容事件、截图工具正规化、charter 持久化 | `0c7839e`, `0d9d32e`, `58675ff` | `main` |
 | 3 | 2026-07-26 | 安全审查与修复:构建期 RCE、CSP 契约、路径穿越 | `82770b5`, `8e24ce8`, `3c59aab`, `5e825a8` | `main` |
 | 2 | 2026-07-26 | Editorial magazine UI polish | `634faea`, `da0225e`, `999dbbf`, `47a01a7` | `main` |

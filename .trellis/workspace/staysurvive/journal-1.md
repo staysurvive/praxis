@@ -213,3 +213,60 @@ Applied the magazine-style editorial redesign across apps/web, verified with che
 ### Next Steps
 
 - None - task complete
+
+
+## Session 5: 第二篇真实内容：先审后信（安全审查实践笔记）
+
+**Date**: 2026-07-26
+**Task**: 第二篇真实内容：先审后信（安全审查实践笔记）
+**Branch**: `main`
+
+### Summary
+
+Session summary was not supplied.
+
+### Main Changes
+
+## 本次会话完成
+
+写入站点第二篇真实内容：`content/notes/ai-code-security-review.md`（praxis-note-0001，type=note，stage=act-achieve，status=reflected）。主题是上一轮对 AI 写的代码做的对抗式安全审查——多视角并行查找、相互否证、结论契约化，符合章程"只记录已经发生的实践"。
+
+### 关键决策
+
+- **不写显式 practiceLog**：该实践已记录在项目条目（praxis.mdx 2026-07-26 practice 事件）中，笔记只贡献 publishedAt 合成的一条 publish 事件，避免热力图重复计数。数据集 8→9 事件、3 活跃天。
+- **标点统一为全角**：初稿混用半角逗号/引号，与项目条目的排版规范不一致；提交前全文改为全角标点（，、：、“”），符合章程"优秀中文排版"。
+- 正文修正一处事实精度：18 条原始发现 → 去重合并为 10 条 → 6 确认 4 驳回。
+
+### 测试与验证
+
+- e2e 更新（site.spec.ts）：RSS 断言 2 个 item + 新笔记 link；sitemap 增加 /notes/ai-code-security-review；新增导航测试（笔记列表 → 详情，role-scoped 选择器避免 strict mode 冲突）。
+- npm run check 绿（31 单测）；npm run test:e2e 28/28 通过（chromium + mobile-chromium）。
+- 截图目检：详情页排版、Journey 六段、时间轴、列表页均符合编辑型设计。
+
+### 提交
+
+- 2b500ee content: add security-review practice note
+
+### 遗留
+
+- 生产部署仍等待用户提供署名/域名/服务器接入信息；任务不归档。
+- Docker digest 锁定仍待联网环境。
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `2b500ee` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
