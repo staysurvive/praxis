@@ -43,7 +43,7 @@ Authoritative planning references:
 The current implementation uses the following concrete boundaries:
 
 ```text
-content/projects/praxis.mdx                 # only production entry
+content/projects/praxis.mdx                 # first production entry (notes/ and journal/ follow the same schema)
 apps/web/src/content.config.ts              # root content loader + schema
 apps/web/src/lib/content/index.ts           # typed queries and summaries
 apps/web/src/lib/practice.ts                # explicit event normalization
