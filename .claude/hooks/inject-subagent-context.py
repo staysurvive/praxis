@@ -131,9 +131,30 @@ def get_current_task(repo_root: str, input_data: dict) -> str | None:
     return active.task_path
 
 
+def _is_within_base(base_path: str, target_path: str) -> bool:
+    """Return True only if target_path resolves inside base_path.
+
+    Guards read_file_content / read_directory_contents against jsonl entries
+    that use absolute paths or ``../`` traversal to pull files from outside the
+    repository into the sub-agent prompt.
+    """
+    try:
+        base_real = os.path.realpath(base_path)
+        target_real = os.path.realpath(target_path)
+    except OSError:
+        return False
+    return target_real == base_real or target_real.startswith(base_real + os.sep)
+
+
 def read_file_content(base_path: str, file_path: str) -> str | None:
     """Read file content, return None if file doesn't exist"""
     full_path = os.path.join(base_path, file_path)
+    if not _is_within_base(base_path, full_path):
+        print(
+            f"[inject-subagent-context] WARN: refusing to read path outside repo: {file_path}",
+            file=sys.stderr,
+        )
+        return None
     if os.path.exists(full_path) and os.path.isfile(full_path):
         try:
             with open(full_path, "r", encoding="utf-8") as f:
@@ -158,6 +179,12 @@ def read_directory_contents(
         [(file_path, content), ...]
     """
     full_path = os.path.join(base_path, dir_path)
+    if not _is_within_base(base_path, full_path):
+        print(
+            f"[inject-subagent-context] WARN: refusing to read directory outside repo: {dir_path}",
+            file=sys.stderr,
+        )
+        return []
     if not os.path.exists(full_path) or not os.path.isdir(full_path):
         return []
 

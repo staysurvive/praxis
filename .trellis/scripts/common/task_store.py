@@ -243,6 +243,14 @@ def cmd_create(args: argparse.Namespace) -> int:
         print(colored("Error: could not generate slug from title", Colors.RED), file=sys.stderr)
         return 1
 
+    # Reject slugs that could escape the tasks directory (path traversal).
+    if "/" in slug or "\\" in slug or ".." in slug or Path(slug).is_absolute():
+        print(
+            colored(f"Error: unsafe slug (path traversal not allowed): {slug!r}", Colors.RED),
+            file=sys.stderr,
+        )
+        return 1
+
     # Create task directory with MM-DD-slug format
     tasks_dir = get_tasks_dir(repo_root)
     date_prefix = generate_task_date_prefix()
@@ -453,6 +461,22 @@ def cmd_archive(args: argparse.Namespace) -> int:
         from .tasks import iter_active_tasks
         for t in iter_active_tasks(tasks_dir):
             print(f"  - {t.dir_name}/", file=sys.stderr)
+        return 1
+
+    # Confine the resolved target to the tasks directory before any move, so a
+    # crafted name like "../../important/dir" cannot relocate an arbitrary
+    # directory into the archive tree.
+    try:
+        tasks_dir_resolved = tasks_dir.resolve()
+        task_dir_resolved = task_dir.resolve()
+    except OSError:
+        print(colored(f"Error: could not resolve task path: {task_name}", Colors.RED), file=sys.stderr)
+        return 1
+    if tasks_dir_resolved not in task_dir_resolved.parents:
+        print(
+            colored(f"Error: refusing to archive path outside tasks dir: {task_name}", Colors.RED),
+            file=sys.stderr,
+        )
         return 1
 
     dir_name = task_dir.name
