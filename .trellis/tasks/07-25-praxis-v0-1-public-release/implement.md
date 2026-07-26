@@ -1,5 +1,17 @@
 # Praxis v0.1 public release — implementation plan
 
+## Progress snapshot (2026-07-26)
+
+- 步骤 1–7 全部完成并有证据：SEO/RSS/Sitemap/robots 落地，release gate 文档就位，
+  `npm run check`、`npm run build`、`npm run test:e2e`（30/30）与 Docker build 均绿。
+- 步骤 8 部分完成：checklist 部署前条目已按证据勾选，Trellis 质量/spec/commit 流程已走完
+  （sessions 1–6）；生产部署与上线后检查仍开放，等待用户提供署名、正式域名和服务器
+  Caddy/Compose 接入边界。
+- 超出原计划的真实进展：正式内容从 1 篇增至 3 篇（项目 + 安全审查笔记 + 首篇日志），
+  首页 currentProject 与 Latest top-3 解耦，e2e 扩至 30 断言；本地 main 已推送到
+  github.com/staysurvive/praxis（32ce0ef）。
+- 任务保持 `in_progress`，在真实部署完成前不归档。
+
 ## Ordered checklist
 
 1. **Establish official discovery dependencies and config**
