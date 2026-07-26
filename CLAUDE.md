@@ -8,6 +8,8 @@ Praxis (知行合一) — a personal practice site. Static Astro + TypeScript + 
 
 This project is managed by Trellis (see `AGENTS.md`): task planning/consent workflow lives in `.trellis/workflow.md`, and coding guidelines are in `.trellis/spec/<package>/<layer>/` — read the relevant spec index before writing code in a layer.
 
+Product-level constraints (decision priority, digital-garden positioning, work mode, adjudicated charter deviations) live in `docs/charter.md` — read it before designing any new feature.
+
 ## Commands
 
 All from repo root (they delegate to the `@praxis/web` workspace):
