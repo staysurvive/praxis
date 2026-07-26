@@ -13,6 +13,24 @@ const repositoryRoot = path.resolve(webRoot, '../..');
 const contentRoot = path.join(repositoryRoot, 'content');
 const outputFile = path.join(webRoot, 'src/generated/practice-activity.json');
 
+// gray-matter enables a JavaScript frontmatter engine by default, so a file
+// whose frontmatter opens with `---js` is parsed through eval() — arbitrary
+// code execution during the build. Content frontmatter must be inert data, so
+// reject every executable engine and only allow the YAML/JSON defaults.
+const rejectExecutableFrontmatter = (): never => {
+  throw new Error('不支持可执行的 frontmatter 引擎；内容文件请使用 YAML frontmatter');
+};
+
+function parseFrontmatter(source: string): Record<string, unknown> {
+  return matter(source, {
+    language: 'yaml',
+    engines: {
+      javascript: rejectExecutableFrontmatter,
+      js: rejectExecutableFrontmatter,
+    },
+  }).data;
+}
+
 async function findContentFiles(directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = await Promise.all(
@@ -37,7 +55,7 @@ async function main(): Promise<void> {
 
   for (const file of files) {
     const source = await readFile(file, 'utf8');
-    const frontmatter = matter(source).data;
+    const frontmatter = parseFrontmatter(source);
     const parsed = contentSchema.safeParse(frontmatter);
     const relativePath = path.relative(repositoryRoot, file).replaceAll('\\', '/');
 
