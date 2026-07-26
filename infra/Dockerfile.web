@@ -1,3 +1,10 @@
+# Supply-chain hardening: pin both base images to an immutable digest, e.g.
+#   FROM node:22-alpine@sha256:<digest> AS build
+# Keep the human-readable tag AND append the digest so the tag documents intent
+# while the digest enforces immutability. Fetch the current digest with:
+#   docker buildx imagetools inspect node:22-alpine --format '{{.Manifest.Digest}}'
+#   docker buildx imagetools inspect busybox:1.37   --format '{{.Manifest.Digest}}'
+# (left un-pinned here because the build host had no registry access; pin before release).
 FROM node:22-alpine AS build
 
 WORKDIR /workspace
@@ -15,6 +22,8 @@ ENV ASTRO_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
+# Pin to a digest before release (see the note on the build stage above):
+#   FROM busybox:1.37@sha256:<digest>
 FROM busybox:1.37
 
 COPY --from=build /workspace/apps/web/dist /site
