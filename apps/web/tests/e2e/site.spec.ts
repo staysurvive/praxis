@@ -81,7 +81,7 @@ test('public pages expose canonical and social discovery metadata', async ({ pag
   );
   await expect(page.locator('meta[property="article:modified_time"]')).toHaveAttribute(
     'content',
-    '2026-07-25',
+    '2026-07-26',
   );
   await expect(page.locator('meta[property="article:tag"]')).toHaveCount(4);
   await expect(page.locator('script:not([src])')).toHaveCount(0);
