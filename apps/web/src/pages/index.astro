@@ -6,11 +6,11 @@ import { homeContent } from '../config/home';
 import { uiCopy } from '../config/copy';
 import { siteConfig } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getLatestEntries } from '../lib/content';
+import { getLatestEntries, listEntries } from '../lib/content';
 import { practiceDataset } from '../lib/practice-data';
 
 const latestEntries = await getLatestEntries(3);
-const currentProject = latestEntries.find((entry) => entry.type === 'project');
+const [currentProject] = await listEntries({ type: 'project' });
 const year = new Date().getFullYear();
 ---
 

@@ -15,6 +15,8 @@ const shots = [
   { path: '/', name: 'home', schemes: ['light', 'dark'] },
   { path: '/projects', name: 'list', schemes: ['light'] },
   { path: '/projects/praxis-foundation', name: 'detail', schemes: ['light', 'dark'] },
+  { path: '/journal', name: 'journal-list', schemes: ['light'] },
+  { path: '/journal/what-green-gates-miss', name: 'journal-detail', schemes: ['light'] },
   { path: '/blog', name: 'empty', schemes: ['light'] },
   { path: '/nope', name: '404', schemes: ['light'] },
 ];

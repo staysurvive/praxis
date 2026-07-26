@@ -48,6 +48,18 @@ test('the notes list reaches the security review note', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /相互否证/ })).toBeVisible();
 });
 
+test('the journal list reaches the first journal entry', async ({ page }) => {
+  await page.goto('/journal');
+
+  await expect(page.getByRole('heading', { level: 1, name: '日志' })).toBeVisible();
+  await page.getByRole('link', { name: /门禁全绿之后/ }).click();
+
+  await expect(page).toHaveURL(/\/journal\/what-green-gates-miss$/);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('门禁全绿之后');
+  await expect(page.getByRole('heading', { name: '真实实践时间轴' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '长期沉淀' })).toHaveCount(0);
+});
+
 test('missing routes use the branded 404', async ({ page }) => {
   const response = await page.goto('/this-route-does-not-exist');
 
@@ -106,7 +118,8 @@ test('RSS, Sitemap, and robots expose only public canonical routes', async ({ re
   expect(rss).toContain('<language>zh-CN</language>');
   expect(rss).toContain('<link>https://praxis.example/projects/praxis-foundation</link>');
   expect(rss).toContain('<link>https://praxis.example/notes/ai-code-security-review</link>');
-  expect(rss.match(/<item>/g)).toHaveLength(2);
+  expect(rss).toContain('<link>https://praxis.example/journal/what-green-gates-miss</link>');
+  expect(rss.match(/<item>/g)).toHaveLength(3);
 
   const sitemapIndexResponse = await request.get('/sitemap-index.xml');
   expect(sitemapIndexResponse.ok()).toBe(true);
@@ -124,6 +137,7 @@ test('RSS, Sitemap, and robots expose only public canonical routes', async ({ re
     '/projects',
     '/projects/praxis-foundation',
     '/notes/ai-code-security-review',
+    '/journal/what-green-gates-miss',
   ]) {
     expect(sitemap).toContain(`<loc>https://praxis.example${path}</loc>`);
   }
