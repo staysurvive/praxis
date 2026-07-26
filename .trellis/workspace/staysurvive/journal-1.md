@@ -270,3 +270,45 @@ Session summary was not supplied.
 ### Next Steps
 
 - None - task complete
+
+
+## Session 6: 发布第一篇日志：门禁全绿之后
+
+**Date**: 2026-07-26
+**Task**: 发布第一篇日志：门禁全绿之后
+**Branch**: `main`
+
+### Summary
+
+Session summary was not supplied.
+
+### Main Changes
+
+发布第一篇日志 content/journal/what-green-gates-miss.md（praxis-journal-0001，status: reflected）。
+
+流程：初稿 → ultracode 对抗式评审 workflow（11 项去重发现：8 项确认并全部落地，1 项证伪，2 项 verify agent 两次 ECONNRESET 丢失后依据仓库证据自行裁决——其一为 status completed→reflected 已应用，其一判定失效）。所有门禁复跑全绿：npm run check（astro check 0 错误 / 31 单测）、npm run test:e2e 30/30。截图目检完成（详情页 meta 行确认渲染「已复盘」）。
+
+配套改动同 commit：e2e 新增日志导航/RSS 3-item/sitemap 断言；首页 currentProject 改用 listEntries({type:'project'}) 与 Latest top-3 解耦；日志页并入 capture-screenshots.mjs 并删除一次性截图脚本。
+
+Spec 更新：frontend/index.md 中 "only production entry" 注释改为多类型表述（cfd7832）；内容/测试/页面改动均沿既有模式，无其他 spec 变更必要。
+
+遗留：v0.1 生产部署待用户提供署名/域名/服务器事实；任务 07-25-praxis-v0-1-public-release 保持 in_progress，不归档。
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `c5ecb32` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
