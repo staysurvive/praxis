@@ -35,17 +35,40 @@ roles rather than hard-coded theme colors:
 
 ```css
 :root {
-  --color-page: #f3f1eb;
-  --color-text: #1d1d1a;
-  --color-accent: #a14f3d;
+  --color-page: #f4f1ea;
+  --color-text: #211e1a;
+  --color-accent: #8c3b26;
 }
 
 [data-theme='dark'] {
-  --color-page: #11110f;
-  --color-text: #f1eee5;
-  --color-accent: #d78067;
+  --color-page: #171512;
+  --color-text: #ece6da;
+  --color-accent: #d98e6b;
 }
 ```
 
 Tailwind is used for composition such as `grid`, `gap-*`, and responsive breakpoints; meaningful patterns such as
-`.surface-card`, `.article-prose`, and `.heatmap-cell` remain named component styles in the Astro files.
+`.rule-scotch`, `.article-prose`, and `.heatmap-cell` remain named component styles in `global.css` or the Astro files.
+
+## Editorial magazine patterns
+
+The v0.1 visual language is editorial (warm paper, ink rules, serif display type, flat 2px radii — "杂志感").
+Recurring patterns are named component classes in `apps/web/src/styles/global.css`; reuse them instead of rebuilding
+per page:
+
+- `.rule-scotch` / `.page-section` — a 2px ink rule over a 1px hairline (a scotch rule) marks every section
+  threshold. `.page-section` also increments the `section-folio` counter that `.eyebrow--folio::before` renders as
+  `01 —`, `02 —` …; adding a homepage section renumbers automatically.
+- `.display-title` / `.section-title` — serif display type from system stacks only (Georgia + Source Han Serif SC
+  fallbacks in `--font-serif`). Webfonts are forbidden: the CSP allows no third-party origins and pages must not pay
+  a font download.
+- `.article-prose` — long-form Chinese body sets `text-align: justify`, `text-justify: inter-character`,
+  `line-break: strict`, and `hanging-punctuation: allow-end` at `--measure-cjk` (36em); headings and blockquotes
+  reset to `text-align: left`.
+- `.text-link::before { inset: -0.65rem 0 }` — an invisible hit-area extension yields comfortable tap targets
+  without moving a pixel; prefer this over padding hacks that shift layout.
+- The practice heatmap opens scrolled to the newest weeks without JavaScript: the scroll container is
+  `direction: rtl` while the inner grid restores `direction: ltr`. Do not replace this with a scroll script — the
+  page must land on current data with JavaScript disabled.
+- Radii are intentionally flat (`--radius-sm/md/lg: 2px`) and `--shadow-soft: none`; depth comes from rules and
+  surface tints, not shadows or rounding.
