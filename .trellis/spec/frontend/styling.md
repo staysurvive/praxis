@@ -70,5 +70,8 @@ per page:
 - The practice heatmap opens scrolled to the newest weeks without JavaScript: the scroll container is
   `direction: rtl` while the inner grid restores `direction: ltr`. Do not replace this with a scroll script — the
   page must land on current data with JavaScript disabled.
+- A `display: grid` section that contains a horizontally scrollable component must define its content track as
+  `minmax(0, 1fr)` (or give its direct grid item `min-width: 0`). Otherwise the grid's automatic minimum can expand
+  the document to the heatmap's intrinsic width. Keep overflow on `.heatmap-scroll`; never hide it at page level.
 - Radii are intentionally flat (`--radius-sm/md/lg: 2px`) and `--shadow-soft: none`; depth comes from rules and
   surface tints, not shadows or rounding.

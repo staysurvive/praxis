@@ -52,7 +52,7 @@ const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data
 >
   <article>
     <header class="content-hero rule-scotch--bottom">
-      <div class="page-shell pt-16 pb-16 md:pt-24 md:pb-24">
+      <div class="content-hero-shell page-shell pt-16 pb-16 md:pt-24 md:pb-24">
         <a class="content-back" href={getContentUrl(summary.type)}>{summary.typeLabel}</a>
         <div
           class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(16rem,0.45fr)] lg:items-end"
@@ -67,7 +67,7 @@ const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data
     </header>
 
     <div
-      class="page-shell grid gap-12 py-16 md:py-24 lg:grid-cols-[minmax(0,1fr)_var(--rail-width)] lg:items-start lg:gap-[clamp(3rem,6vw,5rem)]"
+      class="content-body page-shell grid gap-12 py-16 md:py-24 lg:grid-cols-[minmax(0,1fr)_var(--rail-width)] lg:items-start lg:gap-[clamp(3rem,6vw,5rem)]"
     >
       <div class="article-prose">
         <Content />
@@ -187,6 +187,24 @@ const practiceEvents = normalizePracticeEvents([toPracticeSourceEntry(entry.data
 
   .tag-sep {
     color: var(--color-text-faint);
+  }
+
+  @media (min-width: 64rem) {
+    .content-hero,
+    .content-hero-shell,
+    .content-body {
+      min-block-size: var(--section-min-block-size);
+    }
+
+    .content-hero,
+    .content-hero-shell {
+      display: grid;
+      align-items: center;
+    }
+
+    .content-body {
+      align-content: center;
+    }
   }
 
   @media (max-width: 63.99rem) {

@@ -95,6 +95,13 @@ const summary = uiCopy.heatmap.summary(visibleEvents.length, visibleActiveDays);
 </section>
 
 <style>
+  .heatmap-section {
+    display: grid;
+    align-content: center;
+    grid-template-columns: minmax(0, 1fr);
+    min-block-size: var(--panel-min-block-size);
+  }
+
   .heatmap-panel {
     padding: clamp(1.5rem, 4vw, 3rem);
     border: 1px solid var(--color-border);

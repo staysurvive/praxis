@@ -45,6 +45,7 @@ const sections = journey
   .journey-panel {
     display: grid;
     gap: clamp(2.5rem, 6vw, 5rem);
+    min-block-size: var(--panel-min-block-size);
     padding-block: clamp(4rem, 8vw, 7rem);
   }
 
@@ -111,6 +112,7 @@ const sections = journey
   @media (min-width: 56rem) {
     .journey-panel {
       grid-template-columns: minmax(16rem, 0.7fr) minmax(0, 1.3fr);
+      align-items: center;
     }
   }
 </style>

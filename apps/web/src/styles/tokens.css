@@ -62,6 +62,11 @@
   --space-6: 6.5rem;
   --space-7: 9rem;
   --space-section: clamp(4.5rem, 9vw, 8rem);
+  --space-panel: clamp(1.5rem, 3vw, 3rem);
+
+  --section-min-block-size: calc(100svh - var(--header-height) - 1px);
+  --panel-min-block-size: clamp(20rem, 42svh, 30rem);
+  --card-min-block-size: clamp(18rem, 22vw, 20rem);
 
   --rule-hair: 1px solid var(--color-border);
 

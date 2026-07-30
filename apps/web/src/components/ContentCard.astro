@@ -13,7 +13,7 @@ const { entry, featured = false } = Astro.props;
 
 <article class:list={['content-card', featured && 'content-card--featured']}>
   <ContentMeta entry={entry} showStatus={featured} />
-  <div class="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+  <div class="content-card-body mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
     <div>
       <h3 class="content-title">
         <a href={entry.url}>{entry.title}</a>
@@ -26,13 +26,27 @@ const { entry, featured = false } = Astro.props;
 
 <style>
   .content-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-block-size: var(--card-min-block-size);
     padding-block: clamp(2rem, 4vw, 3rem);
     border-top: 1px solid var(--color-border);
   }
 
   .content-card--featured {
-    padding: 2rem 0 0;
+    padding: var(--space-panel) 0 0;
     border-top: 1px solid var(--color-border);
+  }
+
+  .content-card-body {
+    flex: 1;
+  }
+
+  @media (max-width: 47.99rem) {
+    .content-card {
+      min-block-size: 18rem;
+    }
   }
 
   .content-title {

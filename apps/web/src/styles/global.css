@@ -103,9 +103,14 @@
 
   .page-section {
     position: relative;
+    display: grid;
     padding-block: var(--space-section);
     border-top: 2px solid var(--color-border-strong);
     counter-increment: section-folio;
+  }
+
+  .page-section > .page-shell {
+    min-width: 0;
   }
 
   .page-section::before {
@@ -116,6 +121,13 @@
     height: 1px;
     background: var(--color-border);
     content: '';
+  }
+
+  @media (min-width: 64rem) {
+    .page-section {
+      min-block-size: var(--section-min-block-size);
+      align-items: center;
+    }
   }
 
   .eyebrow {

@@ -91,6 +91,7 @@ const countLabel = uiCopy.listing.countUnit;
   }
 
   .listing-body {
+    display: grid;
     padding-block: clamp(3rem, 6vw, 5rem) clamp(4.5rem, 9vw, 8rem);
   }
 
@@ -101,5 +102,21 @@ const countLabel = uiCopy.listing.countUnit;
   .listing-list :global(.content-card:first-child) {
     border-top: 0;
     padding-top: 0;
+  }
+
+  @media (min-width: 64rem) {
+    .listing-hero,
+    .listing-body {
+      min-block-size: var(--section-min-block-size);
+    }
+
+    .listing-hero {
+      display: grid;
+      align-items: center;
+    }
+
+    .listing-body {
+      align-items: center;
+    }
   }
 </style>
