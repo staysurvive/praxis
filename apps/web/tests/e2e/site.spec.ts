@@ -190,6 +190,31 @@ test('a 320px viewport has no page-level horizontal overflow', async ({ page }) 
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
 });
 
+test('the homepage hero completes the first desktop viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 1536, height: 791 });
+  await page.goto('/');
+
+  const dimensions = await page.locator('.hero-section').evaluate((hero) => {
+    const nextSection = hero.nextElementSibling;
+    if (!(nextSection instanceof HTMLElement)) {
+      throw new Error('Homepage section following the hero is missing');
+    }
+
+    const heroRect = hero.getBoundingClientRect();
+    return {
+      viewportHeight: window.innerHeight,
+      heroBottom: heroRect.bottom,
+      nextSectionTop: nextSection.getBoundingClientRect().top,
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    };
+  });
+
+  expect(Math.abs(dimensions.heroBottom - dimensions.viewportHeight)).toBeLessThanOrEqual(1);
+  expect(Math.abs(dimensions.nextSectionTop - dimensions.viewportHeight)).toBeLessThanOrEqual(1);
+  expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
+});
+
 test('keyboard focus and reduced-motion preferences remain usable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');

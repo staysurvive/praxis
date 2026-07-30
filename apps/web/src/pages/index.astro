@@ -108,7 +108,7 @@ const year = new Date().getFullYear();
   .hero-section {
     display: flex;
     flex-direction: column;
-    min-height: min(calc(100svh - var(--header-height)), 42rem);
+    min-height: calc(100svh - var(--header-height) - 1px);
   }
 
   .hero-copy {
