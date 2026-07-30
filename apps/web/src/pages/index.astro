@@ -70,21 +70,6 @@ const year = new Date().getFullYear();
   </section>
 
   <section class="page-section">
-    <div
-      class="now-panel page-shell grid gap-10 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1.35fr)] lg:items-stretch"
-    >
-      <div>
-        <p class="eyebrow eyebrow--folio mb-5">{homeContent.now.eyebrow}</p>
-        <h2 class="now-title">{homeContent.now.title}</h2>
-      </div>
-      <div class="now-column">
-        <p>{homeContent.now.description}</p>
-        {currentProject && <ContentCard entry={currentProject} featured />}
-      </div>
-    </div>
-  </section>
-
-  <section class="page-section">
     <div class="page-shell">
       <PracticeHeatmap dataset={practiceDataset} />
     </div>
@@ -202,37 +187,6 @@ const year = new Date().getFullYear();
     line-height: 1.9;
   }
 
-  .now-title {
-    max-width: 16ch;
-    margin: 0;
-    font-family: var(--font-serif);
-    font-size: var(--text-title-1);
-    font-weight: 400;
-    letter-spacing: var(--track-cjk-display);
-    line-height: 1.35;
-    text-wrap: balance;
-  }
-
-  .now-column {
-    display: flex;
-    flex-direction: column;
-    padding-left: clamp(1.5rem, 3vw, 3rem);
-    border-left: 1px solid var(--color-border);
-  }
-
-  .now-column > p {
-    max-width: 44rem;
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: 1.05rem;
-    line-height: 1.9;
-  }
-
-  .now-column :global(.content-card--featured) {
-    margin-top: auto;
-    padding-top: 2rem;
-  }
-
   .latest-list :global(.content-card:first-child) {
     border-top: 0;
     padding-top: 0;
@@ -245,22 +199,12 @@ const year = new Date().getFullYear();
   }
 
   @media (max-width: 63.99rem) {
-    .now-column {
-      padding-left: 1.25rem;
-    }
-
     .philosophy-index {
       display: none;
     }
   }
 
   @media (min-width: 64rem) {
-    .now-panel {
-      min-block-size: calc(
-        var(--section-min-block-size) - var(--space-section) - var(--space-section)
-      );
-    }
-
     .philosophy-grid article {
       min-block-size: var(--panel-min-block-size);
       border-right: 1px solid var(--color-border);
