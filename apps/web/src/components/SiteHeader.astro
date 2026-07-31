@@ -17,7 +17,14 @@ function isActive(href: string): boolean {
 <header class="site-header">
   <div class="page-shell flex min-h-[var(--header-height)] items-center justify-between gap-5">
     <a class="brand" href="/" aria-label={`${siteConfig.name} · ${uiCopy.navigation.home}`}>
-      <span class="brand-seal" aria-hidden="true">知行</span>
+      <img
+        class="brand-mark"
+        src="/brand/favicon-mini-32x32.png"
+        width="32"
+        height="32"
+        alt=""
+        aria-hidden="true"
+      />
       <span class="brand-name">{siteConfig.name}</span>
       <span class="brand-motto">{siteConfig.theme}</span>
     </a>
@@ -63,18 +70,12 @@ function isActive(href: string): boolean {
     text-decoration: none;
   }
 
-  .brand-seal {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.3rem 0.34rem;
-    border-radius: 2px;
-    background: var(--color-accent);
-    color: var(--color-seal-ink);
-    font-family: var(--font-serif);
-    font-size: 0.68rem;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    line-height: 1;
+  .brand-mark {
+    display: block;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 auto;
+    object-fit: contain;
   }
 
   .brand-name {

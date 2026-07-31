@@ -10,6 +10,9 @@ test('editorial homepage exposes the real Praxis project and local practice data
   await page.goto('/');
 
   await expect(page.getByRole('heading', { level: 1, name: '知行合一' })).toBeVisible();
+  await expect(page.locator('.brand-mark')).toHaveAttribute('src', '/brand/favicon-mini-32x32.png');
+  await expect(page.locator('.brand-mark')).toHaveAttribute('width', '32');
+  await expect(page.locator('.brand-mark')).toHaveAttribute('height', '32');
   await expect(page.getByRole('heading', { name: /实践不是提交次数/ })).toBeVisible();
   await expect(
     page.getByRole('link', { name: '构建 Praxis：从知到行的第一项长期实践' }).first(),
