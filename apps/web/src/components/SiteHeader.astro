@@ -137,6 +137,7 @@ function isActive(href: string): boolean {
     color: var(--color-text);
   }
 
+  .nav-link:is(:hover, :focus-visible)::after,
   .nav-link--active::after {
     opacity: 1;
     transform: scaleX(1);

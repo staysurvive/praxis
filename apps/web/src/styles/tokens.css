@@ -76,7 +76,7 @@
   --rail-width: 14rem;
   --header-height: 4.75rem;
 
-  --duration-fast: 160ms;
+  --duration-fast: 200ms;
   --duration-base: 260ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 }

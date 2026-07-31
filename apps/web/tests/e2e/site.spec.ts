@@ -178,6 +178,81 @@ test('theme control tracks system theme changes without an explicit preference',
   );
 });
 
+test('interactive styles avoid scroll handlers and layout-affecting transitions', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const nativeAddEventListener = EventTarget.prototype.addEventListener;
+    const scrollListenerTargets: string[] = [];
+
+    EventTarget.prototype.addEventListener = function (type, listener, options) {
+      if (type === 'scroll') {
+        scrollListenerTargets.push(this === window ? 'window' : this.constructor.name);
+      }
+
+      return nativeAddEventListener.call(this, type, listener, options);
+    };
+
+    Object.defineProperty(window, '__praxisScrollListenerTargets', {
+      value: scrollListenerTargets,
+    });
+  });
+
+  await page.goto('/');
+
+  const scrollListenerTargets = await page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          __praxisScrollListenerTargets: string[];
+        }
+      ).__praxisScrollListenerTargets,
+  );
+  expect(scrollListenerTargets).toEqual([]);
+
+  const transitions = await page.evaluate(() => {
+    const transitionProperty = (selector: string, pseudoElement?: string) => {
+      const element = document.querySelector(selector);
+      if (!(element instanceof HTMLElement)) {
+        throw new Error(`Missing interactive element: ${selector}`);
+      }
+
+      return getComputedStyle(element, pseudoElement).transitionProperty;
+    };
+
+    return {
+      navigation: transitionProperty('.nav-link', '::after'),
+      theme: transitionProperty('[data-theme-toggle]'),
+      textLink: transitionProperty('.text-link', '::after'),
+    };
+  });
+
+  expect(transitions.navigation).toContain('opacity');
+  expect(transitions.navigation).toContain('transform');
+  expect(transitions.theme).toContain('background-color');
+  expect(transitions.textLink).toContain('transform');
+  expect(Object.values(transitions).join(',')).not.toContain('all');
+
+  const geometry = async () =>
+    page.evaluate(() => {
+      const header = document.querySelector('.site-header');
+      if (!(header instanceof HTMLElement)) {
+        throw new Error('Missing site header');
+      }
+
+      const { height, width } = header.getBoundingClientRect();
+      return {
+        documentWidth: document.documentElement.clientWidth,
+        headerHeight: height,
+        headerWidth: width,
+      };
+    });
+
+  const beforeThemeChange = await geometry();
+  await page.locator('[data-theme-toggle]').click();
+  expect(await geometry()).toEqual(beforeThemeChange);
+});
+
 test('a 320px viewport has no page-level horizontal overflow', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto('/');
