@@ -92,6 +92,26 @@ test('public pages expose canonical and social discovery metadata', async ({ pag
     'href',
     'https://praxis.example/rss.xml',
   );
+  await expect(page.locator('link[rel="icon"][type="image/svg+xml"][sizes="any"]')).toHaveAttribute(
+    'href',
+    '/favicon.svg',
+  );
+  await expect(page.locator('link[rel="icon"][type="image/png"][sizes="16x16"]')).toHaveAttribute(
+    'href',
+    '/favicon-16x16.png',
+  );
+  await expect(page.locator('link[rel="icon"][type="image/png"][sizes="32x32"]')).toHaveAttribute(
+    'href',
+    '/favicon-32x32.png',
+  );
+  await expect(page.locator('link[rel="icon"][type="image/png"][sizes="48x48"]')).toHaveAttribute(
+    'href',
+    '/favicon-48x48.png',
+  );
+  await expect(page.locator('link[rel="icon"][type="image/x-icon"]')).toHaveAttribute(
+    'href',
+    '/favicon.ico',
+  );
   await expect(page.locator('script:not([src])')).toHaveCount(0);
   await expect(page.locator('style')).toHaveCount(0);
   await expect(page.locator('meta[name="generator"]')).toHaveCount(0);
