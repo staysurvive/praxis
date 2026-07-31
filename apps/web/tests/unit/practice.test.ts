@@ -4,6 +4,7 @@ import type { PracticeSourceEntry } from '../../src/lib/practice';
 import { contentSchema } from '../../src/lib/content/schema';
 import {
   buildHeatmapCalendar,
+  buildHeatmapMonths,
   buildPracticeDataset,
   buildPublicPracticeDataset,
   normalizePracticeEvents,
@@ -98,5 +99,20 @@ describe('practice event normalization', () => {
     expect(cells).toHaveLength(371);
     expect(cells.find((cell) => cell.date === '2026-07-20')?.count).toBe(1);
     expect(cells.filter((cell) => !cell.inRange).length).toBeGreaterThan(0);
+  });
+
+  it('labels only the first calendar week of each month', () => {
+    const cells = buildHeatmapCalendar(buildPracticeDataset([baseEntry]), '2026-07-24');
+    const months = buildHeatmapMonths(cells);
+
+    expect(months).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: '7月', weekIndex: 0 }),
+        expect.objectContaining({ label: '8月', weekIndex: 2 }),
+        expect.objectContaining({ label: '9月', weekIndex: 7 }),
+        expect.objectContaining({ label: '7月', weekIndex: 50 }),
+      ]),
+    );
+    expect(new Set(months.map((month) => month.weekIndex)).size).toBe(months.length);
   });
 });

@@ -16,6 +16,17 @@ test('editorial homepage exposes the real Praxis project and local practice data
   ).toBeVisible();
   await expect(page.locator('a[href="/projects/praxis-foundation"]').first()).toBeVisible();
   await expect(page.getByText('GitHub Contributions')).toHaveCount(0);
+  await expect(page.locator('.heatmap-months span')).not.toHaveCount(0);
+  await expect(page.locator('.heatmap-total')).toHaveText(/过去一年共 \d+ 次实践/);
+  await expect(page.locator('.heatmap-legend i')).toHaveCount(5);
+
+  const activeDays = page.locator('.heatmap-cell:not([data-level="0"])');
+  expect(await activeDays.count()).toBeGreaterThan(0);
+  const activeDay = activeDays.first();
+  await expect(activeDay).toHaveAttribute('data-tooltip', /2026年7月.*次实践/);
+  await expect(activeDay.locator('.heatmap-tooltip strong')).toHaveText(/\d+ 次实践/);
+  await activeDay.hover();
+  await expect(activeDay).toHaveCSS('transform', /matrix/);
 });
 
 test('type-first navigation reaches the project detail', async ({ page }) => {

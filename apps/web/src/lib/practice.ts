@@ -45,6 +45,11 @@ export interface HeatmapCell {
   inRange: boolean;
 }
 
+export interface HeatmapMonth {
+  label: string;
+  weekIndex: number;
+}
+
 function compareEvents(left: NormalizedPracticeEvent, right: NormalizedPracticeEvent): number {
   return (
     left.date.localeCompare(right.date) ||
@@ -186,6 +191,28 @@ export function buildHeatmapCalendar(
       level: levelForCount(count),
       inRange: date <= endDate,
     };
+  });
+}
+
+export function buildHeatmapMonths(cells: readonly HeatmapCell[]): HeatmapMonth[] {
+  let previousMonth = '';
+
+  return cells.flatMap((cell, index) => {
+    if (index % 7 !== 0) return [];
+
+    const month = cell.date.slice(0, 7);
+    if (month === previousMonth) return [];
+
+    previousMonth = month;
+    return [
+      {
+        label: new Intl.DateTimeFormat('zh-CN', {
+          month: 'short',
+          timeZone: 'UTC',
+        }).format(parseDateKey(cell.date)),
+        weekIndex: index / 7,
+      },
+    ];
   });
 }
 
