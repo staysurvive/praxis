@@ -30,6 +30,32 @@ test('editorial homepage exposes the real Praxis project and local practice data
   await expect(activeDay.locator('.heatmap-tooltip strong')).toHaveText(/\d+ 次实践/);
   await activeDay.hover();
   await expect(activeDay).toHaveCSS('transform', /matrix/);
+
+  const firstTopRowCell = page.locator('.heatmap-cell').first();
+  await firstTopRowCell.hover();
+  const firstTopRowTooltip = firstTopRowCell.locator('.heatmap-tooltip');
+  await expect(firstTopRowTooltip).toHaveCSS('opacity', '1');
+  const tooltipGeometry = await firstTopRowTooltip.evaluate((tooltip) => {
+    const cell = tooltip.parentElement;
+    const scroll = tooltip.closest('.heatmap-scroll');
+    if (!(cell instanceof HTMLElement) || !(scroll instanceof HTMLElement)) {
+      throw new Error('Missing heatmap tooltip container');
+    }
+
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const cellRect = cell.getBoundingClientRect();
+    const scrollRect = scroll.getBoundingClientRect();
+    return {
+      tooltipTop: tooltipRect.top,
+      tooltipBottom: tooltipRect.bottom,
+      cellBottom: cellRect.bottom,
+      scrollTop: scrollRect.top,
+      scrollBottom: scrollRect.bottom,
+    };
+  });
+  expect(tooltipGeometry.tooltipBottom).toBeLessThanOrEqual(tooltipGeometry.cellBottom);
+  expect(tooltipGeometry.tooltipTop - tooltipGeometry.scrollTop).toBeGreaterThanOrEqual(4);
+  expect(tooltipGeometry.tooltipBottom).toBeLessThanOrEqual(tooltipGeometry.scrollBottom);
 });
 
 test('type-first navigation reaches the project detail', async ({ page }) => {
@@ -258,6 +284,8 @@ test('interactive styles avoid scroll handlers and layout-affecting transitions'
       navigation: transitionProperty('.nav-link', '::after'),
       theme: transitionProperty('[data-theme-toggle]'),
       textLink: transitionProperty('.text-link', '::after'),
+      heatmapCell: transitionProperty('.heatmap-cell'),
+      heatmapTooltip: transitionProperty('.heatmap-tooltip'),
     };
   });
 
@@ -265,7 +293,23 @@ test('interactive styles avoid scroll handlers and layout-affecting transitions'
   expect(transitions.navigation).toContain('transform');
   expect(transitions.theme).toContain('background-color');
   expect(transitions.textLink).toContain('transform');
+  expect(transitions.heatmapCell).toContain('opacity');
+  expect(transitions.heatmapCell).toContain('transform');
+  expect(transitions.heatmapTooltip).toContain('opacity');
+  expect(transitions.heatmapTooltip).toContain('transform');
   expect(Object.values(transitions).join(',')).not.toContain('all');
+
+  const tooltipEffects = await page.evaluate(() => {
+    const tooltip = document.querySelector('.heatmap-tooltip');
+    if (!(tooltip instanceof HTMLElement)) {
+      throw new Error('Missing heatmap tooltip');
+    }
+
+    const styles = getComputedStyle(tooltip);
+    return { backdropFilter: styles.backdropFilter, boxShadow: styles.boxShadow };
+  });
+  expect(tooltipEffects.backdropFilter).toBe('none');
+  expect(tooltipEffects.boxShadow).toBe('none');
 
   const geometry = async () =>
     page.evaluate(() => {
