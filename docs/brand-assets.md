@@ -31,3 +31,19 @@ each platform can request its intended asset.
 - The Android and Apple assets are ready for a future web-app manifest and touch-icon link. No manifest is added until the site needs installable-app behavior.
 - Keep the current page layout and visible brand treatment unchanged until a placement is explicitly requested.
 - The original files were copied without recompression or renaming. When a new variant is required, derive it from `Logo-Master-1254x1254.png` rather than from an icon-sized file.
+
+## Homepage Artwork
+
+The homepage uses two self-hosted, original editorial artworks under `apps/web/public/art/`. They were generated
+for Praxis on 2026-08-01, compressed as delivery-size WebP assets, and contain no text, logo, or third-party brand.
+They are decorative only: the homepage title, description, CTA, and practice content remain semantic HTML.
+
+| Asset                          | Public URL                          | Intended placement                                                                                           |
+| ------------------------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `praxis-hero-field-1536.webp`  | `/art/praxis-hero-field-1536.webp`  | Desktop Hero backdrop: an ink-like green path and copper field that expresses the thought-to-action cycle.   |
+| `praxis-hero-garden-1536.webp` | `/art/praxis-hero-garden-1536.webp` | Philosophy-section editorial insert: a tactile paper garden that represents practice accumulating over time. |
+
+The field artwork is supplied through the homepage Hero with empty `alt` text and an `aria-hidden` container; desktop
+rendering uses `object-fit: contain` to preserve the original composition. The garden artwork is shown later as a lazy
+loaded, decorative Philosophy-section insert. Do not move copy into either image or use the artwork as the only means
+of communicating content.

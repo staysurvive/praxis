@@ -11,7 +11,7 @@ interface Props {
 const { entry, featured = false } = Astro.props;
 ---
 
-<article class:list={['content-card', featured && 'content-card--featured']}>
+<article class:list={['content-card', 'editorial-surface', featured && 'content-card--featured']}>
   <ContentMeta entry={entry} showStatus={featured} />
   <div class="content-card-body mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
     <div>
@@ -26,17 +26,31 @@ const { entry, featured = false } = Astro.props;
 
 <style>
   .content-card {
+    position: relative;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     min-block-size: var(--card-min-block-size);
     padding-block: clamp(2rem, 4vw, 3rem);
     border-top: 1px solid var(--color-border);
+    transition: transform var(--duration-base) var(--ease-out);
   }
 
   .content-card--featured {
     padding: var(--space-panel) 0 0;
     border-top: 1px solid var(--color-border);
+  }
+
+  .content-card::after {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-raised) 62%, transparent);
+    content: '';
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
   }
 
   .content-card-body {
@@ -77,5 +91,15 @@ const { entry, featured = false } = Astro.props;
     margin: 0.9rem 0 0;
     color: var(--color-text-muted);
     line-height: 1.9;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .content-card:hover {
+      transform: translateY(-0.2rem);
+    }
+
+    .content-card:hover::after {
+      opacity: 1;
+    }
   }
 </style>

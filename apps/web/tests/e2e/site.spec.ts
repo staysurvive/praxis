@@ -9,6 +9,27 @@ test('editorial homepage exposes the real Praxis project and local practice data
 }) => {
   await page.goto('/');
 
+  await expect(page.locator('.hero-art img')).toHaveAttribute(
+    'src',
+    '/art/praxis-hero-field-1536.webp',
+  );
+  await expect(page.locator('.hero-art source')).toHaveCount(0);
+  await expect(page.locator('.philosophy-art img')).toHaveAttribute(
+    'src',
+    '/art/praxis-hero-garden-1536.webp',
+  );
+  await expect(page.locator('.philosophy-art img')).toHaveAttribute('loading', 'lazy');
+  await expect(page.locator('.hero-section .philosophy-art')).toHaveCount(0);
+
+  const renderedHeroArt = await page.locator('.hero-art img').evaluate((image) => {
+    if (!(image instanceof HTMLImageElement)) {
+      throw new Error('Homepage hero artwork is missing');
+    }
+
+    return image.currentSrc;
+  });
+  expect(renderedHeroArt).toContain('/art/praxis-hero-field-1536.webp');
+
   await expect(page.getByRole('heading', { level: 1, name: '知行合一' })).toBeVisible();
   await expect(page.locator('.brand-mark')).toHaveAttribute('src', '/brand/favicon-mini-32x32.png');
   await expect(page.locator('.brand-mark')).toHaveAttribute('width', '32');
@@ -343,6 +364,32 @@ test('a 320px viewport has no page-level horizontal overflow', async ({ page }) 
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
 });
 
+test('the mobile hero preserves the full field artwork above its copy', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  const dimensions = await page.locator('.hero-art img').evaluate((image) => {
+    if (!(image instanceof HTMLImageElement)) {
+      throw new Error('Homepage hero artwork is missing');
+    }
+
+    const rect = image.getBoundingClientRect();
+    return {
+      renderedSrc: image.currentSrc,
+      renderedWidth: rect.width,
+      renderedHeight: rect.height,
+      naturalWidth: image.naturalWidth,
+      naturalHeight: image.naturalHeight,
+      objectFit: getComputedStyle(image).objectFit,
+    };
+  });
+
+  expect(dimensions.renderedSrc).toContain('/art/praxis-hero-field-1536.webp');
+  expect(dimensions.objectFit).toBe('contain');
+  expect(dimensions.renderedHeight / dimensions.renderedWidth).toBeCloseTo(9 / 16, 2);
+  expect(dimensions.naturalWidth / dimensions.naturalHeight).toBeCloseTo(16 / 9, 2);
+});
+
 test('the homepage hero completes the first desktop viewport', async ({ page }) => {
   await page.setViewportSize({ width: 1536, height: 791 });
   await page.goto('/');
@@ -354,18 +401,25 @@ test('the homepage hero completes the first desktop viewport', async ({ page }) 
     }
 
     const heroRect = hero.getBoundingClientRect();
+    const heroImage = hero.querySelector('.hero-art img');
+    if (!(heroImage instanceof HTMLImageElement)) {
+      throw new Error('Homepage hero artwork is missing');
+    }
+
     return {
       viewportHeight: window.innerHeight,
       heroBottom: heroRect.bottom,
       nextSectionTop: nextSection.getBoundingClientRect().top,
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
+      heroImageObjectFit: getComputedStyle(heroImage).objectFit,
     };
   });
 
   expect(Math.abs(dimensions.heroBottom - dimensions.viewportHeight)).toBeLessThanOrEqual(1);
   expect(Math.abs(dimensions.nextSectionTop - dimensions.viewportHeight)).toBeLessThanOrEqual(1);
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
+  expect(dimensions.heroImageObjectFit).toBe('contain');
 });
 
 test('keyboard focus and reduced-motion preferences remain usable', async ({ page }) => {

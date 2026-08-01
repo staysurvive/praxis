@@ -40,6 +40,14 @@
     font: inherit;
   }
 
+  button {
+    transition: transform var(--duration-press) var(--ease-out);
+  }
+
+  button:active {
+    transform: scale(0.97);
+  }
+
   button,
   a {
     -webkit-tap-highlight-color: transparent;
@@ -185,16 +193,6 @@
     text-wrap: pretty;
   }
 
-  .hero-strip {
-    display: flex;
-    gap: 1rem;
-    align-items: baseline;
-    justify-content: space-between;
-    margin: 0;
-    padding-block: 1.5rem 2.5rem;
-    border-top: var(--rule-hair);
-  }
-
   .text-link {
     position: relative;
     display: inline-flex;
@@ -205,6 +203,9 @@
     font-weight: 500;
     letter-spacing: var(--track-meta);
     text-decoration: none;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      transform var(--duration-press) var(--ease-out);
   }
 
   /* Invisible hit-area extension: comfortable tap targets without moving a pixel. */
@@ -226,6 +227,10 @@
 
   .text-link:hover::after {
     transform: translateX(0.25rem);
+  }
+
+  .text-link:active {
+    transform: scale(0.97);
   }
 
   .article-prose {
@@ -412,5 +417,11 @@
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --color-glass: var(--color-surface);
   }
 }

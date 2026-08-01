@@ -312,3 +312,47 @@ Spec 更新：frontend/index.md 中 "only production entry" 注释改为多类�
 ### Next Steps
 
 - None - task complete
+
+
+## Session 7: v0.1 视觉、品牌与热力图迭代
+
+**Date**: 2026-08-01
+**Task**: v0.1 视觉、品牌与热力图迭代
+**Branch**: `main`
+
+### Summary
+
+同步 2026-07-30 至 2026-08-01 的 8 次本地提交：完善首页版式、统一编辑型面板、优化交互动效与 Practice Heatmap，并接入品牌 favicon 和站点页眉标识。
+
+### Main Changes
+
+- 首页 Hero 按桌面视口重新对齐，删除已与最新内容重复的 Now 区块；全站编辑型面板统一最小高度、边框、留白和纵向节奏，相关可复用约束已随 `8a51804` 写入 frontend styling spec。
+- 交互动效改为只过渡 `opacity`、`transform` 和必要颜色属性，移除 `transition: all` 与布局属性动画；保留 reduced-motion 和无 JavaScript 阅读边界。
+- Practice Heatmap 增加月份/星期标尺、年度实践总数、色阶图例和本地化 tooltip；月份标签由 `buildHeatmapMonths()` 纯函数生成并有单元测试，顶行 tooltip 通过滚动容器预留 gutter 防止裁切。
+- 品牌资产集中保存在 `apps/web/public/brand/`，根路径 favicon 作为生产入口；`BaseLayout.astro` 声明 SVG、16/32/48 PNG 与 ICO fallback，页眉使用 32px mini mark，资产用途记录在 `docs/brand-assets.md`。
+- E2E 覆盖首页视口、品牌标识与 favicon 声明、Heatmap tooltip 几何边界，以及交互动效不得引发布局变化等回归契约。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `653cfb1` | (see git log) |
+| `8a51804` | (see git log) |
+| `fbe5657` | (see git log) |
+| `6a753d3` | (see git log) |
+| `ae1f632` | (see git log) |
+| `093faf4` | (see git log) |
+| `6104c59` | (see git log) |
+| `64104a8` | (see git log) |
+
+### Testing
+
+- 各提交包含对应的 Vitest / Playwright 回归断言；本次操作仅同步 Trellis 记录，未重新执行完整质量门禁。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 生产部署仍等待公开署名、正式域名与现有服务器 Caddy/Compose 接入边界；`07-25-praxis-v0-1-public-release` 保持 `in_progress`，完成线上 smoke 后再归档。

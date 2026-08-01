@@ -29,6 +29,9 @@
   --color-heat-2: #c08663;
   --color-heat-3: #98512f;
   --color-heat-4: #6b331c;
+  --color-hero-veil: rgb(244 241 234 / 18%);
+  --color-hero-veil-strong: rgb(244 241 234 / 42%);
+  --color-glass: rgb(255 254 250 / 68%);
 
   --shadow-soft: none;
   --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--color-focus) 30%, transparent);
@@ -76,9 +79,10 @@
   --rail-width: 14rem;
   --header-height: 4.75rem;
 
-  --duration-fast: 200ms;
+  --duration-press: 140ms;
+  --duration-fast: 180ms;
   --duration-base: 260ms;
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 :root[data-theme='dark'] {
@@ -103,6 +107,9 @@
   --color-heat-2: #7a4a2f;
   --color-heat-3: #b06a42;
   --color-heat-4: #e29b70;
+  --color-hero-veil: rgb(23 21 18 / 64%);
+  --color-hero-veil-strong: rgb(23 21 18 / 82%);
+  --color-glass: rgb(30 27 23 / 72%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -128,5 +135,8 @@
     --color-heat-2: #7a4a2f;
     --color-heat-3: #b06a42;
     --color-heat-4: #e29b70;
+    --color-hero-veil: rgb(23 21 18 / 64%);
+    --color-hero-veil-strong: rgb(23 21 18 / 82%);
+    --color-glass: rgb(30 27 23 / 72%);
   }
 }

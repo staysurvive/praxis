@@ -21,6 +21,6 @@
   "children": [],
   "parent": null,
   "relatedFiles": [],
-  "notes": "2026-07-26 进度：实现步骤 1-7 完成（AC1-AC9 全部满足），checklist 部署前条目全勾选；正式内容 3 篇（项目/笔记/日志）；main 已推送 GitHub (32ce0ef)。阻塞生产部署的外部输入：公开署名、正式域名、服务器 Caddy/Compose 接入边界。部署完成前不归档。",
+  "notes": "2026-08-01 进度：实现步骤 1-7 与 AC1-AC9 保持完成；已补录 653cfb1..64104a8 的首页版式、统一面板、交互动效、Practice Heatmap、favicon 与页眉品牌标识迭代，Session 7 已同步。阻塞生产部署的外部输入仍为公开署名、正式域名、服务器 Caddy/Compose 接入边界；完成线上 smoke 前不归档。",
   "meta": {}
 }

@@ -56,10 +56,12 @@ function isActive(href: string): boolean {
 
 <style>
   .site-header {
-    position: relative;
+    position: sticky;
+    top: 0;
     z-index: 20;
     border-bottom: 1px solid var(--color-border);
-    background: var(--color-page);
+    background: color-mix(in srgb, var(--color-page) 76%, transparent);
+    backdrop-filter: blur(18px) saturate(1.15);
   }
 
   .brand {
@@ -68,6 +70,7 @@ function isActive(href: string): boolean {
     align-items: center;
     gap: 0.75rem;
     text-decoration: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
   }
 
   .brand-mark {
@@ -133,15 +136,29 @@ function isActive(href: string): boolean {
       transform var(--duration-fast) var(--ease-out);
   }
 
-  .nav-link:hover,
   .nav-link--active {
     color: var(--color-text);
   }
 
-  .nav-link:is(:hover, :focus-visible)::after,
+  .nav-link:focus-visible::after,
   .nav-link--active::after {
     opacity: 1;
     transform: scaleX(1);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .brand:hover {
+      opacity: 0.72;
+    }
+
+    .nav-link:hover {
+      color: var(--color-text);
+    }
+
+    .nav-link:hover::after {
+      opacity: 1;
+      transform: scaleX(1);
+    }
   }
 
   @media (max-width: 43rem) {

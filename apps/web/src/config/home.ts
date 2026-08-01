@@ -3,8 +3,6 @@ export const homeContent = {
     eyebrow: 'Praxis / Personal practice',
     title: '知行合一',
     lead: '把理解变成行动，把行动沉淀为可以持续生长的成果。',
-    description:
-      'Praxis 是一个长期实践站。这里不只记录已经完成的文章，也保留问题如何经过思考、行动与复盘，逐渐成为真实成果的过程。',
   },
   philosophy: {
     eyebrow: 'Philosophy',

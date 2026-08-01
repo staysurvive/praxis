@@ -69,6 +69,7 @@ const { entry } = Astro.props satisfies Props;
 - Use real links and buttons for navigation/actions; never make a `div` clickable.
 - Preserve visible focus, keyboard order, sufficient contrast, and reduced-motion behavior in both themes.
 - Heatmap cells need a text alternative or accessible summary; color alone cannot communicate activity intensity.
+- Heatmap cells expose a localized native `title` fallback in addition to any CSS tooltip. A tooltip inside `.heatmap-scroll` must reserve enough top gutter to remain within the scroll container's clipping rectangle; cover the top-row geometry with E2E assertions.
 - Decorative visuals are hidden from assistive technology; Philosophy copy remains real text.
 
 ## Avoid

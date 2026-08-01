@@ -33,13 +33,14 @@ import { uiCopy } from '../config/copy';
     justify-content: center;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-pill);
-    background: transparent;
+    background: var(--color-glass);
     color: var(--color-text);
     cursor: pointer;
     transition:
       border-color var(--duration-fast) var(--ease-out),
       background-color var(--duration-fast) var(--ease-out),
-      color var(--duration-fast) var(--ease-out);
+      color var(--duration-fast) var(--ease-out),
+      transform var(--duration-press) var(--ease-out);
   }
 
   :global(.js) .theme-toggle {
@@ -50,6 +51,18 @@ import { uiCopy } from '../config/copy';
     border-color: var(--color-text);
     background: var(--color-text);
     color: var(--color-page);
+  }
+
+  .theme-toggle:active {
+    transform: scale(0.92);
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .theme-toggle:hover {
+      border-color: var(--color-border);
+      background: var(--color-glass);
+      color: var(--color-text);
+    }
   }
 
   .theme-icon {

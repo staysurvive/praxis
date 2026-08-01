@@ -11,35 +11,28 @@ import { practiceDataset } from '../lib/practice-data';
 
 const latestEntries = await getLatestEntries(3);
 const [currentProject] = await listEntries({ type: 'project' });
-const year = new Date().getFullYear();
 ---
 
 <BaseLayout title={siteConfig.title}>
-  <section class="hero-section">
-    <div
-      class="page-shell my-auto grid gap-12 pt-16 pb-12 md:pt-20 md:pb-24 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,0.7fr)] lg:items-end"
-    >
-      <div>
-        <p class="eyebrow mb-7">{homeContent.hero.eyebrow}</p>
-        <h1 class="display-title">{homeContent.hero.title}</h1>
-      </div>
-      <div class="hero-copy lg:pb-3">
+  <section class="hero-section" aria-labelledby="hero-title">
+    <div class="hero-art" aria-hidden="true">
+      <img src="/art/praxis-hero-field-1536.webp" width="1536" height="864" alt="" />
+    </div>
+    <div class="hero-overlay" aria-hidden="true"></div>
+
+    <div class="page-shell hero-shell">
+      <div class="hero-main">
+        <p class="eyebrow hero-eyebrow">{homeContent.hero.eyebrow}</p>
+        <h1 id="hero-title" class="display-title hero-title">{homeContent.hero.title}</h1>
         <p class="hero-lead">{homeContent.hero.lead}</p>
-        <p class="body-copy mt-6">{homeContent.hero.description}</p>
         {
           currentProject && (
-            <a class="text-link mt-7" href={currentProject.url}>
+            <a class="text-link hero-link" href={currentProject.url}>
               {uiCopy.actions.viewProject}
             </a>
           )
         }
       </div>
-    </div>
-    <div class="page-shell">
-      <p class="hero-strip">
-        <span class="hero-motto">{siteConfig.motto}</span>
-        <span class="hero-year">{year}</span>
-      </p>
     </div>
   </section>
 
@@ -54,7 +47,7 @@ const year = new Date().getFullYear();
       <div class="philosophy-grid mt-16 grid gap-0 lg:grid-cols-3">
         {
           homeContent.philosophy.stages.map((stage) => (
-            <article>
+            <article class="philosophy-stage">
               <div class="flex items-start justify-between gap-5">
                 <span class="philosophy-index">{stage.index}</span>
                 <span class="philosophy-subtitle">{stage.subtitle}</span>
@@ -65,6 +58,16 @@ const year = new Date().getFullYear();
             </article>
           ))
         }
+      </div>
+
+      <div class="philosophy-art" aria-hidden="true">
+        <img
+          src="/art/praxis-hero-garden-1536.webp"
+          width="1536"
+          height="864"
+          alt=""
+          loading="lazy"
+        />
       </div>
     </div>
   </section>
@@ -91,41 +94,79 @@ const year = new Date().getFullYear();
 
 <style>
   .hero-section {
+    position: relative;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
     min-height: calc(100svh - var(--header-height) - 1px);
+    overflow: clip;
+    background: var(--color-page);
   }
 
-  .hero-copy {
-    max-width: 32rem;
+  .hero-art,
+  .hero-overlay {
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    pointer-events: none;
   }
 
-  .hero-lead,
-  .hero-copy :global(.body-copy) {
-    margin-bottom: 0;
+  .hero-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-art img {
+    object-fit: contain;
+    object-position: center;
+  }
+
+  .hero-overlay {
+    z-index: -1;
+    background: linear-gradient(
+      90deg,
+      var(--color-hero-veil-strong) 0%,
+      var(--color-hero-veil) 32%,
+      transparent 56%
+    );
+  }
+
+  .hero-shell {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    min-height: inherit;
+    padding-block: clamp(4rem, 7vw, 6.5rem);
+  }
+
+  .hero-main {
+    position: relative;
+    z-index: 1;
+    max-width: 53rem;
+  }
+
+  .hero-eyebrow {
+    margin: 0 0 clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .hero-title {
+    max-width: 5ch;
+    text-wrap: balance;
   }
 
   .hero-lead {
-    margin-top: 0;
+    max-width: 31rem;
+    margin: clamp(1.75rem, 4vw, 3.5rem) 0 0;
     font-family: var(--font-serif);
-    font-size: var(--text-lead);
-    letter-spacing: 0.01em;
-    line-height: 1.75;
+    font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+    letter-spacing: 0.02em;
+    line-height: 1.85;
   }
 
-  .hero-motto {
-    color: var(--color-text-faint);
-    font-family: var(--font-serif);
-    font-size: 0.9rem;
-    letter-spacing: 0.06em;
-  }
-
-  .hero-year {
-    margin-right: -0.22em;
-    color: var(--color-text-faint);
-    font-size: var(--text-kicker);
-    font-weight: 500;
-    letter-spacing: 0.22em;
+  .hero-link {
+    margin-top: clamp(1.75rem, 3vw, 2.5rem);
   }
 
   .philosophy-grid {
@@ -134,10 +175,28 @@ const year = new Date().getFullYear();
   }
 
   .philosophy-grid article {
+    position: relative;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
     padding: clamp(1.6rem, 4vw, 3rem);
     border-bottom: 1px solid var(--color-border);
+    transition:
+      background-color var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  .philosophy-grid article::after {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: color-mix(in srgb, var(--color-accent-soft) 35%, transparent);
+    content: '';
+    opacity: 0;
+    transform: translateY(0.5rem);
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
   }
 
   .philosophy-index,
@@ -192,9 +251,47 @@ const year = new Date().getFullYear();
     padding-top: 0;
   }
 
+  .philosophy-art {
+    margin-top: clamp(2.5rem, 6vw, 5rem);
+    aspect-ratio: 16 / 7.8;
+    overflow: hidden;
+  }
+
+  .philosophy-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 54%;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .philosophy-grid article:hover::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   @media (max-width: 47.99rem) {
     .hero-section {
       min-height: auto;
+    }
+
+    .hero-art {
+      right: 0;
+      bottom: auto;
+      left: 0;
+      height: auto;
+      aspect-ratio: 16 / 9;
+    }
+
+    .hero-overlay {
+      display: none;
+    }
+
+    .hero-shell {
+      min-height: 0;
+      padding: calc(56.25vw + 2rem) 0 4rem;
     }
   }
 
@@ -205,6 +302,10 @@ const year = new Date().getFullYear();
   }
 
   @media (min-width: 64rem) {
+    .hero-shell {
+      padding-block: 3rem;
+    }
+
     .philosophy-grid article {
       min-block-size: var(--panel-min-block-size);
       border-right: 1px solid var(--color-border);

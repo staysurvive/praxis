@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 6
-- **Last Active**: 2026-07-26
+- **Total Sessions**: 7
+- **Last Active**: 2026-08-01
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~314 | Active |
+| `journal-1.md` | ~358 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 7 | 2026-08-01 | v0.1 视觉、品牌与热力图迭代 | `653cfb1`, `8a51804`, `fbe5657`, `6a753d3`, `ae1f632`, `093faf4`, `6104c59`, `64104a8` | `main` |
 | 6 | 2026-07-26 | 发布第一篇日志：门禁全绿之后 | `c5ecb32` | `main` |
 | 5 | 2026-07-26 | 第二篇真实内容：先审后信（安全审查实践笔记） | `2b500ee` | `main` |
 | 4 | 2026-07-26 | 产品章程落地:内容事件、截图工具正规化、charter 持久化 | `0c7839e`, `0d9d32e`, `58675ff` | `main` |

@@ -7,7 +7,7 @@ The foundation slice now follows this boundary without a monorepo orchestrator:
 ```text
 apps/web/
 ├── config/                  # build-config validation helpers
-├── public/                  # copied assets and CSP-safe browser scripts
+├── public/                  # production assets, brand source set, and CSP-safe browser scripts
 ├── scripts/                 # deterministic build-time generators
 ├── src/
 │   ├── components/          # reusable presentational Astro components
@@ -36,6 +36,7 @@ The generated activity file is intentionally ignored at `apps/web/src/generated/
 - `src/styles/` owns semantic CSS tokens and theme primitives; component styles remain local to the component when practical.
 - `config/` owns build configuration validation such as the canonical `SITE_URL`; it must not become a second UI config tree.
 - `public/scripts/` is reserved for small external scripts required by the production CSP. Authored content never belongs there.
+- `public/brand/` keeps the supplied brand source set and its dedicated device-size variants. Root `/favicon.*` files are the production browser entry points declared by `BaseLayout.astro`; derive new large variants from the master asset, never by scaling an icon-sized fallback.
 - `src/generated/` and `dist/generated/` contain reproducible derived output only. Authored content never belongs there.
 - `content/` is not moved under `src/` merely to simplify imports; use the official Astro content loader/adapter.
 - `apps/api/` is reserved for a future FastAPI service and is not part of the first Web implementation.
