@@ -61,7 +61,7 @@ const orderedEvents = [...events].reverse();
 
   .timeline-heading > p:last-child {
     margin-top: 1rem;
-    color: var(--color-text-muted);
+    color: var(--color-fg-muted);
   }
 
   ol {
@@ -74,7 +74,7 @@ const orderedEvents = [...events].reverse();
   li {
     position: relative;
     padding: 0 0 2.4rem 2.25rem;
-    border-left: 1px solid var(--color-border);
+    border-left: 1px solid var(--color-line);
   }
 
   li:last-child {
@@ -88,8 +88,8 @@ const orderedEvents = [...events].reverse();
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
-    background: var(--color-accent);
-    box-shadow: 0 0 0 3px var(--color-page);
+    background: var(--color-brand);
+    box-shadow: 0 0 0 3px var(--color-bg);
   }
 
   .timeline-meta {
@@ -97,12 +97,12 @@ const orderedEvents = [...events].reverse();
     flex-wrap: wrap;
     gap: 0.7rem 1rem;
     align-items: baseline;
-    color: var(--color-text-faint);
+    color: var(--color-fg-subtle);
     font-size: var(--text-kicker);
   }
 
   .timeline-meta span {
-    color: var(--color-accent);
+    color: var(--color-fg-subtle);
     font-weight: 500;
     letter-spacing: var(--track-meta);
   }
@@ -114,7 +114,7 @@ const orderedEvents = [...events].reverse();
 
   li p {
     margin: 0.55rem 0 0;
-    color: var(--color-text-muted);
+    color: var(--color-fg-muted);
     line-height: 1.85;
   }
 </style>

@@ -10,14 +10,14 @@
 
   html {
     scroll-behavior: smooth;
-    background: var(--color-page);
+    background: var(--color-bg);
   }
 
   body {
     min-height: 100vh;
     margin: 0;
-    background: var(--color-page);
-    color: var(--color-text);
+    background: var(--color-bg);
+    color: var(--color-fg);
     counter-reset: section-folio;
     font-family: var(--font-sans);
     font-size: 1rem;
@@ -55,14 +55,14 @@
 
   :focus-visible {
     border-radius: var(--radius-sm);
-    outline: 2px solid var(--color-focus);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 3px;
     box-shadow: var(--shadow-focus);
   }
 
   ::selection {
     background: var(--color-selection);
-    color: var(--color-text);
+    color: var(--color-fg);
   }
 }
 
@@ -81,7 +81,7 @@
   /* Scotch rule: thick ink rule over a hairline — the section threshold. */
   .rule-scotch {
     position: relative;
-    border-top: 2px solid var(--color-border-strong);
+    border-top: 2px solid var(--color-line-strong);
   }
 
   .rule-scotch::before {
@@ -90,13 +90,13 @@
     right: 0;
     left: 0;
     height: 1px;
-    background: var(--color-border);
+    background: var(--color-line);
     content: '';
   }
 
   .rule-scotch--bottom {
     position: relative;
-    border-bottom: 2px solid var(--color-border-strong);
+    border-bottom: 2px solid var(--color-line-strong);
   }
 
   .rule-scotch--bottom::after {
@@ -105,7 +105,7 @@
     bottom: 3px;
     left: 0;
     height: 1px;
-    background: var(--color-border);
+    background: var(--color-line);
     content: '';
   }
 
@@ -113,7 +113,7 @@
     position: relative;
     display: grid;
     padding-block: var(--space-section);
-    border-top: 2px solid var(--color-border-strong);
+    border-top: 2px solid var(--color-line-strong);
     counter-increment: section-folio;
   }
 
@@ -127,7 +127,7 @@
     right: 0;
     left: 0;
     height: 1px;
-    background: var(--color-border);
+    background: var(--color-line);
     content: '';
   }
 
@@ -139,7 +139,7 @@
   }
 
   .eyebrow {
-    color: var(--color-accent);
+    color: var(--color-brand);
     font-family: var(--font-sans);
     font-size: var(--text-kicker);
     font-weight: 500;
@@ -149,7 +149,7 @@
   }
 
   .eyebrow--folio::before {
-    color: var(--color-text-faint);
+    color: var(--color-fg-subtle);
     content: '0' counter(section-folio) ' — ';
   }
 
@@ -187,7 +187,7 @@
 
   .body-copy {
     max-width: var(--measure-reading);
-    color: var(--color-text-muted);
+    color: var(--color-fg-muted);
     font-size: 1rem;
     line-height: 1.9;
     text-wrap: pretty;
@@ -198,7 +198,7 @@
     display: inline-flex;
     gap: 0.5rem;
     align-items: baseline;
-    color: var(--color-accent-strong);
+    color: var(--color-brand-strong);
     font-size: var(--text-meta);
     font-weight: 500;
     letter-spacing: var(--track-meta);
@@ -235,7 +235,7 @@
 
   .article-prose {
     max-width: var(--measure-cjk);
-    color: var(--color-text);
+    color: var(--color-fg);
     font-size: var(--text-body);
     hanging-punctuation: allow-end;
     line-break: strict;
@@ -251,7 +251,7 @@
 
   .article-prose :where(h2, h3) {
     scroll-margin-top: calc(var(--header-height) + 1.5rem);
-    color: var(--color-text);
+    color: var(--color-fg);
     font-family: var(--font-serif);
     font-weight: 400;
     letter-spacing: var(--track-cjk-display);
@@ -269,7 +269,7 @@
     width: 2rem;
     height: 1px;
     margin-bottom: 1rem;
-    background: var(--color-accent);
+    background: var(--color-brand);
     content: '';
   }
 
@@ -291,12 +291,12 @@
   }
 
   .article-prose ul li::marker {
-    color: var(--color-accent);
+    color: var(--color-brand);
     content: '—\2002' / '';
   }
 
   .article-prose ol li::marker {
-    color: var(--color-accent);
+    color: var(--color-brand);
     font-variant-numeric: tabular-nums;
   }
 
@@ -307,7 +307,7 @@
   .article-prose blockquote {
     margin-inline: 0;
     padding-inline-start: 1.25rem;
-    border-left: 2px solid var(--color-border-strong);
+    border-left: 2px solid var(--color-line-strong);
     font-family: var(--font-serif);
     font-size: 1.15rem;
     line-height: 1.9;
@@ -317,7 +317,7 @@
   .article-prose code {
     padding: 0.12rem 0.35rem;
     border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-border) 30%, transparent);
+    background: var(--color-code-surface);
     font-family: var(--font-mono);
     font-size: 0.88em;
     line-break: auto;
@@ -328,7 +328,7 @@
     height: 1px;
     margin: 3.5rem auto;
     border: 0;
-    background: var(--color-border-strong);
+    background: var(--color-line-strong);
   }
 
   .article-prose table {
@@ -347,8 +347,8 @@
   }
 
   .article-prose th {
-    border-bottom: 1px solid var(--color-border-strong);
-    color: var(--color-text-faint);
+    border-bottom: 1px solid var(--color-line-strong);
+    color: var(--color-fg-subtle);
     font-size: var(--text-kicker);
     font-weight: 500;
     letter-spacing: var(--track-meta);
@@ -364,7 +364,7 @@
     flex-wrap: wrap;
     gap: 0.3rem 0.6rem;
     align-items: baseline;
-    color: var(--color-text-faint);
+    color: var(--color-fg-subtle);
     font-size: var(--text-kicker);
     font-weight: 500;
     letter-spacing: var(--track-meta);
@@ -372,7 +372,7 @@
   }
 
   .meta-line .meta-sep {
-    color: var(--color-text-faint);
+    color: var(--color-fg-subtle);
   }
 
   .skip-link {
@@ -382,8 +382,8 @@
     left: 0.75rem;
     padding: 0.65rem 0.9rem;
     border-radius: var(--radius-sm);
-    background: var(--color-text);
-    color: var(--color-page);
+    background: var(--color-fg);
+    color: var(--color-bg);
     transform: translateY(-160%);
     transition: transform var(--duration-fast) var(--ease-out);
   }
@@ -422,6 +422,6 @@
 
 @media (prefers-reduced-transparency: reduce) {
   :root {
-    --color-glass: var(--color-surface);
+    --color-overlay-glass: var(--color-bg-surface);
   }
 }

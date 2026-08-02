@@ -30,6 +30,10 @@ const {
 const documentTitle = title === siteConfig.title ? title : `${title} · ${siteConfig.name}`;
 const canonicalUrl = new URL(canonicalPath, Astro.site);
 const rssUrl = new URL(siteConfig.discovery.rssPath, Astro.site);
+const themeColors = {
+  light: '#f4f1ea',
+  dark: '#171512',
+};
 ---
 
 <!doctype html>
@@ -40,8 +44,12 @@ const rssUrl = new URL(siteConfig.discovery.rssPath, Astro.site);
     <meta name="description" content={description} />
     <meta name="author" content={siteConfig.author.name} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
-    <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#171512" media="(prefers-color-scheme: dark)" />
+    <meta
+      name="theme-color"
+      content={themeColors.light}
+      data-theme-color-light={themeColors.light}
+      data-theme-color-dark={themeColors.dark}
+    />
     <meta property="og:type" content={seoType} />
     <meta property="og:locale" content="zh_CN" />
     <meta property="og:site_name" content={siteConfig.name} />

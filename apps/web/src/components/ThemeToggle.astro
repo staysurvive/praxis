@@ -31,10 +31,10 @@ import { uiCopy } from '../config/copy';
     height: 2.5rem;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-line);
     border-radius: var(--radius-pill);
-    background: var(--color-glass);
-    color: var(--color-text);
+    background: var(--color-overlay-glass);
+    color: var(--color-fg);
     cursor: pointer;
     transition:
       border-color var(--duration-fast) var(--ease-out),
@@ -48,20 +48,20 @@ import { uiCopy } from '../config/copy';
   }
 
   .theme-toggle:hover {
-    border-color: var(--color-text);
-    background: var(--color-text);
-    color: var(--color-page);
+    border-color: var(--color-line-strong);
+    background: var(--color-bg-raised);
+    color: var(--color-fg);
   }
 
   .theme-toggle:active {
-    transform: scale(0.92);
+    transform: scale(0.96);
   }
 
   @media (hover: none), (pointer: coarse) {
     .theme-toggle:hover {
-      border-color: var(--color-border);
-      background: var(--color-glass);
-      color: var(--color-text);
+      border-color: var(--color-line);
+      background: var(--color-overlay-glass);
+      color: var(--color-fg);
     }
   }
 

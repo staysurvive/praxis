@@ -1,5 +1,12 @@
+/*
+ * Praxis color language
+ *
+ * The home page is the visual source of truth: warm paper creates space, ink carries
+ * content, and copper marks a deliberate action or section signal. Moss is reserved
+ * for the supplied mark and editorial artwork, never as a competing UI accent.
+ */
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
 
   --font-sans:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Source Han Sans SC',
@@ -10,31 +17,61 @@
   --font-mono:
     ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 
-  --color-page: #f4f1ea;
-  --color-surface: #faf8f2;
-  --color-surface-raised: #fffefa;
-  --color-text: #211e1a;
-  --color-text-muted: #5c574d;
-  --color-text-faint: #6b655a;
-  --color-border: #dad4c6;
-  --color-border-strong: #211e1a;
-  --color-accent: #8c3b26;
-  --color-accent-strong: #6e2c1b;
-  --color-accent-soft: #ead9ce;
-  --color-seal-ink: #fdf9f0;
-  --color-focus: #2d5fa8;
-  --color-selection: #ebd3c4;
-  --color-heat-0: #e9e4d8;
-  --color-heat-1: #ddbfa8;
-  --color-heat-2: #c08663;
-  --color-heat-3: #98512f;
-  --color-heat-4: #6b331c;
-  --color-hero-veil: rgb(244 241 234 / 18%);
-  --color-hero-veil-strong: rgb(244 241 234 / 42%);
-  --color-glass: rgb(255 254 250 / 68%);
+  /* Background and material layers */
+  --color-bg: light-dark(#f4f1ea, #171512);
+  --color-bg-surface: light-dark(#faf8f2, #1e1b17);
+  --color-bg-raised: light-dark(#fffefa, #26221d);
+  --color-highlight: light-dark(rgb(255 254 250 / 72%), rgb(255 255 255 / 8%));
+  --color-shadow: light-dark(rgb(33 30 26 / 8%), rgb(0 0 0 / 30%));
 
-  --shadow-soft: none;
-  --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--color-focus) 30%, transparent);
+  /* Content hierarchy */
+  --color-fg: light-dark(#211e1a, #ece6da);
+  --color-fg-muted: light-dark(#5c574d, #ada495);
+  --color-fg-subtle: light-dark(#6b655a, #948b7c);
+  --color-line: light-dark(#dad4c6, #332f28);
+  --color-line-strong: light-dark(#211e1a, #c6bda9);
+  --color-line-subtle: color-mix(in srgb, var(--color-line) 70%, transparent);
+  --color-line-emphasis: color-mix(in srgb, var(--color-line-strong) 22%, transparent);
+
+  /* Brand roles: copper is interactive; moss is reserved for the mark and artwork. */
+  --color-brand: light-dark(#8c3b26, #d98e6b);
+  --color-brand-strong: light-dark(#6e2c1b, #e8a886);
+  --color-brand-secondary: light-dark(#397c44, #9ab695);
+  --color-brand-tint: light-dark(#ead9ce, #3a2a21);
+  --color-brand-display: light-dark(#ead9ce, #4a3227);
+  --color-brand-wash: color-mix(in srgb, var(--color-brand-tint) 35%, transparent);
+
+  /* Semantic feedback is intentionally separate from brand emphasis. */
+  --color-success: light-dark(#42684e, #94bb9d);
+  --color-warning: light-dark(#8a682a, #d8b86b);
+  --color-error: light-dark(#9e4536, #f0a194);
+  --color-neutral: var(--color-fg-subtle);
+  --color-focus-ring: light-dark(#2d5fa8, #8fb8f0);
+  --color-selection: light-dark(#ebd3c4, #4a3226);
+
+  /* Data stays in one restrained copper scale and never doubles as an action color. */
+  --color-data-heat-0: light-dark(#e9e4d8, #2e2921);
+  --color-data-heat-1: light-dark(#ddbfa8, #4e3626);
+  --color-data-heat-2: light-dark(#c08663, #7a4a2f);
+  --color-data-heat-3: light-dark(#98512f, #b06a42);
+  --color-data-heat-4: light-dark(#6b331c, #e29b70);
+
+  /* Shared material and image overlays. */
+  --color-overlay-hero: light-dark(rgb(244 241 234 / 18%), rgb(23 21 18 / 64%));
+  --color-overlay-hero-strong: light-dark(rgb(244 241 234 / 42%), rgb(23 21 18 / 82%));
+  --color-overlay-header: color-mix(in srgb, var(--color-bg) 92%, transparent);
+  --color-overlay-glass: light-dark(rgb(255 254 250 / 68%), rgb(30 27 23 / 72%));
+  --color-overlay-philosophy: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-bg) 92%, transparent) 0%,
+    color-mix(in srgb, var(--color-bg) 78%, transparent) 52%,
+    color-mix(in srgb, var(--color-bg) 58%, transparent) 100%
+  );
+  --color-overlay-philosophy-mobile: color-mix(in srgb, var(--color-bg) 82%, transparent);
+  --color-code-surface: color-mix(in srgb, var(--color-line) 30%, transparent);
+
+  --shadow-raised: 0 1rem 2.5rem var(--color-shadow);
+  --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 30%, transparent);
 
   --radius-sm: 2px;
   --radius-md: 2px;
@@ -71,7 +108,7 @@
   --panel-min-block-size: clamp(20rem, 42svh, 30rem);
   --card-min-block-size: clamp(18rem, 22vw, 20rem);
 
-  --rule-hair: 1px solid var(--color-border);
+  --rule-hair: 1px solid var(--color-line);
 
   --measure-cjk: 36em;
   --measure-reading: 42rem;
@@ -85,58 +122,10 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-:root[data-theme='dark'] {
-  color-scheme: dark;
-
-  --color-page: #171512;
-  --color-surface: #1e1b17;
-  --color-surface-raised: #26221d;
-  --color-text: #ece6da;
-  --color-text-muted: #ada495;
-  --color-text-faint: #948b7c;
-  --color-border: #332f28;
-  --color-border-strong: #c6bda9;
-  --color-accent: #d98e6b;
-  --color-accent-strong: #e8a886;
-  --color-accent-soft: #3a2a21;
-  --color-seal-ink: #1a0c08;
-  --color-focus: #8fb8f0;
-  --color-selection: #4a3226;
-  --color-heat-0: #2e2921;
-  --color-heat-1: #4e3626;
-  --color-heat-2: #7a4a2f;
-  --color-heat-3: #b06a42;
-  --color-heat-4: #e29b70;
-  --color-hero-veil: rgb(23 21 18 / 64%);
-  --color-hero-veil-strong: rgb(23 21 18 / 82%);
-  --color-glass: rgb(30 27 23 / 72%);
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    color-scheme: dark;
-
-    --color-page: #171512;
-    --color-surface: #1e1b17;
-    --color-surface-raised: #26221d;
-    --color-text: #ece6da;
-    --color-text-muted: #ada495;
-    --color-text-faint: #948b7c;
-    --color-border: #332f28;
-    --color-border-strong: #c6bda9;
-    --color-accent: #d98e6b;
-    --color-accent-strong: #e8a886;
-    --color-accent-soft: #3a2a21;
-    --color-seal-ink: #1a0c08;
-    --color-focus: #8fb8f0;
-    --color-selection: #4a3226;
-    --color-heat-0: #2e2921;
-    --color-heat-1: #4e3626;
-    --color-heat-2: #7a4a2f;
-    --color-heat-3: #b06a42;
-    --color-heat-4: #e29b70;
-    --color-hero-veil: rgb(23 21 18 / 64%);
-    --color-hero-veil-strong: rgb(23 21 18 / 82%);
-    --color-glass: rgb(30 27 23 / 72%);
-  }
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }

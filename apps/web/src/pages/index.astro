@@ -101,7 +101,7 @@ const [currentProject] = await listEntries({ type: 'project' });
     flex-direction: column;
     min-height: calc(100svh - var(--header-height) - 1px);
     overflow: clip;
-    background: var(--color-page);
+    background: var(--color-bg);
   }
 
   .hero-art,
@@ -127,8 +127,8 @@ const [currentProject] = await listEntries({ type: 'project' });
     z-index: -1;
     background: linear-gradient(
       90deg,
-      var(--color-hero-veil-strong) 0%,
-      var(--color-hero-veil) 32%,
+      var(--color-overlay-hero-strong) 0%,
+      var(--color-overlay-hero) 32%,
       transparent 56%
     );
   }
@@ -171,8 +171,8 @@ const [currentProject] = await listEntries({ type: 'project' });
   }
 
   .philosophy-grid {
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
   }
 
   .philosophy-section {
@@ -207,12 +207,7 @@ const [currentProject] = await listEntries({ type: 'project' });
 
   .philosophy-background-wash {
     z-index: 1;
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--color-page) 92%, transparent) 0%,
-      color-mix(in srgb, var(--color-page) 78%, transparent) 52%,
-      color-mix(in srgb, var(--color-page) 58%, transparent) 100%
-    );
+    background: var(--color-overlay-philosophy);
   }
 
   .philosophy-grid article {
@@ -221,7 +216,7 @@ const [currentProject] = await listEntries({ type: 'project' });
     display: flex;
     flex-direction: column;
     padding: clamp(1.6rem, 4vw, 3rem);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-line);
     transition:
       background-color var(--duration-base) var(--ease-out),
       transform var(--duration-base) var(--ease-out);
@@ -231,7 +226,7 @@ const [currentProject] = await listEntries({ type: 'project' });
     position: absolute;
     z-index: -1;
     inset: 0;
-    background: color-mix(in srgb, var(--color-accent-soft) 35%, transparent);
+    background: var(--color-brand-wash);
     content: '';
     opacity: 0;
     transform: translateY(0.5rem);
@@ -249,18 +244,18 @@ const [currentProject] = await listEntries({ type: 'project' });
   }
 
   .philosophy-index {
-    color: var(--color-accent);
+    color: var(--color-brand);
   }
 
   .philosophy-subtitle {
     margin-right: -0.16em;
-    color: var(--color-text-faint);
+    color: var(--color-fg-subtle);
   }
 
   .philosophy-numeral {
     display: block;
     margin-top: clamp(1.5rem, 4vw, 3.5rem);
-    color: var(--color-accent-soft);
+    color: var(--color-brand-display);
     font-family: var(--font-serif);
     font-size: clamp(4.5rem, 8vw, 7rem);
     letter-spacing: var(--track-latin-display);
@@ -283,7 +278,7 @@ const [currentProject] = await listEntries({ type: 'project' });
 
   .philosophy-grid p {
     margin: 1rem 0 0;
-    color: var(--color-text-muted);
+    color: var(--color-fg-muted);
     line-height: 1.9;
   }
 
@@ -330,7 +325,7 @@ const [currentProject] = await listEntries({ type: 'project' });
     }
 
     .philosophy-background-wash {
-      background: color-mix(in srgb, var(--color-page) 82%, transparent);
+      background: var(--color-overlay-philosophy-mobile);
     }
   }
 
@@ -347,7 +342,7 @@ const [currentProject] = await listEntries({ type: 'project' });
 
     .philosophy-grid article {
       min-block-size: var(--panel-min-block-size);
-      border-right: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-line);
       border-bottom: 0;
     }
 

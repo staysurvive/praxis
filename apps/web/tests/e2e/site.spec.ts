@@ -245,16 +245,55 @@ test('theme control persists an explicit dark theme', async ({ page }) => {
   expect(storedTheme === 'light' || storedTheme === 'dark').toBe(true);
 });
 
+test('theme changes keep color hierarchy and browser chrome in sync', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+
+  const resolvedColors = () =>
+    page.evaluate(() => {
+      const probe = document.createElement('div');
+      probe.style.background = 'var(--color-bg)';
+      probe.style.color = 'var(--color-fg)';
+      probe.style.borderTop = '1px solid var(--color-brand)';
+      document.body.append(probe);
+
+      const styles = getComputedStyle(probe);
+      const colors = {
+        background: styles.backgroundColor,
+        foreground: styles.color,
+        brand: styles.borderTopColor,
+      };
+      probe.remove();
+      return colors;
+    });
+
+  const lightColors = await resolvedColors();
+  const themeColor = page.locator('meta[name="theme-color"]');
+  await expect(themeColor).toHaveAttribute('content', '#f4f1ea');
+
+  await page.locator('[data-theme-toggle]').click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(themeColor).toHaveAttribute('content', '#171512');
+
+  const darkColors = await resolvedColors();
+  expect(darkColors).not.toEqual(lightColors);
+  expect(new Set(Object.values(lightColors)).size).toBe(3);
+  expect(new Set(Object.values(darkColors)).size).toBe(3);
+});
+
 test('theme control tracks system theme changes without an explicit preference', async ({
   page,
 }) => {
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto('/');
 
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#f4f1ea');
+
   const toggle = page.getByRole('button', { name: '切换到深色主题' });
   await expect(toggle).toHaveAttribute('title', '切换到深色主题');
 
   await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#171512');
   await expect(page.getByRole('button', { name: '切换到浅色主题' })).toHaveAttribute(
     'title',
     '切换到浅色主题',
@@ -475,6 +514,53 @@ function collectHtmlFiles(directory: string): string[] {
   }
   return found;
 }
+
+function collectSourceFiles(directory: string): string[] {
+  const found: string[] = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      found.push(...collectSourceFiles(full));
+    } else if (/\.(astro|css|js|ts)$/.test(entry.name)) {
+      found.push(full);
+    }
+  }
+  return found;
+}
+
+test('source uses the semantic color system without legacy color aliases', () => {
+  const legacyTokens = [
+    'page',
+    'surface',
+    'surface-raised',
+    'text',
+    'text-muted',
+    'text-faint',
+    'border',
+    'border-strong',
+    'accent',
+    'accent-strong',
+    'accent-soft',
+    'focus',
+    'glass',
+    'hero-veil',
+    'hero-veil-strong',
+    'heat-0',
+    'heat-1',
+    'heat-2',
+    'heat-3',
+    'heat-4',
+  ];
+  const legacyTokenPattern = new RegExp(`--color-(?:${legacyTokens.join('|')})(?=$|[\\s:;,)])`);
+  const sourceDir = path.resolve(process.cwd(), 'src');
+
+  const offenders = collectSourceFiles(sourceDir).flatMap((file) => {
+    const source = readFileSync(file, 'utf8');
+    return legacyTokenPattern.test(source) ? [path.relative(sourceDir, file)] : [];
+  });
+
+  expect(offenders).toEqual([]);
+});
 
 test('no built HTML page ships inline script or style (CSP contract)', () => {
   const distDir = path.resolve(process.cwd(), 'dist');

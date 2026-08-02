@@ -27,30 +27,17 @@ const { entry, featured = false } = Astro.props;
 <style>
   .content-card {
     position: relative;
-    isolation: isolate;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     min-block-size: var(--card-min-block-size);
     padding-block: clamp(2rem, 4vw, 3rem);
-    border-top: 1px solid var(--color-border);
-    transition: transform var(--duration-base) var(--ease-out);
+    border-top: 1px solid var(--color-line);
   }
 
   .content-card--featured {
     padding: var(--space-panel) 0 0;
-    border-top: 1px solid var(--color-border);
-  }
-
-  .content-card::after {
-    position: absolute;
-    z-index: -1;
-    inset: 0;
-    border: 1px solid var(--color-border);
-    background: color-mix(in srgb, var(--color-surface-raised) 62%, transparent);
-    content: '';
-    opacity: 0;
-    transition: opacity var(--duration-base) var(--ease-out);
+    border-top: 1px solid var(--color-line);
   }
 
   .content-card-body {
@@ -80,26 +67,18 @@ const { entry, featured = false } = Astro.props;
   }
 
   .content-title a:hover {
-    color: var(--color-accent-strong);
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.25em;
+    color: var(--color-brand-strong);
+    text-decoration: none;
+  }
+
+  .content-card .text-link:hover {
+    text-decoration: none;
   }
 
   .content-summary {
     max-width: 46rem;
     margin: 0.9rem 0 0;
-    color: var(--color-text-muted);
+    color: var(--color-fg-muted);
     line-height: 1.9;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .content-card:hover {
-      transform: translateY(-0.2rem);
-    }
-
-    .content-card:hover::after {
-      opacity: 1;
-    }
   }
 </style>
