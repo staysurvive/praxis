@@ -11,7 +11,7 @@
 }
 
 praxis.example {
-	root * /srv/praxis
+	root * /srv/praxis/current
 	encode zstd gzip
 
 	import praxis_security_headers

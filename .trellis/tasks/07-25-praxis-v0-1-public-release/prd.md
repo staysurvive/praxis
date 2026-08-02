@@ -8,7 +8,7 @@ Practice Heatmap、主题与移动端体验必须经过审计并保持完整；�
 
 ## Background and confirmed facts
 
-- `apps/web` 已实现 Astro 7 + TypeScript + MDX 静态站点，生产内容只来自根目录 `content/`。
+- `apps/web` 已实现 Astro 7 + TypeScript + Markdown 静态站点，生产内容只来自根目录 `content/`。
 - 首页已经包含 Hero、Philosophy、Now、Praxis Practice Heatmap 与 Latest Content；热力图只读取本地构建数据。
 - `/projects/praxis-foundation` 是唯一正式内容，`blog`、`note`、`journal` 仅有测试 fixtures，不发布虚构文章。
 - 自定义 404、Light/Dark、移动端 Playwright 项目、无 JavaScript 阅读和 Axe 检查已经存在，应审计和扩展而非重写。
@@ -16,7 +16,7 @@ Practice Heatmap、主题与移动端体验必须经过审计并保持完整；�
   RSS discovery、Twitter card、文章级时间/标签元数据或 404 noindex。
 - 仓库尚无 `/rss.xml`、Sitemap、`robots.txt` 或长期保存的 v0.1 上线 Checklist。
 - `SITE_URL` 是构建期站点来源；缺省值仍为 `https://praxis.example`，正式部署必须显式传入真实域名。
-- `content/projects/praxis.mdx` 与首页 Now 文案仍描述“基础功能即将实现”，需要按真实进展更新。
+- `content/projects/praxis.md` 与首页 Now 文案仍描述“基础功能即将实现”，需要按真实进展更新。
 
 ## Requirements
 
@@ -39,7 +39,7 @@ Practice Heatmap、主题与移动端体验必须经过审计并保持完整；�
 
 - 提供构建期生成的 `/rss.xml`，只收录非 draft 的真实内容。
 - 每项至少包含标题、摘要、首次发布日期、规范 URL 和内容类型/标签分类。
-- v0.1 使用摘要型 feed，不在 feed 层重复渲染完整 MDX；正文仍以站内规范 URL 为事实来源。
+- v0.1 使用摘要型 feed，不在 feed 层重复渲染完整 Markdown；正文仍以站内规范 URL 为事实来源。
 - Feed 不依赖 FastAPI、数据库、外部 API 或客户端 JavaScript。
 
 ### R4 — Sitemap and robots
@@ -80,7 +80,7 @@ Practice Heatmap、主题与移动端体验必须经过审计并保持完整；�
 - [x] AC5：Sitemap 覆盖首页、类型列表和真实内容，排除 404 与生成 JSON；`/robots.txt` 指向 Sitemap。
 - [x] AC6：Praxis 项目和首页 Now 准确记录真实进展，`contentId`/URL 不变，没有虚构内容或虚假部署事件。
 - [x] AC7：`docs/releases/v0.1-checklist.md` 存在，部署前条目以验证证据勾选，生产部署条目保持待办直至真实完成。
-- [x] AC8：`npm run check`、`npm run build`、`npm run test:e2e` 和 Docker build 全部通过。
+- [ ] AC8：`npm run check`、`npm run build`、`npm run test:e2e` 已通过；Docker build 待 Docker daemon 可用时补验。
 - [x] AC9：站点仍为静态优先；无需 FastAPI、数据库、登录、评论、统计或 AI 服务即可构建和阅读。
 
 ## Out of scope

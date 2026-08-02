@@ -1,11 +1,4 @@
-# Supply-chain hardening: pin both base images to an immutable digest, e.g.
-#   FROM node:22-alpine@sha256:<digest> AS build
-# Keep the human-readable tag AND append the digest so the tag documents intent
-# while the digest enforces immutability. Fetch the current digest with:
-#   docker buildx imagetools inspect node:22-alpine --format '{{.Manifest.Digest}}'
-#   docker buildx imagetools inspect busybox:1.37   --format '{{.Manifest.Digest}}'
-# (left un-pinned here because the build host had no registry access; pin before release).
-FROM node:22-alpine AS build
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS build
 
 WORKDIR /workspace
 
@@ -16,16 +9,15 @@ RUN npm ci
 COPY apps/web apps/web
 COPY content content
 
-ARG SITE_URL=https://praxis.example
+ARG SITE_URL
 ENV SITE_URL=$SITE_URL
 ENV ASTRO_TELEMETRY_DISABLED=1
 
-RUN npm run build
+RUN npm run build:production
 
-# Pin to a digest before release (see the note on the build stage above):
-#   FROM busybox:1.37@sha256:<digest>
-FROM busybox:1.37
+FROM busybox:1.37@sha256:9db7b59979c38555a39def84a31fb98b5296952f9e3afd4f6f11f05b07adfab0
 
 COPY --from=build /workspace/apps/web/dist /site
+COPY infra/export-web-dist.sh /export-web-dist.sh
 
-CMD ["sh", "-c", "find /output -mindepth 1 -maxdepth 1 -exec rm -rf -- {} + && cp -R /site/. /output/"]
+CMD ["sh", "/export-web-dist.sh"]

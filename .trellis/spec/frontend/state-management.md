@@ -2,7 +2,7 @@
 
 ## Default state model
 
-The first release has no global client state. Public content is resolved at build time from Markdown/MDX, and the
+The first release has no global client state. Public content is resolved at build time from Markdown, and the
 Practice Heatmap is generated as deterministic static JSON. Astro page props and typed content queries are the primary
 data flow.
 

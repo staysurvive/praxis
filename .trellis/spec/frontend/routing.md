@@ -87,13 +87,17 @@ Build configuration validates the canonical origin before Astro loads:
 
 ```typescript
 resolveSiteUrl(value?: string): string;
+resolveProductionSiteUrl(value?: string): string;
 ```
 
 ### 3. Contracts
 
-- `SITE_URL` is the canonical build-time origin. It must be HTTPS, contain no credentials/path/query/fragment, and may
-  use HTTP only for `localhost`, `127.0.0.1`, or `[::1]`. Local/test builds may use `https://praxis.example`; production
-  must supply the real HTTPS origin.
+- `SITE_URL` is the canonical build-time origin. `resolveSiteUrl` accepts HTTPS origins and local HTTP only for
+  `localhost`, `127.0.0.1`, or `[::1]`; local/test builds may use `https://praxis.example`.
+- `npm run build:production` and `infra/Dockerfile.web` invoke `resolveProductionSiteUrl` before the export build.
+  Production requires an explicit,
+  normalized HTTPS origin that is neither a local host nor any canonical form of the `praxis.example` placeholder
+  (including case, trailing slash/dot, or default-port variants).
 - `siteConfig.discovery.rssPath` is `/rss.xml`; `siteConfig.discovery.sitemapPath` is `/sitemap-index.xml`.
 - `/rss.xml` consumes `listEntries()`, which excludes drafts, and emits summary-only items with canonical links,
   `publishedAt`, type label, and tags.
@@ -117,6 +121,7 @@ resolveSiteUrl(value?: string): string;
 |---|---|---|
 | Missing Astro `site` | RSS/robots endpoint | Build fails with an explicit Chinese configuration error |
 | Invalid/insecure/ambiguous `SITE_URL` | `resolveSiteUrl` | Astro config load fails before routes or metadata build |
+| Missing, local, or normalized placeholder `SITE_URL` in production build/export | `resolveProductionSiteUrl` | Build fails before static output is emitted |
 | Draft content | `listEntries()` | Entry is absent from RSS and public content routes |
 | Unknown route in Astro preview or Caddy | `404.astro` / Caddy `handle_errors` | HTTP 404, branded page, `noindex, nofollow` |
 | `/projects/` or `/projects/index.html` | Caddy canonical redirects | Permanent redirect to `/projects`, query preserved |
@@ -128,13 +133,15 @@ resolveSiteUrl(value?: string): string;
 - Good: a published project appears once in RSS/Sitemap, Caddy serves its clean URL directly, and all metadata uses the
   validated origin.
 - Base: an empty content type still has an index route in Sitemap but contributes no RSS item.
-- Bad: a page hard-codes `https://praxis.example`, accepts an HTTP production origin, parses raw frontmatter for RSS,
-  lets 404/JSON enter Sitemap, or serves `/404.html` through `try_files` with status 200.
+- Bad: a page hard-codes `https://praxis.example`, a Docker export accepts `https://praxis.example/` or
+  `https://localhost`, parses raw frontmatter for RSS, lets 404/JSON enter Sitemap, or serves `/404.html` through
+  `try_files` with status 200.
 
 ### 6. Tests Required
 
 - E2E: assert homepage and detail canonical/Open Graph/Twitter/RSS discovery metadata.
-- Unit: reject non-HTTPS public origins, credentials, paths, queries, fragments, and malformed `SITE_URL` values.
+- Unit: reject non-HTTPS public origins, credentials, paths, queries, fragments, malformed values, and every
+  normalized placeholder/local origin passed to `resolveProductionSiteUrl`.
 - E2E: assert article publish/update/tag metadata and visible footer RSS link.
 - E2E: assert RSS has only real non-draft items and canonical absolute links.
 - E2E: assert Sitemap includes all public HTML namespaces and excludes 404, RSS, robots, and generated JSON.

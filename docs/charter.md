@@ -24,7 +24,7 @@ Praxis（知行合一）是一个**个人数字花园**：记录知识、实践�
 
 ## 事实源与架构红线
 
-- **Markdown/MDX + Git 是唯一事实源。** 未来允许 FastAPI + PostgreSQL 作为增强层，但数据库永远不能替代 Markdown；没有后端、没有数据库时网站必须能完整构建。
+- **Markdown + Git 是唯一事实源。** 未来允许 FastAPI + PostgreSQL 作为增强层，但数据库永远不能替代 Markdown；没有后端、没有数据库时网站必须能完整构建。
 - 统一 Content Collection：`type` 组织内容，`stage` 表达实践进度，`journey` 沉淀长期成长，`practiceLog` 记录真实实践事件。字段保持可扩展，不为当前需求写死 schema。
 - URL 永久稳定：`/blog/`、`/notes/`、`/journal/`、`/projects/`；`stage` 不进入 URL。
 - Practice Heatmap 数据来自站点自身内容，不是 GitHub Contributions，永不接外部活动 API。

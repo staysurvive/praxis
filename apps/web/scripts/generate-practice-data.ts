@@ -4,8 +4,10 @@ import { fileURLToPath } from 'node:url';
 
 import matter from 'gray-matter';
 
+import { assertMarkdownContentFile, getContentFileKind } from '../src/lib/content/file-policy';
 import { contentSchema } from '../src/lib/content/schema';
 import { buildPublicPracticeDataset } from '../src/lib/practice';
+import { getTodayDateKey } from '../src/lib/date';
 import type { ContentFrontmatter } from '../src/lib/content/schema';
 
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -40,7 +42,7 @@ async function findContentFiles(directory: string): Promise<string[]> {
         return findContentFiles(absolutePath);
       }
 
-      return /\.(md|mdx)$/i.test(entry.name) ? [absolutePath] : [];
+      return getContentFileKind(entry.name) ? [absolutePath] : [];
     }),
   );
 
@@ -54,10 +56,12 @@ async function main(): Promise<void> {
   const urls = new Set<string>();
 
   for (const file of files) {
+    const relativePath = path.relative(repositoryRoot, file).replaceAll('\\', '/');
+    assertMarkdownContentFile(relativePath);
+
     const source = await readFile(file, 'utf8');
     const frontmatter = parseFrontmatter(source);
     const parsed = contentSchema.safeParse(frontmatter);
-    const relativePath = path.relative(repositoryRoot, file).replaceAll('\\', '/');
 
     if (!parsed.success) {
       throw new Error(
@@ -81,7 +85,7 @@ async function main(): Promise<void> {
     parsedEntries.push(parsed.data);
   }
 
-  const dataset = buildPublicPracticeDataset(parsedEntries);
+  const dataset = buildPublicPracticeDataset(parsedEntries, { endDateKey: getTodayDateKey() });
   await mkdir(path.dirname(outputFile), { recursive: true });
   await writeFile(outputFile, `${JSON.stringify(dataset, null, 2)}\n`, 'utf8');
 

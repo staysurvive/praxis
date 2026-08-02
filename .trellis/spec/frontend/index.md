@@ -2,7 +2,7 @@
 
 ## Current repository state
 
-The Praxis v0.1 release candidate is implemented in `apps/web` as an Astro + TypeScript + MDX static site. The root
+The Praxis v0.1 release candidate is implemented in `apps/web` as an Astro + TypeScript + Markdown static site. The root
 `content/` directory remains the authored source of truth, while `infra/` documents the existing Docker Compose +
 Caddy deployment boundary. Static RSS, Sitemap, robots, social metadata, and release-gate checks are part of the public
 Web contract; draft-safe public projections, strict origin validation, CSP-compatible browser scripts, and hardened
@@ -33,7 +33,7 @@ Authoritative planning references:
 ## Pre-development checklist
 
 - Read the task PRD, technical design, and implementation plan.
-- Keep Markdown/MDX in `content/` as the source of truth; do not introduce a CMS or database for article bodies.
+- Keep Markdown `.md` in `content/` as the source of truth; do not introduce a CMS or database for article bodies.
 - Confirm that a change belongs to `apps/web`, `content`, `infra`, or a future API boundary before editing.
 - Search existing content access, token, copy, and route helpers before adding a new one.
 - Preserve static rendering and verify the core path without client-side JavaScript.
@@ -43,7 +43,7 @@ Authoritative planning references:
 The current implementation uses the following concrete boundaries:
 
 ```text
-content/projects/praxis.mdx                 # first production entry (notes/ and journal/ follow the same schema)
+content/projects/praxis.md                  # first production entry (notes/ and journal/ follow the same schema)
 apps/web/src/content.config.ts              # root content loader + schema
 apps/web/src/lib/content/index.ts           # typed queries and summaries
 apps/web/src/lib/practice.ts                # explicit event normalization

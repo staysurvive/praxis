@@ -2,11 +2,11 @@
 
 知而思，思而行，行而成。
 
-Praxis 是一个以“知行合一”为核心理念的个人实践站。正文由 Git 管理的 Markdown/MDX 驱动，Astro 负责静态构建，实践热力图由内容中的 `publishedAt` 与显式 `practiceLog` 在构建时生成。
+Praxis 是一个以“知行合一”为核心理念的个人实践站。正文由 Git 管理的 Markdown 驱动，Astro 负责静态构建，实践热力图由内容中的 `publishedAt` 与显式 `practiceLog` 在构建时生成。
 
 ## 技术边界
 
-- Astro + TypeScript + MDX
+- Astro + TypeScript + Markdown
 - Tailwind CSS 用于布局，CSS Custom Properties 管理设计 token 与 Light/Dark 主题
 - 根目录 `content/` 是内容事实源
 - `apps/web` 是当前静态站点
@@ -40,7 +40,14 @@ npm run build
 npm run preview
 ```
 
-生产文件会生成到 `apps/web/dist/`。本地预览默认同样使用 <http://localhost:4321/>；如果开发服务器仍在运行，请先停止开发服务器再执行预览。
+`npm run build` 使用开发/测试默认 origin 生成静态文件。正式构建必须显式设置真实 HTTPS origin：
+
+```powershell
+$env:SITE_URL='https://your-domain.example'
+npm run build:production
+```
+
+文件会生成到 `apps/web/dist/`。本地预览默认同样使用 <http://localhost:4321/>；如果开发服务器仍在运行，请先停止开发服务器再执行预览。
 
 ## 验证
 
@@ -49,6 +56,9 @@ npm run check
 npm run audit:deps
 npm run test:e2e
 npm run build
+# production gate (requires a real non-local HTTPS origin)
+$env:SITE_URL='https://your-domain.example'
+npm run build:production
 ```
 
 ## 部署

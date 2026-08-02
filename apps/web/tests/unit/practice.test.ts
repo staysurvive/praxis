@@ -92,6 +92,25 @@ describe('practice event normalization', () => {
     expect(dataset.events.every((event) => event.contentId !== draft.contentId)).toBe(true);
   });
 
+  it('excludes future events from a dated public heatmap dataset', () => {
+    const dataset = buildPracticeDataset(
+      [
+        baseEntry,
+        {
+          ...baseEntry,
+          contentId: 'praxis-project-future',
+          publishedAt: '2026-08-03',
+          practiceLog: [{ date: '2026-08-04', kind: 'milestone' }],
+        },
+      ],
+      { endDateKey: '2026-08-02' },
+    );
+
+    expect(dataset.totalEvents).toBe(1);
+    expect(dataset.contentCount).toBe(1);
+    expect(dataset.events.every((event) => event.date <= '2026-08-02')).toBe(true);
+  });
+
   it('builds a fixed 53-week calendar ending around the requested date', () => {
     const dataset = buildPracticeDataset([baseEntry]);
     const cells = buildHeatmapCalendar(dataset, '2026-07-24');
@@ -99,6 +118,25 @@ describe('practice event normalization', () => {
     expect(cells).toHaveLength(371);
     expect(cells.find((cell) => cell.date === '2026-07-20')?.count).toBe(1);
     expect(cells.filter((cell) => !cell.inRange).length).toBeGreaterThan(0);
+  });
+
+  it('does not display future events from a stale dataset', () => {
+    const dataset = buildPracticeDataset([
+      baseEntry,
+      {
+        ...baseEntry,
+        contentId: 'praxis-project-future-calendar',
+        publishedAt: '2026-07-25',
+        practiceLog: [{ date: '2026-07-25', kind: 'milestone' }],
+      },
+    ]);
+    const cells = buildHeatmapCalendar(dataset, '2026-07-24');
+
+    expect(cells.find((cell) => cell.date === '2026-07-25')).toMatchObject({
+      count: 0,
+      level: 0,
+      inRange: false,
+    });
   });
 
   it('labels only the first calendar week of each month', () => {

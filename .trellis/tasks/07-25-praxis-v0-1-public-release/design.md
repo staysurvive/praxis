@@ -41,7 +41,7 @@ v0.1 不引入动态 OG 图片生成服务。社交元数据先保证标题、�
 ## RSS data flow
 
 ```text
-content/**/*.md(x)
+content/**/*.md
     -> Astro content collection validation
     -> listEntries() (filters drafts, shared ordering)
     -> src/pages/rss.xml.ts
@@ -49,7 +49,7 @@ content/**/*.md(x)
     -> dist/rss.xml
 ```
 
-RSS 只使用共享内容摘要，输出 canonical link、summary、publishedAt、type/tag categories。它不渲染完整 MDX，避免引入
+RSS 只使用共享内容摘要，输出 canonical link、summary、publishedAt、type/tag categories。它不渲染完整 Markdown，避免引入
 feed 专用内容管线或重复正文事实源。Feed URL 和每项 URL 都从 `Astro.site` 计算。
 
 ## Sitemap and robots
@@ -57,11 +57,11 @@ feed 专用内容管线或重复正文事实源。Feed URL 和每项 URL 都从 
 - `@astrojs/sitemap` 注册在 `astro.config.mjs`，使用 filter 排除 `/404` 与 `/generated/`。
 - 静态路由与动态内容路由由构建 manifest 自动进入 Sitemap。
 - `src/pages/robots.txt.ts` 返回纯文本；Sitemap 行通过 `new URL('sitemap-index.xml', Astro.site)` 生成。
-- 测试构建通过 `SITE_URL=https://praxis.example` 运行，生产构建必须覆盖该值。
+- 测试构建默认使用 `https://praxis.example`；也可通过 `$env:SITE_URL` 覆盖，生产构建必须使用真实非本地 HTTPS origin。
 
 ## Content and practice record update
 
-`content/projects/praxis.mdx` 保持现有 stable ID、slug 与 `type`。更新内容时：
+`content/projects/praxis.md` 保持现有 stable ID、slug 与 `type`。更新内容时：
 
 - `updatedAt` 改为实际编辑日期，但不因此生成实践事件。
 - 新增的 `practiceLog` 只描述已完成的 foundation 实现/验证与 v0.1 发布准备启动。

@@ -19,7 +19,7 @@ apps/web/
 │   └── content.config.ts    # collection/loader schema for root content/
 ├── tests/                   # unit, fixture, and browser test support
 └── astro.config.*
-content/                     # Markdown/MDX authored source of truth
+content/                     # Markdown (.md) authored source of truth
 infra/                       # static artifact and existing Compose/Caddy deployment docs
 ```
 

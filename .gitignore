@@ -8,6 +8,8 @@ apps/web/src/generated/
 apps/web/playwright-report/
 apps/web/test-results/
 apps/web/shots/
+test-results/
+playwright-report/
 
 # local environment and logs
 .env

@@ -4,6 +4,12 @@ import path from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
+import { resolveSiteUrl } from '../../config/site-url';
+
+const siteOrigin = resolveSiteUrl(process.env.SITE_URL);
+const absoluteUrl = (pathname: string) => new URL(pathname, siteOrigin).toString();
+const sitemapUrl = (pathname: string) => (pathname ? absoluteUrl(pathname) : siteOrigin);
+
 test('editorial homepage exposes the real Praxis project and local practice data', async ({
   page,
 }) => {
@@ -42,7 +48,8 @@ test('editorial homepage exposes the real Praxis project and local practice data
   ).toBeVisible();
   await expect(page.locator('a[href="/projects/praxis-foundation"]').first()).toBeVisible();
   await expect(page.getByText('GitHub Contributions')).toHaveCount(0);
-  await expect(page.locator('.heatmap-months span')).not.toHaveCount(0);
+  await expect(page.locator('.heatmap-months span')).toHaveCount(53);
+  await expect(page.locator('.heatmap-months span:not(:empty)')).not.toHaveCount(0);
   await expect(page.locator('.heatmap-total')).toHaveText(/过去一年共 \d+ 次实践/);
   await expect(page.locator('.heatmap-legend i')).toHaveCount(5);
 
@@ -134,15 +141,12 @@ test('missing routes use the branded 404', async ({ page }) => {
 test('public pages expose canonical and social discovery metadata', async ({ page }) => {
   await page.goto('/');
 
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-    'href',
-    'https://praxis.example/',
-  );
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', absoluteUrl('/'));
   await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary');
   await expect(page.locator('link[type="application/rss+xml"]')).toHaveAttribute(
     'href',
-    'https://praxis.example/rss.xml',
+    absoluteUrl('/rss.xml'),
   );
   await expect(page.locator('link[rel="icon"][type="image/svg+xml"][sizes="any"]')).toHaveAttribute(
     'href',
@@ -178,7 +182,7 @@ test('public pages expose canonical and social discovery metadata', async ({ pag
 
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
-    'https://praxis.example/projects/praxis-foundation',
+    absoluteUrl('/projects/praxis-foundation'),
   );
   await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
   await expect(page.locator('meta[property="article:published_time"]')).toHaveAttribute(
@@ -199,15 +203,15 @@ test('RSS, Sitemap, and robots expose only public canonical routes', async ({ re
   expect(rssResponse.ok()).toBe(true);
   const rss = await rssResponse.text();
   expect(rss).toContain('<language>zh-CN</language>');
-  expect(rss).toContain('<link>https://praxis.example/projects/praxis-foundation</link>');
-  expect(rss).toContain('<link>https://praxis.example/notes/ai-code-security-review</link>');
-  expect(rss).toContain('<link>https://praxis.example/journal/what-green-gates-miss</link>');
+  expect(rss).toContain(`<link>${absoluteUrl('/projects/praxis-foundation')}</link>`);
+  expect(rss).toContain(`<link>${absoluteUrl('/notes/ai-code-security-review')}</link>`);
+  expect(rss).toContain(`<link>${absoluteUrl('/journal/what-green-gates-miss')}</link>`);
   expect(rss.match(/<item>/g)).toHaveLength(3);
 
   const sitemapIndexResponse = await request.get('/sitemap-index.xml');
   expect(sitemapIndexResponse.ok()).toBe(true);
   const sitemapIndex = await sitemapIndexResponse.text();
-  expect(sitemapIndex).toContain('https://praxis.example/sitemap-0.xml');
+  expect(sitemapIndex).toContain(absoluteUrl('/sitemap-0.xml'));
 
   const sitemapResponse = await request.get('/sitemap-0.xml');
   expect(sitemapResponse.ok()).toBe(true);
@@ -222,7 +226,7 @@ test('RSS, Sitemap, and robots expose only public canonical routes', async ({ re
     '/notes/ai-code-security-review',
     '/journal/what-green-gates-miss',
   ]) {
-    expect(sitemap).toContain(`<loc>https://praxis.example${path}</loc>`);
+    expect(sitemap).toContain(`<loc>${sitemapUrl(path)}</loc>`);
   }
   for (const excludedPath of ['/404', '/rss.xml', '/robots.txt', '/generated/']) {
     expect(sitemap).not.toContain(excludedPath);
@@ -231,7 +235,7 @@ test('RSS, Sitemap, and robots expose only public canonical routes', async ({ re
   const robotsResponse = await request.get('/robots.txt');
   expect(robotsResponse.ok()).toBe(true);
   expect(await robotsResponse.text()).toBe(
-    'User-agent: *\nAllow: /\nSitemap: https://praxis.example/sitemap-index.xml\n',
+    `User-agent: *\nAllow: /\nSitemap: ${absoluteUrl('/sitemap-index.xml')}\n`,
   );
 });
 
@@ -577,6 +581,12 @@ test('no built HTML page ships inline script or style (CSP contract)', () => {
     }
     if (/<style[\s>]/i.test(html)) {
       offenders.push(`${relative}: inline <style>`);
+    }
+    if (/\sstyle=/i.test(html)) {
+      offenders.push(`${relative}: inline style attribute`);
+    }
+    if (/\son[a-z]+=/i.test(html)) {
+      offenders.push(`${relative}: inline event handler`);
     }
   }
 

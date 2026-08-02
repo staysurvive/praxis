@@ -9,10 +9,11 @@ snippet to merge into that existing setup.
 ```powershell
 $env:SITE_URL='https://your-domain.example'
 npm ci
-npm run build
+npm run build:production
 ```
 
-Serve or mount the resulting `apps/web/dist/` directory from the existing Caddy container.
+`npm run build:production` rejects a missing, local, private, reserved, or placeholder origin. Serve or mount the resulting
+`apps/web/dist/` directory from the existing Caddy container.
 
 ## Compose integration
 
@@ -21,10 +22,14 @@ volume into the existing Compose project, then mount the same `praxis-web-dist` 
 service at `/srv/praxis`.
 
 ```powershell
+$env:PRAXIS_SITE_URL='https://your-domain.example'
 docker compose -f infra/compose.web.example.yml run --rm praxis-web-build
 ```
 
-The example does not run a second web server or proxy.
+`PRAXIS_SITE_URL` is required and must be the public HTTPS origin; the export image rejects an empty, local, or
+`praxis.example` placeholder origin. Each export writes a complete release under `praxis-web-dist/releases/` and
+atomically switches `praxis-web-dist/current`; point Caddy at `/srv/praxis/current`. The example does not run a second
+web server or proxy.
 
 ## Caddy integration
 

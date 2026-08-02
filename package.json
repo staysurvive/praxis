@@ -12,6 +12,7 @@
     "dev": "npm run dev --workspace @praxis/web",
     "generate:practice": "npm run generate:practice --workspace @praxis/web",
     "build": "npm run build --workspace @praxis/web",
+    "build:production": "npm run build:production --workspace @praxis/web",
     "preview": "npm run preview --workspace @praxis/web",
     "format": "prettier --write --ignore-unknown README.md package.json apps/web content docs infra",
     "format:check": "prettier --check --ignore-unknown README.md package.json apps/web content docs infra",

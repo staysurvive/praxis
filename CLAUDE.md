@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Praxis (知行合一) — a personal practice site. Static Astro + TypeScript + MDX build; all content and UI copy is Chinese (`zh-CN`). npm-workspaces monorepo with a single workspace `apps/web`. Root `content/` (Markdown/MDX) is the content source of truth. `apps/api` is reserved for a future FastAPI service — do not add backend code without explicit scope approval. Node >= 22.12.0.
+Praxis (知行合一) — a personal practice site. Static Astro + TypeScript + Markdown build; all content and UI copy is Chinese (`zh-CN`). npm-workspaces monorepo with a single workspace `apps/web`. Root `content/` (Markdown) is the content source of truth. `apps/api` is reserved for a future FastAPI service — do not add backend code without explicit scope approval. Node >= 22.12.0.
 
 This project is managed by Trellis (see `AGENTS.md`): task planning/consent workflow lives in `.trellis/workflow.md`, and coding guidelines are in `.trellis/spec/<package>/<layer>/` — read the relevant spec index before writing code in a layer.
 
@@ -17,6 +17,7 @@ All from repo root (they delegate to the `@praxis/web` workspace):
 ```bash
 npm run dev            # regenerates practice data, then astro dev at http://localhost:4321
 npm run build          # regenerates practice data, then astro build → apps/web/dist/
+npm run build:production # validates a real HTTPS SITE_URL, then runs the static build
 npm run preview        # serves dist/ (also port 4321 — stop dev first)
 npm run check          # format:check + lint + typecheck + test:unit (offline quality gate)
 npm run test:e2e       # runs a full build first, then Playwright against preview
@@ -35,8 +36,8 @@ cd apps/web && npx playwright test site.spec.ts -g "branded 404" --project=chrom
 Gotchas:
 
 - `dev`, `build`, and `typecheck` self-prime via pre-hooks that run `generate:practice`; `lint` and `test:unit` do not (unit tests are pure library tests and don't need it).
-- Playwright defines two projects: `chromium` and `mobile-chromium` (Pixel 7); without `--project` every test runs in both. Locally it reuses an existing preview server on 4321.
-- Do not set `SITE_URL` when running e2e — tests assert canonical URLs against the default fallback `https://praxis.example`.
+- Playwright defines two projects: `chromium` and `mobile-chromium` (Pixel 7); without `--project` every test runs in both. The suite starts a fresh preview server on 4321 and does not reuse an existing one.
+- E2E metadata assertions derive their expected origin from `SITE_URL`; when it is unset they use the default fallback `https://praxis.example`.
 - `apps/web/README.md` is the untouched Astro starter README; ignore it. Root `README.md` and root `package.json` are authoritative.
 
 ## Architecture

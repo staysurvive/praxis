@@ -4,7 +4,7 @@ services:
       context: ..
       dockerfile: infra/Dockerfile.web
       args:
-        SITE_URL: ${PRAXIS_SITE_URL:-https://praxis.example}
+        SITE_URL: ${PRAXIS_SITE_URL:?set the public HTTPS origin before building}
     volumes:
       - praxis-web-dist:/output
     restart: 'no'

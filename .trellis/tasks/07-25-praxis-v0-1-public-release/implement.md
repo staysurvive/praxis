@@ -9,8 +9,8 @@
 
 ## Progress snapshot (2026-07-26)
 
-- 步骤 1–7 全部完成并有证据：SEO/RSS/Sitemap/robots 落地，release gate 文档就位，
-  `npm run check`、`npm run build`、`npm run test:e2e`（30/30）与 Docker build 均绿。
+- 步骤 1–7 的静态检查与浏览器验证已有证据：SEO/RSS/Sitemap/robots 落地，release gate 文档就位，
+  `npm run check`、生产静态构建与 `npm run test:e2e` 均通过；Docker build 需在 Docker daemon 可用时补验。
 - 步骤 8 部分完成：checklist 部署前条目已按证据勾选，Trellis 质量/spec/commit 流程已走完
   （sessions 1–6）；生产部署与上线后检查仍开放，等待用户提供署名、正式域名和服务器
   Caddy/Compose 接入边界。
@@ -54,9 +54,9 @@
 7. **Run release-candidate validation**
    - `npm run format`
    - `npm run check`
-   - `npm run build`
+   - `$env:SITE_URL='https://praxis-build-check.example'; npm run build:production`
    - `npm run test:e2e`
-   - `docker build -f infra/Dockerfile.web -t praxis-web-v0.1-check .`
+   - `docker build --build-arg SITE_URL=https://praxis-build-check.example -f infra/Dockerfile.web -t praxis-web-v0.1-check .`
    - Inspect desktop/mobile Light/Dark pages and generated discovery files.
 
 8. **Update evidence and prepare deployment handoff**
@@ -69,7 +69,7 @@
 
 - `apps/web/src/layouts/BaseLayout.astro`: metadata regressions affect every page; validate defaults and 404 separately.
 - `apps/web/astro.config.mjs`: Sitemap integration affects the full build; verify output paths before continuing.
-- `content/projects/praxis.mdx`: schema rejects invalid dates or duplicate events; preserve stable identity and URL.
+- `content/projects/praxis.md`: schema rejects invalid dates or duplicate events; preserve stable identity and URL.
 - `package-lock.json`: dependency changes must stay limited to official Astro packages and their transitive requirements.
 
 ## Review gates

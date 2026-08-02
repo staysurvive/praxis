@@ -18,8 +18,10 @@ the offline-capable `check` command.
 - Responsive: run the normal mobile project and a 320px regression; the document must not scroll horizontally. A wide
   heatmap may scroll only inside `.heatmap-scroll`.
 - Build: deterministic offline activity JSON and a static artifact that can be served without FastAPI/PostgreSQL.
-- Security: drafts are absent from every public projection; production HTML has no inline scripts or styles; `SITE_URL`
-  rejects unsafe origins; Caddy returns a real 404 with security headers; the final export image has no known CVEs.
+- Security: drafts and future events are absent from public projections; authored content is Markdown-only and rejects
+  raw HTML/MDX syntax plus unsafe link/image protocols; production HTML has no inline scripts or styles; Docker
+  validates a real nonlocal `SITE_URL`;
+  Caddy returns a real 404 with security headers; the final export image has no known CVEs.
 
 ## Forbidden patterns
 
@@ -47,8 +49,9 @@ npm run typecheck
 npm run test:unit
 npm run audit:deps
 npm run build
+npm run build:production # with an explicit nonlocal, non-placeholder SITE_URL
 npm run test:e2e
-docker build -f infra/Dockerfile.web -t praxis-web-check .
+docker build --build-arg SITE_URL=https://praxis-build-check.example -f infra/Dockerfile.web -t praxis-web-check .
 docker scout cves local://praxis-web-check
 ```
 
@@ -69,6 +72,8 @@ four content types without publishing those fixtures.
 | Duplicate `contentId` or type/slug | `generate-practice-data.ts` | Build fails before static output |
 | Draft contains private practice notes | `buildPublicPracticeDataset` | Notes and counters are absent from public JSON/UI |
 | Unsafe `SITE_URL` | `resolveSiteUrl` | Astro config load fails before generating metadata |
+| Placeholder or local production `SITE_URL` | `resolveProductionSiteUrl` | Docker export fails before generating metadata |
+| `.mdx`, raw HTML, MDX syntax, or unsafe link/image protocol in authored content | content source policy | Build fails rather than sanitizing or emitting it |
 | Unknown public path | `404.astro` | Branded 404 with safe navigation copy |
 | Unknown path behind Caddy | `handle_errors` | Branded document with HTTP 404, never a soft 404 |
 | Empty type or activity list | `EmptyState.astro` / `PracticeHeatmap.astro` | Intentional empty state, no fake content |

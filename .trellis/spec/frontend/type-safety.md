@@ -10,7 +10,8 @@
 
 ## Runtime boundaries
 
-- Validate Markdown/MDX frontmatter with the Astro-supported schema/runtime validator before a page can build.
+- Validate Markdown frontmatter with the Astro-supported schema/runtime validator before a page can build; reject
+  `.mdx` source files before collection discovery.
 - Treat generated activity JSON as a typed derived artifact; validate its shape at the boundary that reads it.
 - Normalize dates to a documented date-only representation before grouping by day; do not mix locale strings and `Date`
   objects in aggregation logic.

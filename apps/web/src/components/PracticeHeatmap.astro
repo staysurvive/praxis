@@ -10,14 +10,22 @@ interface Props {
 }
 
 const { dataset } = Astro.props;
-const cells = buildHeatmapCalendar(dataset, getTodayDateKey());
-const months = buildHeatmapMonths(cells).slice(1);
+const todayDateKey = getTodayDateKey();
+const cells = buildHeatmapCalendar(dataset, todayDateKey);
+const monthLabels = new Map(
+  buildHeatmapMonths(cells)
+    .slice(1)
+    .map((month) => [month.weekIndex, month.label]),
+);
+const weekLabels = Array.from({ length: cells.length / 7 }, (_, weekIndex) =>
+  monthLabels.get(weekIndex),
+);
 const firstDate = cells.at(0)?.date;
-const lastDate = cells.at(-1)?.date;
 const visibleEvents = dataset.events.filter(
-  (event) => (!firstDate || event.date >= firstDate) && (!lastDate || event.date <= lastDate),
+  (event) => (!firstDate || event.date >= firstDate) && event.date <= todayDateKey,
 );
 const visibleActiveDays = new Set(visibleEvents.map((event) => event.date)).size;
+const visibleContentCount = new Set(visibleEvents.map((event) => event.contentId)).size;
 const recentEvents = [...visibleEvents].reverse().slice(0, 8);
 const summary = uiCopy.heatmap.summary(visibleEvents.length, visibleActiveDays);
 ---
@@ -32,21 +40,21 @@ const summary = uiCopy.heatmap.summary(visibleEvents.length, visibleActiveDays);
     <dl class="stats-grid grid grid-cols-3 gap-3">
       <div>
         <dt>{uiCopy.heatmap.totalEvents}</dt>
-        <dd>{dataset.totalEvents}</dd>
+        <dd>{visibleEvents.length}</dd>
       </div>
       <div>
         <dt>{uiCopy.heatmap.activeDays}</dt>
-        <dd>{dataset.activeDays}</dd>
+        <dd>{visibleActiveDays}</dd>
       </div>
       <div>
         <dt>{uiCopy.heatmap.contentCount}</dt>
-        <dd>{dataset.contentCount}</dd>
+        <dd>{visibleContentCount}</dd>
       </div>
     </dl>
   </div>
 
   {
-    dataset.events.length === 0 ? (
+    visibleEvents.length === 0 ? (
       <div class="mt-10">
         <EmptyState description={uiCopy.empty.practice} />
       </div>
@@ -68,8 +76,8 @@ const summary = uiCopy.heatmap.summary(visibleEvents.length, visibleActiveDays);
             </div>
             <div class="heatmap-data">
               <div class="heatmap-months" aria-hidden="true">
-                {months.map((month) => (
-                  <span style={`grid-column: ${month.weekIndex + 1}`}>{month.label}</span>
+                {weekLabels.map((label) => (
+                  <span>{label}</span>
                 ))}
               </div>
               <div class="heatmap-grid" aria-hidden="true">

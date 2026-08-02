@@ -1,10 +1,10 @@
 // @ts-check
-import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
 import { resolveSiteUrl } from './config/site-url';
+import { contentMarkdownProcessor } from './src/lib/content/markdown';
 
 /** @param {string} page */
 function isIndexablePage(page) {
@@ -25,7 +25,10 @@ export default defineConfig({
   build: {
     inlineStylesheets: 'never',
   },
-  integrations: [mdx(), sitemap({ filter: isIndexablePage })],
+  markdown: {
+    processor: contentMarkdownProcessor,
+  },
+  integrations: [sitemap({ filter: isIndexablePage })],
   vite: {
     plugins: [tailwindcss()],
   },

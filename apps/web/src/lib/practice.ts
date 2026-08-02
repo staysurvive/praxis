@@ -38,6 +38,10 @@ export interface PracticeDataset {
   days: PracticeDay[];
 }
 
+export interface PracticeDatasetOptions {
+  endDateKey?: string;
+}
+
 export interface HeatmapCell {
   date: string;
   count: number;
@@ -104,8 +108,13 @@ export function normalizePracticeEvents(
   return events.sort(compareEvents);
 }
 
-export function buildPracticeDataset(entries: readonly PracticeSourceEntry[]): PracticeDataset {
-  const events = normalizePracticeEvents(entries);
+export function buildPracticeDataset(
+  entries: readonly PracticeSourceEntry[],
+  options: PracticeDatasetOptions = {},
+): PracticeDataset {
+  const events = normalizePracticeEvents(entries).filter(
+    (event) => !options.endDateKey || event.date <= options.endDateKey,
+  );
   const byDate = new Map<string, NormalizedPracticeEvent[]>();
 
   for (const event of events) {
@@ -134,7 +143,7 @@ export function buildPracticeDataset(entries: readonly PracticeSourceEntry[]): P
     version: 1,
     totalEvents: events.length,
     activeDays: days.length,
-    contentCount: new Set(entries.map((entry) => entry.contentId)).size,
+    contentCount: new Set(events.map((event) => event.contentId)).size,
     events,
     days,
   };
@@ -142,9 +151,11 @@ export function buildPracticeDataset(entries: readonly PracticeSourceEntry[]): P
 
 export function buildPublicPracticeDataset(
   entries: readonly ContentFrontmatter[],
+  options: PracticeDatasetOptions = {},
 ): PracticeDataset {
   return buildPracticeDataset(
     entries.filter((entry) => isPublicStatus(entry.status)).map(toPracticeSourceEntry),
+    options,
   );
 }
 
@@ -178,7 +189,9 @@ export function buildHeatmapCalendar(
   const endDate = parseDateKey(endDateKey);
   const endOfWeek = addUtcDays(endDate, 6 - endDate.getUTCDay());
   const startDate = addUtcDays(endOfWeek, -(weeks * 7 - 1));
-  const counts = new Map(dataset.days.map((day) => [day.date, day.count]));
+  const counts = new Map(
+    dataset.days.filter((day) => day.date <= endDateKey).map((day) => [day.date, day.count]),
+  );
 
   return Array.from({ length: weeks * 7 }, (_, index) => {
     const date = addUtcDays(startDate, index);
