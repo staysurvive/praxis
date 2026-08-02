@@ -38,12 +38,13 @@ The homepage uses two self-hosted, original editorial artworks under `apps/web/p
 for Praxis on 2026-08-01, compressed as delivery-size WebP assets, and contain no text, logo, or third-party brand.
 They are decorative only: the homepage title, description, CTA, and practice content remain semantic HTML.
 
-| Asset                          | Public URL                          | Intended placement                                                                                           |
-| ------------------------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `praxis-hero-field-1536.webp`  | `/art/praxis-hero-field-1536.webp`  | Desktop Hero backdrop: an ink-like green path and copper field that expresses the thought-to-action cycle.   |
-| `praxis-hero-garden-1536.webp` | `/art/praxis-hero-garden-1536.webp` | Philosophy-section editorial insert: a tactile paper garden that represents practice accumulating over time. |
+| Asset                          | Public URL                          | Intended placement                                                                                         |
+| ------------------------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `praxis-hero-field-1536.webp`  | `/art/praxis-hero-field-1536.webp`  | Desktop Hero backdrop: an ink-like green path and copper field that expresses the thought-to-action cycle. |
+| `praxis-hero-garden-1536.webp` | `/art/praxis-hero-garden-1536.webp` | Philosophy-section background: a tactile paper garden that represents practice accumulating over time.     |
 
 The field artwork is supplied through the homepage Hero with empty `alt` text and an `aria-hidden` container; desktop
-rendering uses `object-fit: contain` to preserve the original composition. The garden artwork is shown later as a lazy
-loaded, decorative Philosophy-section insert. Do not move copy into either image or use the artwork as the only means
-of communicating content.
+rendering uses `object-fit: cover` so the artwork fills the viewport without letterboxing, while mobile rendering uses
+`object-fit: contain` to preserve the complete composition above the copy. The garden artwork is loaded lazily as a
+decorative, full-bleed Philosophy-section background with a theme-aware wash behind the semantic copy. Do not move
+copy into either image or use the artwork as the only means of communicating content.

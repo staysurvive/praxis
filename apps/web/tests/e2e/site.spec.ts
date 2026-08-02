@@ -14,12 +14,14 @@ test('editorial homepage exposes the real Praxis project and local practice data
     '/art/praxis-hero-field-1536.webp',
   );
   await expect(page.locator('.hero-art source')).toHaveCount(0);
-  await expect(page.locator('.philosophy-art img')).toHaveAttribute(
+  await expect(page.locator('.philosophy-background img')).toHaveAttribute(
     'src',
     '/art/praxis-hero-garden-1536.webp',
   );
-  await expect(page.locator('.philosophy-art img')).toHaveAttribute('loading', 'lazy');
-  await expect(page.locator('.hero-section .philosophy-art')).toHaveCount(0);
+  await expect(page.locator('.philosophy-background img')).toHaveAttribute('loading', 'lazy');
+  await expect(page.locator('.philosophy-section .philosophy-background')).toHaveCount(1);
+  await expect(page.locator('.philosophy-section .philosophy-background-wash')).toHaveCount(1);
+  await expect(page.locator('.philosophy-art')).toHaveCount(0);
 
   const renderedHeroArt = await page.locator('.hero-art img').evaluate((image) => {
     if (!(image instanceof HTMLImageElement)) {
@@ -419,7 +421,7 @@ test('the homepage hero completes the first desktop viewport', async ({ page }) 
   expect(Math.abs(dimensions.heroBottom - dimensions.viewportHeight)).toBeLessThanOrEqual(1);
   expect(Math.abs(dimensions.nextSectionTop - dimensions.viewportHeight)).toBeLessThanOrEqual(1);
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
-  expect(dimensions.heroImageObjectFit).toBe('contain');
+  expect(dimensions.heroImageObjectFit).toBe('cover');
 });
 
 test('keyboard focus and reduced-motion preferences remain usable', async ({ page }) => {

@@ -36,7 +36,18 @@ const [currentProject] = await listEntries({ type: 'project' });
     </div>
   </section>
 
-  <section class="page-section">
+  <section class="page-section philosophy-section">
+    <div class="philosophy-background" aria-hidden="true">
+      <img
+        src="/art/praxis-hero-garden-1536.webp"
+        width="1536"
+        height="864"
+        alt=""
+        loading="lazy"
+      />
+    </div>
+    <div class="philosophy-background-wash" aria-hidden="true"></div>
+
     <div class="page-shell">
       <SectionHeading
         eyebrow={homeContent.philosophy.eyebrow}
@@ -58,16 +69,6 @@ const [currentProject] = await listEntries({ type: 'project' });
             </article>
           ))
         }
-      </div>
-
-      <div class="philosophy-art" aria-hidden="true">
-        <img
-          src="/art/praxis-hero-garden-1536.webp"
-          width="1536"
-          height="864"
-          alt=""
-          loading="lazy"
-        />
       </div>
     </div>
   </section>
@@ -118,7 +119,7 @@ const [currentProject] = await listEntries({ type: 'project' });
   }
 
   .hero-art img {
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
   }
 
@@ -172,6 +173,46 @@ const [currentProject] = await listEntries({ type: 'project' });
   .philosophy-grid {
     border-top: 1px solid var(--color-border);
     border-bottom: 1px solid var(--color-border);
+  }
+
+  .philosophy-section {
+    isolation: isolate;
+    overflow: clip;
+  }
+
+  .philosophy-section > .page-shell {
+    position: relative;
+    z-index: 2;
+  }
+
+  .philosophy-section::before {
+    z-index: 3;
+  }
+
+  .philosophy-background,
+  .philosophy-background-wash {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .philosophy-background img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .philosophy-background-wash {
+    z-index: 1;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-page) 92%, transparent) 0%,
+      color-mix(in srgb, var(--color-page) 78%, transparent) 52%,
+      color-mix(in srgb, var(--color-page) 58%, transparent) 100%
+    );
   }
 
   .philosophy-grid article {
@@ -251,20 +292,6 @@ const [currentProject] = await listEntries({ type: 'project' });
     padding-top: 0;
   }
 
-  .philosophy-art {
-    margin-top: clamp(2.5rem, 6vw, 5rem);
-    aspect-ratio: 16 / 7.8;
-    overflow: hidden;
-  }
-
-  .philosophy-art img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 54%;
-  }
-
   @media (hover: hover) and (pointer: fine) {
     .philosophy-grid article:hover::after {
       opacity: 1;
@@ -285,6 +312,10 @@ const [currentProject] = await listEntries({ type: 'project' });
       aspect-ratio: 16 / 9;
     }
 
+    .hero-art img {
+      object-fit: contain;
+    }
+
     .hero-overlay {
       display: none;
     }
@@ -292,6 +323,14 @@ const [currentProject] = await listEntries({ type: 'project' });
     .hero-shell {
       min-height: 0;
       padding: calc(56.25vw + 2rem) 0 4rem;
+    }
+
+    .philosophy-background img {
+      object-position: 62% center;
+    }
+
+    .philosophy-background-wash {
+      background: color-mix(in srgb, var(--color-page) 82%, transparent);
     }
   }
 
