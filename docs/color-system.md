@@ -7,14 +7,14 @@ brand artwork, not to general interface emphasis.
 
 ## Token layers
 
-| Layer                   | Tokens                                                                                                       | Purpose                                                                                                                     |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| Background and material | `--color-bg`, `--color-bg-surface`, `--color-bg-raised`, `--color-highlight`, `--color-shadow`               | Establish page depth through value, transparency, and material rather than extra hues.                                      |
-| Content                 | `--color-fg`, `--color-fg-muted`, `--color-fg-subtle`, `--color-line-*`                                      | Preserve reading hierarchy, rules, dividers, and quiet metadata.                                                            |
-| Brand                   | `--color-brand`, `--color-brand-strong`, `--color-brand-tint`, `--color-brand-display`, `--color-brand-wash` | Copper is reserved for CTA/link hierarchy, active navigation, section signals, and intentional editorial markers.           |
-| Brand secondary         | `--color-brand-secondary`                                                                                    | Moss remains restricted to supplied brand assets and editorial artwork. It must not become a second general-purpose accent. |
-| Feedback                | `--color-success`, `--color-warning`, `--color-error`, `--color-neutral`, `--color-focus-ring`               | Communicate state independently from the brand palette.                                                                     |
-| Data and overlays       | `--color-data-heat-*`, `--color-overlay-*`                                                                   | Keep practice intensity separate from actions, and make shared image, glass, and header materials consistent.               |
+| Layer                   | Tokens                                                                                         | Purpose                                                                                                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Background and material | `--color-bg`, `--color-bg-surface`, `--color-bg-raised`, `--color-highlight`, `--color-shadow` | Establish page depth through value, transparency, and material rather than extra hues.                                      |
+| Content                 | `--color-fg`, `--color-fg-muted`, `--color-fg-subtle`, `--color-line-*`                        | Preserve reading hierarchy, rules, dividers, and quiet metadata.                                                            |
+| Brand                   | `--color-brand`, `--color-brand-strong`, `--color-brand-tint`, `--color-brand-display`         | Copper is reserved for CTA/link hierarchy, active navigation, section signals, and intentional editorial markers.           |
+| Brand secondary         | `--color-brand-secondary`                                                                      | Moss remains restricted to supplied brand assets and editorial artwork. It must not become a second general-purpose accent. |
+| Feedback                | `--color-success`, `--color-warning`, `--color-error`, `--color-neutral`, `--color-focus-ring` | Communicate state independently from the brand palette.                                                                     |
+| Data and overlays       | `--color-data-heat-*`, `--color-overlay-*`                                                     | Keep practice intensity separate from actions, and make shared image, glass, and header materials consistent.               |
 
 All tokens live in `apps/web/src/styles/tokens.css` and use `light-dark()` so light and dark values stay paired in one declaration. Explicit `data-theme` only selects the color scheme; it does not maintain a second drifting palette.
 

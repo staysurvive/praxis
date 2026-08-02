@@ -35,16 +35,17 @@ each platform can request its intended asset.
 ## Homepage Artwork
 
 The homepage uses two self-hosted, original editorial artworks under `apps/web/public/art/`. They were generated
-for Praxis on 2026-08-01, compressed as delivery-size WebP assets, and contain no text, logo, or third-party brand.
-They are decorative only: the homepage title, description, CTA, and practice content remain semantic HTML.
+for Praxis, compressed as delivery-size WebP assets, and contain no text, logo, or third-party brand. They are
+decorative only: the homepage title, description, CTA, and practice content remain semantic HTML.
 
-| Asset                          | Public URL                          | Intended placement                                                                                         |
-| ------------------------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `praxis-hero-field-1536.webp`  | `/art/praxis-hero-field-1536.webp`  | Desktop Hero backdrop: an ink-like green path and copper field that expresses the thought-to-action cycle. |
-| `praxis-hero-garden-1536.webp` | `/art/praxis-hero-garden-1536.webp` | Philosophy-section background: a tactile paper garden that represents practice accumulating over time.     |
+| Asset                               | Public URL                               | Intended placement                                                                                          |
+| ----------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `praxis-hero-field-1536.webp`       | `/art/praxis-hero-field-1536.webp`       | Desktop Hero backdrop: an ink-like green path and copper field that expresses the thought-to-action cycle.  |
+| `praxis-philosophy-field-2048.webp` | `/art/praxis-philosophy-field-2048.webp` | Current Philosophy background: a copy-safe paper field with restrained ink, torn edges, and copper nodes.   |
+| `praxis-hero-garden-1536.webp`      | `/art/praxis-hero-garden-1536.webp`      | Retained rollback artwork from the previous Philosophy composition; not referenced by the current homepage. |
 
 The field artwork is supplied through the homepage Hero with empty `alt` text and an `aria-hidden` container; desktop
 rendering uses `object-fit: cover` so the artwork fills the viewport without letterboxing, while mobile rendering uses
-`object-fit: contain` to preserve the complete composition above the copy. The garden artwork is loaded lazily as a
-decorative, full-bleed Philosophy-section background with a theme-aware wash behind the semantic copy. Do not move
-copy into either image or use the artwork as the only means of communicating content.
+`object-fit: contain` to preserve the complete composition above the copy. The Philosophy artwork is loaded lazily as
+a decorative, full-bleed section background with a theme-aware wash behind the semantic copy. Do not move copy into
+either image or use the artwork as the only means of communicating content.

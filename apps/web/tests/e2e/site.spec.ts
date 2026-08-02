@@ -16,7 +16,7 @@ test('editorial homepage exposes the real Praxis project and local practice data
   await expect(page.locator('.hero-art source')).toHaveCount(0);
   await expect(page.locator('.philosophy-background img')).toHaveAttribute(
     'src',
-    '/art/praxis-hero-garden-1536.webp',
+    '/art/praxis-philosophy-field-2048.webp',
   );
   await expect(page.locator('.philosophy-background img')).toHaveAttribute('loading', 'lazy');
   await expect(page.locator('.philosophy-section .philosophy-background')).toHaveCount(1);

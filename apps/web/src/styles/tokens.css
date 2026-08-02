@@ -39,7 +39,6 @@
   --color-brand-secondary: light-dark(#397c44, #9ab695);
   --color-brand-tint: light-dark(#ead9ce, #3a2a21);
   --color-brand-display: light-dark(#ead9ce, #4a3227);
-  --color-brand-wash: color-mix(in srgb, var(--color-brand-tint) 35%, transparent);
 
   /* Semantic feedback is intentionally separate from brand emphasis. */
   --color-success: light-dark(#42684e, #94bb9d);
@@ -63,11 +62,11 @@
   --color-overlay-glass: light-dark(rgb(255 254 250 / 68%), rgb(30 27 23 / 72%));
   --color-overlay-philosophy: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--color-bg) 92%, transparent) 0%,
-    color-mix(in srgb, var(--color-bg) 78%, transparent) 52%,
-    color-mix(in srgb, var(--color-bg) 58%, transparent) 100%
+    light-dark(rgb(244 241 234 / 78%), rgb(23 21 18 / 82%)) 0%,
+    light-dark(rgb(244 241 234 / 52%), rgb(23 21 18 / 64%)) 52%,
+    light-dark(rgb(244 241 234 / 28%), rgb(23 21 18 / 48%)) 100%
   );
-  --color-overlay-philosophy-mobile: color-mix(in srgb, var(--color-bg) 82%, transparent);
+  --color-overlay-philosophy-mobile: light-dark(rgb(244 241 234 / 74%), rgb(23 21 18 / 80%));
   --color-code-surface: color-mix(in srgb, var(--color-line) 30%, transparent);
 
   --shadow-raised: 0 1rem 2.5rem var(--color-shadow);
