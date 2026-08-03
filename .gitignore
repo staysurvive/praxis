@@ -17,6 +17,10 @@ playwright-report/
 !.env.example
 *.log
 
+# Python hook caches
+__pycache__/
+*.py[cod]
+
 # editors and operating systems
 .DS_Store
 .idea/
