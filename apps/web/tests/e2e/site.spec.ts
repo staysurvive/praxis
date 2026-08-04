@@ -5,10 +5,18 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 import { resolveSiteUrl } from '../../config/site-url';
+import { uiCopy } from '../../src/config/copy';
+import { getKnowledgeUrl, knowledgeSections } from '../../src/lib/content/domain';
 
 const siteOrigin = resolveSiteUrl(process.env.SITE_URL);
 const absoluteUrl = (pathname: string) => new URL(pathname, siteOrigin).toString();
 const sitemapUrl = (pathname: string) => (pathname ? absoluteUrl(pathname) : siteOrigin);
+const firstKnowledgeSection = knowledgeSections[0];
+const firstKnowledgeSectionUrl = getKnowledgeUrl(firstKnowledgeSection.slug);
+const knowledgeMenuItems = [
+  { label: uiCopy.navigation.knowledgeOverview, href: getKnowledgeUrl() },
+  ...knowledgeSections.map(({ label, slug }) => ({ label, href: getKnowledgeUrl(slug) })),
+];
 
 test('editorial homepage exposes the real Praxis project and local practice data', async ({
   page,
@@ -112,17 +120,46 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   await page.goto('/');
 
   const navigation = page.getByRole('navigation', { name: '主要导航' });
-  const links = navigation.getByRole('link');
-  await expect(links).toHaveCount(4);
-  await expect(links).toHaveText(['知识', '项目', '旅程', '关于']);
-  await expect(links.nth(0)).toHaveAttribute('href', '/knowledge');
-  await expect(links.nth(1)).toHaveAttribute('href', '/projects');
-  await expect(links.nth(2)).toHaveAttribute('href', '/journey');
-  await expect(links.nth(3)).toHaveAttribute('href', '/about');
+  const primaryItems = navigation.locator(':scope > ul.nav-list > li.nav-item');
+  await expect(primaryItems).toHaveCount(4);
+
+  const knowledgeMenu = primaryItems.nth(0).locator('details[data-knowledge-menu]');
+  const knowledgeTrigger = knowledgeMenu.locator('summary[data-knowledge-menu-trigger]');
+  await expect(knowledgeTrigger).toHaveText('知识');
+  const knowledgeTriggerIcon = knowledgeTrigger.locator('[data-knowledge-menu-trigger-icon]');
+  await expect(knowledgeTriggerIcon).toHaveAttribute('aria-hidden', 'true');
+  await expect(knowledgeTriggerIcon).toHaveAttribute('viewBox', '0 0 10 6');
+  await expect(knowledgeTriggerIcon.locator('path')).toHaveAttribute('d', 'M1 1.25 5 4.75 9 1.25');
+
+  const directPrimaryLinks = navigation.locator(':scope > ul.nav-list > li.nav-item > a.nav-link');
+  await expect(directPrimaryLinks).toHaveCount(3);
+  await expect(directPrimaryLinks).toHaveText(['项目', '旅程', '关于']);
+  await expect(directPrimaryLinks.nth(0)).toHaveAttribute('href', '/projects');
+  await expect(directPrimaryLinks.nth(1)).toHaveAttribute('href', '/journey');
+  await expect(directPrimaryLinks.nth(2)).toHaveAttribute('href', '/about');
+
+  const knowledgeLinks = knowledgeMenu.locator('[data-knowledge-menu-link]');
+  await expect(knowledgeLinks).toHaveCount(knowledgeMenuItems.length);
+  await expect(knowledgeLinks.locator('.knowledge-menu-label')).toHaveText(
+    knowledgeMenuItems.map(({ label }) => label),
+  );
+  expect(
+    await knowledgeLinks.evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
+  ).toEqual(knowledgeMenuItems.map(({ href }) => href));
   await expect(page.locator('.brand')).toHaveAttribute('href', '/');
 
+  await page.goto('/knowledge');
+  await expect(knowledgeTrigger).toHaveClass(/nav-link--active/);
+  await expect(knowledgeTrigger).toHaveAttribute('aria-current', 'page');
+  await expect(knowledgeLinks.nth(0)).toHaveAttribute('aria-current', 'page');
+
+  await page.goto(firstKnowledgeSectionUrl);
+  await expect(knowledgeTrigger).toHaveAttribute('aria-current', 'location');
+  await expect(
+    knowledgeMenu.locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`),
+  ).toHaveAttribute('aria-current', 'page');
+
   for (const [pathname, label] of [
-    ['/knowledge', '知识'],
     ['/projects', '项目'],
     ['/journey', '旅程'],
     ['/about', '关于'],
@@ -135,10 +172,8 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   }
 
   await page.goto('/knowledge/ai-code-security-review');
-  await expect(navigation.getByRole('link', { name: '知识' })).toHaveAttribute(
-    'aria-current',
-    'location',
-  );
+  await expect(knowledgeTrigger).toHaveAttribute('aria-current', 'location');
+  await expect(knowledgeTrigger).toHaveClass(/nav-link--active/);
 
   await page.goto('/projects/praxis-foundation');
   await expect(navigation.getByRole('link', { name: '项目' })).toHaveAttribute(
@@ -147,21 +182,168 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   );
 });
 
+test('knowledge menu opens on desktop hover and dismisses without moving focus', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === 'mobile-chromium',
+    'Desktop fine-pointer behavior is covered by the desktop project.',
+  );
+  await page.goto('/');
+
+  const menu = page.locator('details[data-knowledge-menu]');
+  const trigger = menu.locator('summary[data-knowledge-menu-trigger]');
+  const panel = menu.locator('[data-knowledge-menu-panel]');
+
+  await trigger.hover();
+  await expect(menu).toHaveJSProperty('open', true);
+  await expect(panel).toBeVisible();
+
+  const firstSectionLink = menu.locator(
+    `[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`,
+  );
+  await expect(firstSectionLink).toHaveCount(1);
+  await firstSectionLink.hover();
+  const hoverFeedback = await firstSectionLink.evaluate((link) => {
+    const linkStyles = getComputedStyle(link);
+    const label = link.querySelector('.knowledge-menu-label');
+    return {
+      background: linkStyles.backgroundColor,
+      edge: linkStyles.boxShadow,
+      labelWeight: label ? getComputedStyle(label).fontWeight : null,
+    };
+  });
+  expect(hoverFeedback.background).not.toBe('rgba(0, 0, 0, 0)');
+  expect(hoverFeedback.edge).not.toBe('none');
+  expect(Number.parseInt(hoverFeedback.labelWeight ?? '0', 10)).toBeGreaterThanOrEqual(600);
+
+  await page.keyboard.press('Escape');
+  await expect(menu).toHaveJSProperty('open', false);
+  await expect(panel).toBeHidden();
+
+  const viewport = page.viewportSize();
+  if (!viewport) throw new Error('Missing desktop viewport');
+  await page.mouse.move(viewport.width - 2, viewport.height - 2);
+
+  await trigger.hover();
+  await expect(menu).toHaveJSProperty('open', true);
+  await page.mouse.move(viewport.width - 2, viewport.height - 2);
+
+  await expect(menu).toHaveJSProperty('open', false);
+  await expect(panel).toBeHidden();
+});
+
+test('an expanded knowledge menu child link navigates with JavaScript enabled', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const menu = page.locator('details[data-knowledge-menu]');
+  await menu.locator('summary[data-knowledge-menu-trigger]').click();
+  await expect(menu).toHaveJSProperty('open', true);
+
+  const childLink = menu.locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`);
+  await expect(childLink).toBeVisible();
+  await childLink.click();
+  await expect(page).toHaveURL(new RegExp(`${firstKnowledgeSectionUrl}$`));
+  await expect(
+    page.getByRole('heading', { level: 1, name: firstKnowledgeSection.label }),
+  ).toBeVisible();
+});
+
+test('knowledge menu opens by touch and closes on an outside tap', async ({ page }, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'mobile-chromium',
+    'Touch behavior is covered by the mobile project.',
+  );
+  await page.goto('/');
+
+  const menu = page.locator('details[data-knowledge-menu]');
+  const trigger = menu.locator('summary[data-knowledge-menu-trigger]');
+  const panel = menu.locator('[data-knowledge-menu-panel]');
+
+  await trigger.tap();
+  await expect(menu).toHaveJSProperty('open', true);
+  await expect(panel).toBeVisible();
+
+  await page.getByRole('button', { name: /切换到/ }).tap();
+  await expect(menu).toHaveJSProperty('open', false);
+  await expect(panel).toBeHidden();
+
+  await trigger.tap();
+  await menu.locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`).tap();
+  await expect(page).toHaveURL(new RegExp(`${firstKnowledgeSectionUrl}$`));
+});
+
+test('Escape closes the knowledge menu and restores focus to its trigger', async ({ page }) => {
+  await page.goto('/');
+
+  const menu = page.locator('details[data-knowledge-menu]');
+  const trigger = menu.locator('summary[data-knowledge-menu-trigger]');
+
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+  await expect(menu).toHaveJSProperty('open', true);
+
+  await page.keyboard.press('Tab');
+  await expect(menu.locator('[data-knowledge-menu-link]').first()).toBeFocused();
+  await page.keyboard.press('Escape');
+
+  await expect(menu).toHaveJSProperty('open', false);
+  await expect(trigger).toBeFocused();
+});
+
+test('outside dismissal preserves keyboard focus at the knowledge trigger', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === 'mobile-chromium',
+    'Mobile outside-tap dismissal is covered through the reachable theme control.',
+  );
+  await page.goto('/journey');
+
+  const menu = page.locator('details[data-knowledge-menu]');
+  const trigger = menu.locator('summary[data-knowledge-menu-trigger]');
+
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+  await expect(menu).toHaveJSProperty('open', true);
+
+  await page.keyboard.press('Tab');
+  await expect(menu.locator('[data-knowledge-menu-link]').first()).toBeFocused();
+  await page.getByRole('heading', { level: 1, name: '旅程' }).click();
+
+  await expect(menu).toHaveJSProperty('open', false);
+  await expect(trigger).toBeFocused();
+});
+
+test('Space toggles the native knowledge disclosure from the keyboard', async ({ page }) => {
+  await page.goto('/');
+
+  const menu = page.locator('details[data-knowledge-menu]');
+  const trigger = menu.locator('summary[data-knowledge-menu-trigger]');
+  await trigger.focus();
+
+  await page.keyboard.press('Space');
+  await expect(menu).toHaveJSProperty('open', true);
+  await page.keyboard.press('Space');
+  await expect(menu).toHaveJSProperty('open', false);
+  await expect(trigger).toBeFocused();
+});
+
 test('knowledge exposes five truthful sections and all recent knowledge', async ({ page }) => {
   await page.goto('/knowledge');
 
   await expect(page.getByRole('heading', { level: 1, name: '知识' })).toBeVisible();
   const sectionCards = page.locator('.knowledge-section-card');
-  await expect(sectionCards).toHaveCount(5);
-  await expect(sectionCards.getByRole('link')).toHaveCount(5);
-  await expect(sectionCards.getByRole('heading', { level: 2 })).toHaveText([
-    'Agent 应用开发',
-    '大模型原理与实现',
-    '微调、推理与部署',
-    '实践与案例',
-    '知识前沿',
-  ]);
-  await expect(sectionCards.getByText('暂无作者内容', { exact: true })).toHaveCount(5);
+  await expect(sectionCards).toHaveCount(knowledgeSections.length);
+  await expect(sectionCards.getByRole('link')).toHaveCount(knowledgeSections.length);
+  await expect(sectionCards.getByRole('heading', { level: 2 })).toHaveText(
+    knowledgeSections.map(({ label }) => label),
+  );
+  await expect(sectionCards.getByText('暂无作者内容', { exact: true })).toHaveCount(
+    knowledgeSections.length,
+  );
 
   const recent = page.locator('.recent-list');
   await expect(recent.locator('.content-card')).toHaveCount(2);
@@ -176,15 +358,9 @@ test('knowledge exposes five truthful sections and all recent knowledge', async 
 });
 
 test('knowledge section empty state and detail keep a knowledge return path', async ({ page }) => {
-  for (const [slug, title] of [
-    ['agent-app-development', 'Agent 应用开发'],
-    ['llm-principles', '大模型原理与实现'],
-    ['fine-tuning-inference-deployment', '微调、推理与部署'],
-    ['practice-cases', '实践与案例'],
-    ['knowledge-frontier', '知识前沿'],
-  ] as const) {
-    await page.goto(`/knowledge/${slug}`);
-    await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
+  for (const section of knowledgeSections) {
+    await page.goto(getKnowledgeUrl(section.slug));
+    await expect(page.getByRole('heading', { level: 1, name: section.label })).toBeVisible();
     await expect(page.getByRole('heading', { name: '此入口尚无作者内容' })).toBeVisible();
     await expect(page.getByRole('link', { name: '返回知识总览' })).toHaveAttribute(
       'href',
@@ -327,7 +503,7 @@ test('public pages expose canonical and social discovery metadata', async ({ pag
 test('every new indexable shell shares the centralized metadata contract', async ({ page }) => {
   for (const pathname of [
     '/knowledge',
-    '/knowledge/agent-app-development',
+    firstKnowledgeSectionUrl,
     '/projects',
     '/journey',
     '/about',
@@ -377,11 +553,7 @@ test('RSS, Sitemap, and robots expose only public canonical routes', async ({ re
     '/about',
     '/journey',
     '/knowledge',
-    '/knowledge/agent-app-development',
-    '/knowledge/llm-principles',
-    '/knowledge/fine-tuning-inference-deployment',
-    '/knowledge/practice-cases',
-    '/knowledge/knowledge-frontier',
+    ...knowledgeSections.map(({ slug }) => getKnowledgeUrl(slug)),
     '/knowledge/ai-code-security-review',
     '/knowledge/what-green-gates-miss',
     '/projects',
@@ -599,7 +771,7 @@ test('a 320px viewport has no page-level horizontal overflow', async ({ page }) 
   for (const path of [
     '/',
     '/knowledge',
-    '/knowledge/agent-app-development',
+    firstKnowledgeSectionUrl,
     '/knowledge/ai-code-security-review',
     '/projects#praxis-foundation',
     '/projects/praxis-foundation',
@@ -617,6 +789,32 @@ test('a 320px viewport has no page-level horizontal overflow', async ({ page }) 
   }
 
   await page.goto('/knowledge');
+  const knowledgeMenu = page.locator('details[data-knowledge-menu]');
+  await knowledgeMenu.locator('summary[data-knowledge-menu-trigger]').click();
+  await expect(knowledgeMenu).toHaveJSProperty('open', true);
+
+  const openedMenuGeometry = await knowledgeMenu
+    .locator('[data-knowledge-menu-panel]')
+    .evaluate((panel) => {
+      const rect = panel.getBoundingClientRect();
+      return {
+        clientWidth: document.documentElement.clientWidth,
+        documentScrollWidth: document.documentElement.scrollWidth,
+        panelLeft: rect.left,
+        panelRight: rect.right,
+        panelWidth: rect.width,
+      };
+    });
+  expect(openedMenuGeometry.documentScrollWidth).toBeLessThanOrEqual(
+    openedMenuGeometry.clientWidth,
+  );
+  expect(openedMenuGeometry.panelLeft).toBeGreaterThanOrEqual(0);
+  expect(openedMenuGeometry.panelRight).toBeLessThanOrEqual(openedMenuGeometry.clientWidth);
+  expect(openedMenuGeometry.panelWidth).toBeGreaterThanOrEqual(openedMenuGeometry.clientWidth - 48);
+
+  await page.keyboard.press('Escape');
+  await expect(knowledgeMenu).toHaveJSProperty('open', false);
+
   const headerTargets = await page
     .locator('.brand, .nav-link, [data-theme-toggle]')
     .evaluateAll((elements) =>
@@ -748,8 +946,7 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
   await expect(page).toHaveURL(/#main-content$/);
 
   const transitionDuration = await page
-    .locator('a[href="/knowledge"]')
-    .first()
+    .locator('[data-knowledge-menu-trigger]')
     .evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration));
   expect(transitionDuration).toBeLessThanOrEqual(0.00001);
 });
@@ -757,27 +954,66 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
 test('keyboard order remains brand-first across the explicit navigation', async ({ page }) => {
   await page.goto('/knowledge');
 
+  const navigation = page.getByRole('navigation', { name: '主要导航' });
+  const knowledgeMenu = navigation.locator('details[data-knowledge-menu]');
+  const knowledgeTrigger = knowledgeMenu.locator('summary[data-knowledge-menu-trigger]');
+
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: '跳到主要内容' })).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.locator('.brand')).toBeFocused();
 
-  for (const label of ['知识', '项目', '旅程', '关于']) {
+  await page.keyboard.press('Tab');
+  await expect(knowledgeTrigger).toBeFocused();
+  const knowledgeTriggerStyle = await knowledgeTrigger.evaluate((element) => {
+    const indicator = getComputedStyle(element, '::after');
+    const trigger = getComputedStyle(element);
+    return {
+      boxShadow: trigger.boxShadow,
+      opacity: indicator.opacity,
+      height: indicator.height,
+      outlineStyle: trigger.outlineStyle,
+    };
+  });
+  expect(knowledgeTriggerStyle.outlineStyle).toBe('none');
+  expect(knowledgeTriggerStyle.boxShadow).toBe('none');
+  expect(knowledgeTriggerStyle.opacity).toBe('1');
+  expect(Number.parseFloat(knowledgeTriggerStyle.height)).toBeGreaterThanOrEqual(2);
+  await page.keyboard.press('Enter');
+  await expect(knowledgeMenu).toHaveJSProperty('open', true);
+
+  const knowledgeLinks = knowledgeMenu.locator('[data-knowledge-menu-link]');
+  for (let index = 0; index < knowledgeMenuItems.length; index += 1) {
     await page.keyboard.press('Tab');
-    await expect(
-      page
-        .getByRole('navigation', { name: '主要导航' })
-        .getByRole('link', { name: label, exact: true }),
-    ).toBeFocused();
+    await expect(knowledgeLinks.nth(index)).toBeFocused();
+    if (index === 0) {
+      const firstKnowledgeLinkStyle = await knowledgeLinks.nth(index).evaluate((element) => {
+        const styles = getComputedStyle(element);
+        const label = element.querySelector('.knowledge-menu-label');
+        return {
+          outlineStyle: styles.outlineStyle,
+          outlineWidth: styles.outlineWidth,
+          background: styles.backgroundColor,
+          edge: styles.boxShadow,
+          labelWeight: label ? getComputedStyle(label).fontWeight : null,
+        };
+      });
+      expect(firstKnowledgeLinkStyle.outlineStyle).not.toBe('none');
+      expect(Number.parseFloat(firstKnowledgeLinkStyle.outlineWidth)).toBeGreaterThan(0);
+      expect(firstKnowledgeLinkStyle.background).not.toBe('rgba(0, 0, 0, 0)');
+      expect(firstKnowledgeLinkStyle.edge).not.toBe('none');
+      expect(
+        Number.parseInt(firstKnowledgeLinkStyle.labelWeight ?? '0', 10),
+      ).toBeGreaterThanOrEqual(600);
+    }
   }
 
-  await page.keyboard.press('Tab');
-  await expect(page.getByRole('button', { name: /切换到/ })).toBeFocused();
+  for (const label of ['项目', '旅程', '关于']) {
+    await page.keyboard.press('Tab');
+    await expect(navigation.getByRole('link', { name: label, exact: true })).toBeFocused();
+  }
 
-  await page.keyboard.press('Shift+Tab');
-  const aboutLink = page
-    .getByRole('navigation', { name: '主要导航' })
-    .getByRole('link', { name: '关于', exact: true });
+  const aboutLink = navigation.getByRole('link', { name: '关于', exact: true });
   await expect(aboutLink).toBeFocused();
 
   const focusedNavigationStyle = await aboutLink.evaluate((element) => {
@@ -802,7 +1038,7 @@ test('new primary, empty, and detail pages pass a basic automated accessibility 
     for (const path of [
       '/',
       '/knowledge',
-      '/knowledge/agent-app-development',
+      firstKnowledgeSectionUrl,
       '/knowledge/ai-code-security-review',
       '/projects',
       '/projects/praxis-foundation',
@@ -810,6 +1046,11 @@ test('new primary, empty, and detail pages pass a basic automated accessibility 
       '/about',
     ]) {
       await page.goto(path);
+      if (path === '/knowledge') {
+        const knowledgeMenu = page.locator('details[data-knowledge-menu]');
+        await knowledgeMenu.locator('summary[data-knowledge-menu-trigger]').click();
+        await expect(knowledgeMenu).toHaveJSProperty('open', true);
+      }
       const results = await new AxeBuilder({ page }).analyze();
       expect(results.violations).toEqual([]);
     }
@@ -820,8 +1061,14 @@ test('core content remains readable without JavaScript', async ({ browser }) => 
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
 
-  await page.goto('/knowledge');
-  await page.getByRole('link', { name: /Agent 应用开发/ }).click();
+  await page.goto('/');
+  const knowledgeMenu = page.locator('details[data-knowledge-menu]');
+  await knowledgeMenu.locator('summary[data-knowledge-menu-trigger]').click();
+  await expect(knowledgeMenu).toHaveJSProperty('open', true);
+  await knowledgeMenu
+    .locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`)
+    .click();
+  await expect(page).toHaveURL(new RegExp(`${firstKnowledgeSectionUrl}$`));
   await expect(page.getByRole('heading', { name: '此入口尚无作者内容' })).toBeVisible();
   await page.getByRole('link', { name: '返回知识总览' }).click();
   await expect(page).toHaveURL(/\/knowledge$/);
