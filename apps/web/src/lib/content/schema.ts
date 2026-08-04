@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { contentTypes, practiceKinds, stages, statuses } from './domain';
+import { contentTypes, isKnowledgeSectionKey, practiceKinds, stages, statuses } from './domain';
 
 const dateKeyPattern = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -43,6 +43,14 @@ export const practiceLogEntrySchema = z
   })
   .strict();
 
+const knowledgeSectionKeySchema = z
+  .string()
+  .refine(isKnowledgeSectionKey, 'knowledgeSections 包含未知入口');
+
+const knowledgeSectionsSchema = z
+  .array(knowledgeSectionKeySchema)
+  .transform((sections) => [...new Set(sections)]);
+
 export const contentSchema = z
   .object({
     contentId: z
@@ -65,11 +73,20 @@ export const contentSchema = z
     updatedAt: dateKeySchema,
     summary: z.string().trim().min(1).max(240),
     tags: z.array(z.string().trim().min(1).max(40)).max(12).default([]),
+    knowledgeSections: knowledgeSectionsSchema.optional(),
     journey: journeySchema.optional(),
     practiceLog: z.array(practiceLogEntrySchema).max(200).default([]),
   })
   .strict()
   .superRefine((entry, context) => {
+    if (entry.type === 'project' && entry.knowledgeSections !== undefined) {
+      context.addIssue({
+        code: 'custom',
+        path: ['knowledgeSections'],
+        message: '项目内容不能设置 knowledgeSections',
+      });
+    }
+
     if (entry.updatedAt < entry.publishedAt) {
       context.addIssue({
         code: 'custom',

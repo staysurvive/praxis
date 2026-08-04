@@ -4,7 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
 import { resolveSiteUrl } from './config/site-url';
+import { legacyCompatibilityMappings } from './src/lib/content/domain';
 import { contentMarkdownProcessor } from './src/lib/content/markdown';
+
+const redirects = Object.fromEntries(legacyCompatibilityMappings.map(({ from, to }) => [from, to]));
 
 /** @param {string} page */
 function isIndexablePage(page) {
@@ -12,6 +15,7 @@ function isIndexablePage(page) {
 
   return (
     pathname !== '/404' &&
+    !legacyCompatibilityMappings.some(({ from }) => pathname === from) &&
     !pathname.endsWith('.txt') &&
     !pathname.endsWith('.xml') &&
     !pathname.startsWith('/generated/')
@@ -21,6 +25,7 @@ function isIndexablePage(page) {
 export default defineConfig({
   site: resolveSiteUrl(process.env.SITE_URL),
   output: 'static',
+  redirects,
   trailingSlash: 'never',
   build: {
     inlineStylesheets: 'never',

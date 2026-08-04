@@ -1,0 +1,50 @@
+---
+import PageHero from '../components/PageHero.astro';
+import { uiCopy } from '../config/copy';
+import { siteConfig } from '../config/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title={uiCopy.about.title} description={siteConfig.author.bio}>
+  <PageHero
+    eyebrow={uiCopy.about.eyebrow}
+    title={`关于 ${siteConfig.author.name}`}
+    description={siteConfig.author.bio}
+  />
+  <section class="about-body">
+    <div class="page-shell about-profile">
+      <p class="eyebrow">{uiCopy.about.profileLabel}</p>
+      <p class="profile-copy">{siteConfig.author.bio}</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about-body {
+    padding-block: clamp(3.5rem, 8vw, 7rem);
+  }
+
+  .about-profile {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .about-profile p {
+    margin: 0;
+  }
+
+  .profile-copy {
+    max-width: 34rem;
+    font-family: var(--font-serif);
+    font-size: var(--text-title-1);
+    letter-spacing: var(--track-cjk-display);
+    line-height: 1.7;
+  }
+
+  @media (min-width: 48rem) {
+    .about-profile {
+      grid-template-columns: minmax(10rem, 0.35fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+</style>

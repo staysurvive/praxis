@@ -25,6 +25,7 @@ export const GET: APIRoute = async ({ site }) => {
       link: entry.url,
       pubDate: new Date(`${entry.publishedAt}T00:00:00.000Z`),
       categories: [entry.typeLabel, ...entry.tags],
+      customData: `<guid isPermaLink="false">${entry.contentId}</guid>`,
     })),
   });
 };

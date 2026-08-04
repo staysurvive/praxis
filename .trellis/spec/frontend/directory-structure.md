@@ -30,7 +30,8 @@ The generated activity file is intentionally ignored at `apps/web/src/generated/
 ## Ownership rules
 
 - `src/pages/` composes loaders and components; it does not parse frontmatter or contain query variants.
-- `src/lib/` owns typed content access, practice-event normalization, and type-first URL generation.
+- `src/lib/` owns typed content access, knowledge projections, slug-collision validation, the public URL resolver, and
+  practice-event normalization.
 - `src/components/` renders typed props and does not make network calls.
 - `src/config/` owns `zh-CN` copy, navigation metadata, and site defaults; repeated labels do not live in component markup.
 - `src/styles/` owns semantic CSS tokens and theme primitives; component styles remain local to the component when practical.
@@ -44,7 +45,9 @@ The generated activity file is intentionally ignored at `apps/web/src/generated/
 ## Naming
 
 - Use kebab-case for content slugs and route segments, PascalCase for component filenames, and camelCase for TypeScript helpers.
-- Name route files after their URL responsibility (`[type]/index.astro`, `[type]/[slug].astro`, `404.astro`).
+- Name route files after their URL responsibility (`knowledge/[key].astro` for the shared section/detail namespace,
+  `projects/index.astro` for the project single page, `[type]/[slug].astro` only for the historical project-detail
+  exception, and `404.astro` for unknown paths).
 - Keep domain vocabulary stable: `contentId`, `journey`, `practiceLog`, `type`, `stage`, and `status` are not renamed per page.
 - Put generated files under an explicit `generated` directory and document whether they are committed or ignored.
 

@@ -1,0 +1,159 @@
+---
+import ContentMeta from '../../components/ContentMeta.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import PageHero from '../../components/PageHero.astro';
+import { uiCopy } from '../../config/copy';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getContentEntries, renderContentEntry, toContentSummary } from '../../lib/content';
+import { legacyProjectDetail } from '../../lib/content/domain';
+
+const entries = await getContentEntries({ type: 'project' });
+const projects = await Promise.all(
+  entries.map(async (entry) => ({
+    summary: toContentSummary(entry),
+    Content:
+      entry.data.contentId === legacyProjectDetail.contentId
+        ? undefined
+        : (await renderContentEntry(entry)).Content,
+  })),
+);
+---
+
+<BaseLayout title={uiCopy.projects.title} description={uiCopy.projects.description}>
+  <PageHero
+    eyebrow={uiCopy.projects.eyebrow}
+    title={uiCopy.projects.title}
+    description={uiCopy.projects.description}
+  />
+
+  <section class="project-listing" aria-label={uiCopy.projects.title}>
+    <div class="page-shell">
+      {
+        projects.length > 0 ? (
+          <div class="project-list">
+            {projects.map(({ summary, Content }) => (
+              <article class="project-entry" id={summary.slug}>
+                <ContentMeta entry={summary} showStatus={false} />
+                <div class="project-heading">
+                  <div>
+                    <h2>{summary.title}</h2>
+                    <p>{summary.summary}</p>
+                  </div>
+                  <span class="project-status">{summary.statusLabel}</span>
+                </div>
+                {summary.tags.length > 0 && (
+                  <ul class="project-tags" aria-label={uiCopy.detail.tags}>
+                    {summary.tags.map((tag) => (
+                      <li>{tag}</li>
+                    ))}
+                  </ul>
+                )}
+                {Content ? (
+                  <div class="project-body article-prose">
+                    <Content />
+                  </div>
+                ) : (
+                  <a class="text-link project-detail-link" href={summary.url}>
+                    {uiCopy.actions.viewProject}
+                  </a>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <EmptyState />
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .project-listing {
+    padding-block: clamp(3.5rem, 8vw, 7rem);
+  }
+
+  .project-list {
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .project-entry {
+    padding-block: clamp(2.5rem, 7vw, 5rem);
+    border-top: 1px solid var(--color-line);
+    scroll-margin-top: calc(var(--header-height) + 1.5rem);
+  }
+
+  .project-entry:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .project-heading {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  h2,
+  .project-heading p {
+    margin: 0;
+  }
+
+  h2 {
+    max-width: 24ch;
+    font-family: var(--font-serif);
+    font-size: var(--text-title-1);
+    font-weight: 400;
+    letter-spacing: var(--track-cjk-display);
+    line-height: 1.35;
+  }
+
+  .project-heading p {
+    max-width: 46rem;
+    margin-top: 1rem;
+    color: var(--color-fg-muted);
+    line-height: 1.9;
+  }
+
+  .project-status {
+    align-self: start;
+    color: var(--color-brand-strong);
+    font-size: var(--text-meta);
+    font-weight: 500;
+    letter-spacing: var(--track-meta);
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-meta);
+    list-style: none;
+  }
+
+  .project-tags li + li::before {
+    margin-right: 1rem;
+    content: '·';
+  }
+
+  .project-detail-link,
+  .project-body {
+    margin-top: 2.25rem;
+  }
+
+  @media (min-width: 48rem) {
+    .project-heading {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+    }
+  }
+
+  @media (max-width: 23rem) {
+    .project-entry {
+      scroll-margin-top: calc(var(--header-height) + 3rem);
+    }
+  }
+</style>

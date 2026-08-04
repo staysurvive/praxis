@@ -4,15 +4,36 @@ import { uiCopy } from '../config/copy';
 interface Props {
   title?: string;
   description?: string;
+  actions?: readonly {
+    label: string;
+    href: string;
+  }[];
 }
 
-const { title = uiCopy.empty.title, description = uiCopy.empty.description } = Astro.props;
+const {
+  title = uiCopy.empty.title,
+  description = uiCopy.empty.description,
+  actions = [],
+} = Astro.props;
 ---
 
 <div class="empty-state">
   <span class="empty-mark" aria-hidden="true"></span>
   <h2>{title}</h2>
   <p>{description}</p>
+  {
+    actions.length > 0 && (
+      <ul class="empty-actions" aria-label={title}>
+        {actions.map((action) => (
+          <li>
+            <a class="text-link" href={action.href}>
+              {action.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
 </div>
 
 <style>
@@ -46,5 +67,14 @@ const { title = uiCopy.empty.title, description = uiCopy.empty.description } = A
     margin-top: 0.75rem;
     color: var(--color-fg-muted);
     line-height: 1.9;
+  }
+
+  .empty-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    margin: 1.75rem 0 0;
+    padding: 0;
+    list-style: none;
   }
 </style>

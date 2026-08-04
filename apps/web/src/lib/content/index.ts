@@ -2,9 +2,12 @@ import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
 import { uiCopy } from '../../config/copy';
-import { getContentUrl, isPublicStatus } from './domain';
-import type { ContentType, Stage, Status } from './domain';
+import { getPublicContentUrl, isPublicStatus } from './domain';
+import type { ContentType, KnowledgeSectionKey, Stage, Status } from './domain';
+import { selectKnowledgeSectionEntries, selectRecentKnowledge } from './query';
 import type { ContentFrontmatter } from './schema';
+
+export { selectKnowledgeSectionEntries, selectRecentKnowledge } from './query';
 
 export type ContentCollectionEntry = CollectionEntry<'content'>;
 
@@ -48,7 +51,7 @@ export function toContentSummary(entry: ContentCollectionEntry): ContentSummary 
   return {
     id: entry.id,
     ...entry.data,
-    url: getContentUrl(entry.data.type, entry.data.slug),
+    url: getPublicContentUrl(entry.data),
     typeLabel: uiCopy.contentTypes[entry.data.type],
     stageLabel: uiCopy.stages[entry.data.stage],
     statusLabel: uiCopy.statuses[entry.data.status],
@@ -64,6 +67,16 @@ export async function getContentEntries(
 
 export async function listEntries(filter: ContentFilter = {}): Promise<ContentSummary[]> {
   return (await getContentEntries(filter)).map(toContentSummary);
+}
+
+export async function listKnowledgeSectionEntries(
+  section: KnowledgeSectionKey,
+): Promise<ContentSummary[]> {
+  return selectKnowledgeSectionEntries(await listEntries(), section);
+}
+
+export async function listRecentKnowledge(): Promise<ContentSummary[]> {
+  return selectRecentKnowledge(await listEntries());
 }
 
 export async function getEntryBySlug(

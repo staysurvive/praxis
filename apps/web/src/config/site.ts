@@ -1,4 +1,3 @@
-import { contentTypes, getContentUrl } from '../lib/content/domain';
 import { uiCopy } from './copy';
 
 export const siteConfig = {
@@ -17,9 +16,10 @@ export const siteConfig = {
     name: 'Praxis',
     bio: '一个关于长期思考、真实行动与持续复盘的个人实践站。',
   },
-  navigation: contentTypes.map((type) => ({
-    type,
-    label: uiCopy.contentTypes[type],
-    href: getContentUrl(type),
-  })),
+  navigation: [
+    { key: 'knowledge', label: uiCopy.navigation.knowledge, href: '/knowledge' },
+    { key: 'projects', label: uiCopy.navigation.projects, href: '/projects' },
+    { key: 'journey', label: uiCopy.navigation.journey, href: '/journey' },
+    { key: 'about', label: uiCopy.navigation.about, href: '/about' },
+  ],
 } as const;

@@ -8,12 +8,16 @@ frontmatter.
 
 ## Entry identity and dimensions
 
-Every entry has an immutable `contentId` independent of its slug. `type` (`blog`, `note`, `journal`, `project`) and
-`stage` (`know-think`, `think-act`, `act-achieve`) are orthogonal. `status` describes publication/progress and does not
-change the URL namespace.
+Every entry has an immutable `contentId` independent of its slug. `type` (`blog`, `note`, `journal`, `project`) remains
+the legacy content-form dimension, while `stage` (`know-think`, `think-act`, `act-achieve`) and `status` remain
+orthogonal publication/progress dimensions. Public navigation is not generated from `type`: non-project content uses
+`/knowledge/:slug`, projects use the `/projects` single-page projection, and only `praxis-project-0001` keeps its
+historical detail URL.
 
-Adding a type means extending one registry/configuration and presentation mapping. Do not create a second collection,
-schema, query helper, or route family with copied logic.
+Knowledge classification is one optional, flat, deduplicated `knowledgeSections` multi-select. It reads only the
+author's explicit values, may contain zero, one, or multiple keys from the central five-section registry, and is
+rejected on project content. Do not infer it from `type`, tags, titles, paths, or Markdown body text. Adding a type or
+classification capability must not create a second collection, schema, or copied route/query family.
 
 ## Journey versus practiceLog
 
@@ -52,9 +56,17 @@ Keep shared operations in one content module:
 
 ```text
 listEntries({ type?, stage?, status?, tag? })
+listRecentKnowledge()
+listKnowledgeSectionEntries(section)
 getEntryBySlug(type, slug)
 getEntryByContentId(contentId)
+getPublicContentUrl({ contentId, type, slug })
 ```
+
+The public URL resolver maps all non-project content to `/knowledge/:slug`, maps the one historical Praxis project to
+`/projects/praxis-foundation`, and maps every other project to `/projects#<slug>`. Knowledge section and content slugs
+share one route namespace, so every build validates reserved-section conflicts and duplicate non-project slugs before
+static paths are emitted.
 
 The practice aggregator consumes the same typed entries and writes a deterministic static JSON artifact. It never calls
 GitHub or derives events from Git history.
@@ -116,7 +128,7 @@ markdownContentLoader(): Loader;
 | `javascript:`, `data:`, or other unsafe link/image protocol | production Markdown policy | Build fails before an executable URL can be emitted |
 | Draft content with practice events | `isPublicStatus` + `buildPublicPracticeDataset` | Entry is absent from public routes, RSS, heatmap totals, events, and JSON |
 | Event date after `endDateKey` | practice projection | Event and its counters are absent from public JSON and heatmap UI |
-| Missing type content | shared index route + `EmptyState` | Safe empty state, no fabricated entry |
+| Empty knowledge section, project projection, or activity list | owning page + `EmptyState` / `PracticeHeatmap` | Safe empty state, no fabricated entry |
 
 ### 5. Good / Base / Bad cases
 
@@ -135,9 +147,12 @@ markdownContentLoader(): Loader;
   updatedAt-only changes, draft exclusion, and end-date exclusion preserve expected public counts.
 - `apps/web/tests/unit/content-markdown.test.ts`: ordinary Markdown renders, while raw HTML, MDX syntax, unsafe
   link/image protocols, and `.mdx` source files fail; fenced code and escaped braces remain valid.
-- `apps/web/tests/unit/content-domain.test.ts`: type-first URL mapping, shared registry behavior, and the public-status
-  policy remain stable.
-- `apps/web/tests/e2e/site.spec.ts`: homepage → `/projects` → real detail, empty `/blog`, 404, no-JS reading, and Axe.
+- `apps/web/tests/unit/content-domain.test.ts`: the five-section registry, public URL resolver, exact compatibility
+  mappings, slug-collision guard, legacy type helper, and public-status policy remain stable.
+- `apps/web/tests/unit/content-query.test.ts`: unclassified public knowledge remains visible in recent updates, while
+  section membership is explicit-only and supports multiple sections.
+- `apps/web/tests/e2e/site.spec.ts`: Knowledge/Projects/Journey/About navigation, five empty knowledge sections, recent
+  knowledge, the one project-detail exception, exact compatibility pages, 404, no-JS round trips, and Axe.
 
 ### 7. Wrong vs Correct
 

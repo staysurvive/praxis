@@ -10,9 +10,11 @@ the offline-capable `check` command.
 ## Test coverage
 
 - Schema fixtures: valid entries for all four types, invalid metadata, cumulative journey data, and empty production lists.
-- Domain units: type/stage/status filters, type-first URL generation, practice-kind registry, publish de-duplication,
-  multiple events on a day, and proof that `updatedAt` alone has no effect.
-- Browser smoke: home → a type index → the real Praxis project detail, plus a missing route/404.
+- Domain units: type/stage/status filters, the public URL resolver, exact compatibility mappings, knowledge slug
+  collision guards, explicit-only multi-section projections, practice-kind registry, publish de-duplication, multiple
+  events on a day, and proof that `updatedAt` alone has no effect.
+- Browser smoke: Knowledge empty-section and recent-detail round trips, Projects → the one real detail exception,
+  Journey/About, all five compatibility pages, plus a missing route/404.
 - Accessibility: keyboard navigation, visible focus, landmarks/headings, reduced motion, color-independent heatmap
   summary, and basic automated checks in both themes.
 - Responsive: run the normal mobile project and a 320px regression; the document must not scroll horizontally. A wide
@@ -55,10 +57,11 @@ docker build --build-arg SITE_URL=https://praxis-build-check.example -f infra/Do
 docker scout cves local://praxis-web-check
 ```
 
-The current browser suite is `apps/web/tests/e2e/site.spec.ts`; it covers the homepage, type-first navigation, empty
-states, branded 404, theme persistence, no-JavaScript reading, 320px/mobile Chromium, Light/Dark Axe checks, keyboard
-focus, reduced motion, and public discovery endpoints. Unit fixtures in `apps/web/tests/fixtures/content.ts` cover all
-four content types without publishing those fixtures.
+The current browser suite is `apps/web/tests/e2e/site.spec.ts`; it covers the frozen homepage, explicit primary
+navigation, Knowledge/Projects/Journey/About, empty states, canonical details and compatibility pages, branded 404,
+theme persistence, no-JavaScript round trips, 320px/mobile Chromium, Light/Dark Axe checks, keyboard focus, reduced
+motion, and public discovery endpoints. Unit fixtures in `apps/web/tests/fixtures/content.ts` cover all four content
+types without publishing those fixtures.
 
 > **Narrow viewport gotcha**: do not apply a fixed `min-width: 20rem` to `html`. At a 320px outer viewport, the
 > vertical scrollbar reduces the document client width below 20rem and creates page-level horizontal scrolling. Let
@@ -76,7 +79,7 @@ four content types without publishing those fixtures.
 | `.mdx`, raw HTML, MDX syntax, or unsafe link/image protocol in authored content | content source policy | Build fails rather than sanitizing or emitting it |
 | Unknown public path | `404.astro` | Branded 404 with safe navigation copy |
 | Unknown path behind Caddy | `handle_errors` | Branded document with HTTP 404, never a soft 404 |
-| Empty type or activity list | `EmptyState.astro` / `PracticeHeatmap.astro` | Intentional empty state, no fake content |
+| Empty knowledge section, project projection, or activity list | owning page + `EmptyState.astro` / `PracticeHeatmap.astro` | Intentional empty state, no fake content |
 | Future API outage | isolated API island | Static Markdown/detail content remains readable |
 
 ### Wrong vs correct

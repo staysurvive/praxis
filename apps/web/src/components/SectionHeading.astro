@@ -3,9 +3,10 @@ interface Props {
   eyebrow: string;
   title: string;
   description?: string;
+  titleId?: string;
 }
 
-const { eyebrow, title, description } = Astro.props;
+const { eyebrow, title, description, titleId } = Astro.props;
 ---
 
 <header
@@ -13,7 +14,7 @@ const { eyebrow, title, description } = Astro.props;
 >
   <div>
     <p class="eyebrow eyebrow--folio mb-4">{eyebrow}</p>
-    <h2 class="section-title">{title}</h2>
+    <h2 class="section-title" id={titleId}>{title}</h2>
   </div>
   {description && <p class="body-copy m-0 lg:justify-self-end">{description}</p>}
 </header>

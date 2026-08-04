@@ -23,7 +23,7 @@ Authoritative planning references:
 | [Directory structure](./directory-structure.md) | `apps/web`, `content/`, generated assets, and tests |
 | [Component guidelines](./component-guidelines.md) | Astro components, props, composition, and accessibility |
 | [Content model](./content-model.md) | Unified entries, `journey`, `practiceLog`, and queries |
-| [Routing](./routing.md) | Type-first URLs, filters, metadata, and 404 behavior |
+| [Routing](./routing.md) | Canonical knowledge/project URLs, exact legacy compatibility, metadata, and 404 behavior |
 | [Styling](./styling.md) | Tailwind layout utilities and CSS design tokens |
 | [State management](./state-management.md) | Build-time data and progressive enhancement boundaries |
 | [Hook and browser behavior](./hook-guidelines.md) | Client scripts and hydrated islands; no React hooks |
@@ -53,11 +53,12 @@ apps/web/src/pages/                         # HTML routes plus RSS, robots, and 
 infra/Dockerfile.web                        # static artifact image
 ```
 
-For example, routes consume a shared summary rather than parsing frontmatter:
+For example, routes consume a shared summary and its canonical public URL rather than parsing frontmatter or rebuilding
+legacy type-first paths:
 
 ```typescript
 const entries = await listEntries({ type: 'project' });
-const href = entries[0] ? getContentUrl(entries[0].type, entries[0].slug) : '/projects';
+const href = entries[0]?.url ?? '/projects';
 ```
 
 The generated activity boundary is validated again when it is read:

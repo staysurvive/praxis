@@ -2,34 +2,42 @@
 
 ## Permanent namespaces
 
-Content type is the first URL segment:
+Public information architecture is independent from the legacy content-form `type`:
 
 ```text
-/blog
-/blog/:slug
-/notes
-/notes/:slug
-/journal
-/journal/:slug
+/knowledge
+/knowledge/:key       # one resolver owns five section slugs and every non-project content slug
 /projects
-/projects/:slug
+/projects#<slug>      # default project identity and inline body
+/projects/praxis-foundation  # the only historical project-detail exception
+/journey
+/about
 ```
 
-`stage` is a filter/progress dimension and never appears in a permanent content path. A stage change must not break a
-content link or a future record keyed by `contentId`.
+`stage`, `status`, content form, and knowledge section are orthogonal and never create additional permanent route
+families. A stage or section change must not break a canonical link or a future record keyed by `contentId`.
+
+Exactly five legacy addresses are compatibility-only HTML pages: `/blog`, `/notes`, and `/journal` target
+`/knowledge`; `/notes/ai-code-security-review` and `/journal/what-green-gates-miss` target their matching knowledge
+canonical. The static candidate emits `noindex`, canonical, and immediate meta refresh. Production Caddy GET 301 and
+online single-hop verification remain an external deployment gate; do not add wildcards or a general alias system.
 
 ## Route responsibilities
 
 - The home route composes editorial sections and a small latest-content selection.
-- A shared type-index route validates the type against the central registry and uses the content access layer.
-- A shared detail route resolves `(type, slug)`, returns the custom 404 for unknown combinations, and renders typed body,
-  metadata, journey, and practiceLog.
-- Independent pages (`about`, `now`, `uses`, `search`) may be added without changing content namespaces.
+- `/knowledge` renders the central five-section registry plus all public non-project content in recent-update order.
+- `/knowledge/[key]` is the single route owner for both reserved section slugs and canonical knowledge details; builds
+  fail on section/content or content/content slug collisions.
+- `/projects` renders every public project at a stable slug anchor and inlines Markdown for every project except the
+  one historical detail. The remaining `[type]/[slug]` owner emits only that exception.
+- `/journey` is a truthful empty single page until the author confirms real Journey nodes; `/about` consumes only the
+  confirmed site identity. Neither creates a new content type.
 
 ## Navigation and filters
 
-Use real links/forms for type and stage filters so the experience works without JavaScript. Do not create stage navigation
-that implies three separate collections. Empty type indexes are valid and should use the centralized copy/empty-state component.
+Primary navigation is the explicit ordered list Knowledge, Projects, Journey, About; it is never derived from
+`contentTypes`. Use `aria-current="page"` on an exact primary page and `aria-current="location"` for its descendants.
+All navigation, section entries, empty-state exits, and detail return paths are real links and work without JavaScript.
 
 ## Metadata and errors
 
@@ -39,18 +47,16 @@ that implies three separate collections. Empty type indexes are valid and should
 
 ## Implemented route examples
 
-The shared dynamic route is `apps/web/src/pages/[type]/[slug].astro`. Static paths are generated from the unified
-collection and use the type path only for the first segment:
+`ContentSummary.url` is computed once by the shared public resolver and is consumed by pages, cards, metadata, and RSS:
 
 ```typescript
-return entries.map((entry) => ({
-  params: { type: getContentPath(entry.data.type), slug: entry.data.slug },
-  props: { contentId: entry.data.contentId },
-}));
+const summary = toContentSummary(entry);
+return summary.url; // knowledge canonical, project anchor, or the one project-detail exception
 ```
 
-The detail page uses `getContentUrl(summary.type)` for its back link, so a stage change does not alter the permanent
-URL. Unknown paths are handled by `apps/web/src/pages/404.astro`; no raw exception text is sent to visitors.
+Knowledge details return to `/knowledge` without guessing a primary section from a multi-select. The historical project
+detail returns to `/projects`. Unknown paths are handled by `apps/web/src/pages/404.astro`; no raw exception text is
+sent to visitors.
 
 ## Public discovery contract
 
@@ -100,9 +106,12 @@ resolveProductionSiteUrl(value?: string): string;
   (including case, trailing slash/dot, or default-port variants).
 - `siteConfig.discovery.rssPath` is `/rss.xml`; `siteConfig.discovery.sitemapPath` is `/sitemap-index.xml`.
 - `/rss.xml` consumes `listEntries()`, which excludes drafts, and emits summary-only items with canonical links,
-  `publishedAt`, type label, and tags.
+  `publishedAt`, type label, tags, and `<guid isPermaLink="false">contentId</guid>` so a canonical migration is not a
+  new feed identity.
 - `/robots.txt` allows public crawling and points to the Sitemap URL derived from `Astro.site`.
-- Sitemap includes public HTML routes and excludes `/404`, generated data, and `.xml`/`.txt` endpoints.
+- Sitemap includes the primary pages, all five knowledge sections, canonical knowledge details, `/projects`, the one
+  historical project detail, `/journey`, and `/about`; it excludes all five compatibility pages, `/404`, generated
+  data, and `.xml`/`.txt` endpoints.
 - `BaseLayout` emits website metadata by default. Content detail explicitly supplies article dates/tags; 404 supplies
   `noindex`.
 - Caddy redirects trailing-slash and direct `index.html` variants to the no-trailing-slash canonical path. Query-aware
@@ -123,6 +132,8 @@ resolveProductionSiteUrl(value?: string): string;
 | Invalid/insecure/ambiguous `SITE_URL` | `resolveSiteUrl` | Astro config load fails before routes or metadata build |
 | Missing, local, or normalized placeholder `SITE_URL` in production build/export | `resolveProductionSiteUrl` | Build fails before static output is emitted |
 | Draft content | `listEntries()` | Entry is absent from RSS and public content routes |
+| Knowledge slug matches a section or another knowledge item | knowledge route build guard | Build fails before static paths are emitted |
+| One of the five legacy paths in the static candidate | configured Astro redirect | HTTP 200 compatibility HTML with noindex, target canonical, and immediate refresh |
 | Unknown route in Astro preview or Caddy | `404.astro` / Caddy `handle_errors` | HTTP 404, branded page, `noindex, nofollow` |
 | `/projects/` or `/projects/index.html` | Caddy canonical redirects | Permanent redirect to `/projects`, query preserved |
 | XML/TXT/generated endpoint | Sitemap filter | Endpoint is omitted from `sitemap-0.xml` |
@@ -130,9 +141,9 @@ resolveProductionSiteUrl(value?: string): string;
 
 ### 5. Good / Base / Bad Cases
 
-- Good: a published project appears once in RSS/Sitemap, Caddy serves its clean URL directly, and all metadata uses the
-  validated origin.
-- Base: an empty content type still has an index route in Sitemap but contributes no RSS item.
+- Good: a published knowledge item appears once at `/knowledge/:slug`, keeps `contentId` as its RSS GUID, and every
+  generated link/metadata output uses the same canonical.
+- Base: an empty knowledge section remains indexable and returns to `/knowledge` without fabricated content.
 - Bad: a page hard-codes `https://praxis.example`, a Docker export accepts `https://praxis.example/` or
   `https://localhost`, parses raw frontmatter for RSS, lets 404/JSON enter Sitemap, or serves `/404.html` through
   `try_files` with status 200.
@@ -143,8 +154,11 @@ resolveProductionSiteUrl(value?: string): string;
 - Unit: reject non-HTTPS public origins, credentials, paths, queries, fragments, malformed values, and every
   normalized placeholder/local origin passed to `resolveProductionSiteUrl`.
 - E2E: assert article publish/update/tag metadata and visible footer RSS link.
-- E2E: assert RSS has only real non-draft items and canonical absolute links.
-- E2E: assert Sitemap includes all public HTML namespaces and excludes 404, RSS, robots, and generated JSON.
+- E2E: assert RSS has only real non-draft items, canonical absolute links, and exactly one stable `contentId` GUID per item.
+- E2E: assert Sitemap includes the new primary/section/canonical routes and excludes all compatibility paths, 404, RSS,
+  robots, and generated JSON.
+- E2E/build: inspect all five static compatibility artifacts for noindex, target canonical, immediate refresh, and no
+  duplicate article body; verify each reaches its final target in one hop.
 - E2E: assert robots points to `sitemap-index.xml` and missing routes return 404 plus noindex.
 - E2E: assert production HTML contains external theme scripts and no inline scripts or `<style>` blocks.
 - Build/Docker: assert `rss.xml`, both Sitemap files, `robots.txt`, `404.html`, and content HTML exist in the exported artifact.
@@ -154,8 +168,8 @@ resolveProductionSiteUrl(value?: string): string;
 ### 7. Wrong vs Correct
 
 ```typescript
-// Wrong: route-specific origin and raw collection parsing drift from public queries.
-const link = `https://praxis.example/projects/${entry.data.slug}`;
+// Wrong: legacy type-first URL generation drifts from canonical knowledge URLs.
+const link = `https://praxis.example/notes/${entry.data.slug}`;
 
 // Correct: validated summaries and Astro.site own the canonical boundary.
 const entries = await listEntries();

@@ -1,0 +1,32 @@
+---
+import EmptyState from '../components/EmptyState.astro';
+import PageHero from '../components/PageHero.astro';
+import { uiCopy } from '../config/copy';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title={uiCopy.journeyPage.title} description={uiCopy.journeyPage.description}>
+  <PageHero
+    eyebrow={uiCopy.journeyPage.eyebrow}
+    title={uiCopy.journeyPage.title}
+    description={uiCopy.journeyPage.description}
+  />
+  <section class="journey-empty">
+    <div class="page-shell">
+      <EmptyState
+        title={uiCopy.journeyPage.emptyTitle}
+        description={uiCopy.journeyPage.emptyDescription}
+        actions={[
+          { label: uiCopy.actions.browseKnowledge, href: '/knowledge' },
+          { label: uiCopy.actions.viewProjects, href: '/projects' },
+        ]}
+      />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .journey-empty {
+    padding-block: clamp(3.5rem, 8vw, 7rem);
+  }
+</style>

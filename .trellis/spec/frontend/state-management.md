@@ -9,7 +9,8 @@ data flow.
 ## State categories
 
 - **Build-time state:** content entries, journey, practiceLog, normalized activity, navigation metadata, and UI copy.
-- **URL state:** type, slug, and future filter/search parameters; URL state must be serializable and shareable.
+- **URL state:** canonical namespace, content/section slug or project hash, and future filter/search parameters; URL state
+  must be serializable and shareable. Legacy `type` appears only in the five exact compatibility addresses.
 - **Ephemeral browser state:** theme preference or an explicitly interactive control, kept local to that control.
 - **Future server state:** comments, identity, views, and assistant data behind `/api/v1`; isolate it in an API client and
   never make article rendering depend on it.

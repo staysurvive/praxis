@@ -1,0 +1,38 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  description: string;
+}
+
+const { eyebrow, title, description } = Astro.props;
+---
+
+<header class="page-hero rule-scotch--bottom">
+  <div
+    class="page-shell grid gap-10 pt-20 pb-16 md:pt-28 md:pb-24 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.42fr)] lg:items-end"
+  >
+    <div>
+      <p class="eyebrow mb-5">{eyebrow}</p>
+      <h1 class="display-title display-title--wide">{title}</h1>
+    </div>
+    <p class="page-description">{description}</p>
+  </div>
+</header>
+
+<style>
+  .page-description {
+    margin: 0;
+    color: var(--color-fg-muted);
+    font-size: 1.05rem;
+    line-height: 1.9;
+  }
+
+  @media (min-width: 64rem) {
+    .page-hero {
+      display: grid;
+      min-block-size: var(--section-min-block-size);
+      align-items: center;
+    }
+  }
+</style>

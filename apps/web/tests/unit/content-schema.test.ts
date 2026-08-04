@@ -61,4 +61,57 @@ describe('content schema', () => {
 
     expect(contentSchema.safeParse(fixture).success).toBe(false);
   });
+
+  it('accepts multiple knowledge sections and deduplicates author input', () => {
+    const parsed = contentSchema.parse({
+      ...createContentFixture('note'),
+      knowledgeSections: [
+        'agent-app-development',
+        'practice-cases',
+        'agent-app-development',
+        'practice-cases',
+        'agent-app-development',
+        'practice-cases',
+      ],
+    });
+
+    expect(parsed.knowledgeSections).toEqual(['agent-app-development', 'practice-cases']);
+  });
+
+  it('keeps knowledge sections optional for existing content', () => {
+    const parsed = contentSchema.parse(createContentFixture('journal'));
+
+    expect(parsed.knowledgeSections).toBeUndefined();
+  });
+
+  it('rejects unknown knowledge sections', () => {
+    const parsed = contentSchema.safeParse({
+      ...createContentFixture('blog'),
+      knowledgeSections: ['not-a-real-section'],
+    });
+
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error.issues.some((issue) => issue.path.includes('knowledgeSections'))).toBe(
+        true,
+      );
+    }
+  });
+
+  it('rejects knowledge classification on projects', () => {
+    const parsed = contentSchema.safeParse({
+      ...createContentFixture('project'),
+      knowledgeSections: ['practice-cases'],
+    });
+
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error.issues).toContainEqual(
+        expect.objectContaining({
+          path: ['knowledgeSections'],
+          message: '项目内容不能设置 knowledgeSections',
+        }),
+      );
+    }
+  });
 });

@@ -39,6 +39,17 @@ test('editorial homepage exposes the real Praxis project and local practice data
   expect(renderedHeroArt).toContain('/art/praxis-hero-field-1536.webp');
 
   await expect(page.getByRole('heading', { level: 1, name: '知行合一' })).toBeVisible();
+  const sectionHeadingOrder = await page
+    .locator('#main-content > section')
+    .evaluateAll((sections) =>
+      sections.map((section) => section.querySelector('h1, h2')?.textContent?.trim()),
+    );
+  expect(sectionHeadingOrder).toEqual([
+    '知行合一',
+    '知不是终点，行动也不是。',
+    '实践不是提交次数，而是重要行动留下的痕迹。',
+    '最近的真实记录',
+  ]);
   await expect(page.locator('.brand-mark')).toHaveAttribute('src', '/brand/favicon-mini-32x32.png');
   await expect(page.locator('.brand-mark')).toHaveAttribute('width', '32');
   await expect(page.locator('.brand-mark')).toHaveAttribute('height', '32');
@@ -47,7 +58,16 @@ test('editorial homepage exposes the real Praxis project and local practice data
     page.getByRole('link', { name: '构建 Praxis：从知到行的第一项长期实践' }).first(),
   ).toBeVisible();
   await expect(page.locator('a[href="/projects/praxis-foundation"]').first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /先审后信/ }).first()).toHaveAttribute(
+    'href',
+    '/knowledge/ai-code-security-review',
+  );
+  await expect(page.getByRole('link', { name: /门禁全绿之后/ }).first()).toHaveAttribute(
+    'href',
+    '/knowledge/what-green-gates-miss',
+  );
   await expect(page.getByText('GitHub Contributions')).toHaveCount(0);
+  await expect(page.locator('.latest-list .content-card')).toHaveCount(3);
   await expect(page.locator('.heatmap-months span')).toHaveCount(53);
   await expect(page.locator('.heatmap-months span:not(:empty)')).not.toHaveCount(0);
   await expect(page.locator('.heatmap-total')).toHaveText(/过去一年共 \d+ 次实践/);
@@ -88,46 +108,136 @@ test('editorial homepage exposes the real Praxis project and local practice data
   expect(tooltipGeometry.tooltipBottom).toBeLessThanOrEqual(tooltipGeometry.scrollBottom);
 });
 
-test('type-first navigation reaches the project detail', async ({ page }) => {
-  await page.goto('/projects');
+test('primary navigation is explicit and section-aware', async ({ page }) => {
+  await page.goto('/');
+
+  const navigation = page.getByRole('navigation', { name: '主要导航' });
+  const links = navigation.getByRole('link');
+  await expect(links).toHaveCount(4);
+  await expect(links).toHaveText(['知识', '项目', '旅程', '关于']);
+  await expect(links.nth(0)).toHaveAttribute('href', '/knowledge');
+  await expect(links.nth(1)).toHaveAttribute('href', '/projects');
+  await expect(links.nth(2)).toHaveAttribute('href', '/journey');
+  await expect(links.nth(3)).toHaveAttribute('href', '/about');
+  await expect(page.locator('.brand')).toHaveAttribute('href', '/');
+
+  for (const [pathname, label] of [
+    ['/knowledge', '知识'],
+    ['/projects', '项目'],
+    ['/journey', '旅程'],
+    ['/about', '关于'],
+  ] as const) {
+    await page.goto(pathname);
+    await expect(navigation.getByRole('link', { name: label })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  }
+
+  await page.goto('/knowledge/ai-code-security-review');
+  await expect(navigation.getByRole('link', { name: '知识' })).toHaveAttribute(
+    'aria-current',
+    'location',
+  );
+
+  await page.goto('/projects/praxis-foundation');
+  await expect(navigation.getByRole('link', { name: '项目' })).toHaveAttribute(
+    'aria-current',
+    'location',
+  );
+});
+
+test('knowledge exposes five truthful sections and all recent knowledge', async ({ page }) => {
+  await page.goto('/knowledge');
+
+  await expect(page.getByRole('heading', { level: 1, name: '知识' })).toBeVisible();
+  const sectionCards = page.locator('.knowledge-section-card');
+  await expect(sectionCards).toHaveCount(5);
+  await expect(sectionCards.getByRole('link')).toHaveCount(5);
+  await expect(sectionCards.getByRole('heading', { level: 2 })).toHaveText([
+    'Agent 应用开发',
+    '大模型原理与实现',
+    '微调、推理与部署',
+    '实践与案例',
+    '知识前沿',
+  ]);
+  await expect(sectionCards.getByText('暂无作者内容', { exact: true })).toHaveCount(5);
+
+  const recent = page.locator('.recent-list');
+  await expect(recent.locator('.content-card')).toHaveCount(2);
+  await expect(recent.getByRole('link', { name: /先审后信/ }).first()).toHaveAttribute(
+    'href',
+    '/knowledge/ai-code-security-review',
+  );
+  await expect(recent.getByRole('link', { name: /门禁全绿之后/ }).first()).toHaveAttribute(
+    'href',
+    '/knowledge/what-green-gates-miss',
+  );
+});
+
+test('knowledge section empty state and detail keep a knowledge return path', async ({ page }) => {
+  for (const [slug, title] of [
+    ['agent-app-development', 'Agent 应用开发'],
+    ['llm-principles', '大模型原理与实现'],
+    ['fine-tuning-inference-deployment', '微调、推理与部署'],
+    ['practice-cases', '实践与案例'],
+    ['knowledge-frontier', '知识前沿'],
+  ] as const) {
+    await page.goto(`/knowledge/${slug}`);
+    await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '此入口尚无作者内容' })).toBeVisible();
+    await expect(page.getByRole('link', { name: '返回知识总览' })).toHaveAttribute(
+      'href',
+      '/knowledge',
+    );
+  }
+
+  await page.getByRole('link', { name: '返回知识总览' }).click();
+  await expect(page).toHaveURL(/\/knowledge$/);
+
+  await page
+    .locator('.recent-list h3')
+    .getByRole('link', { name: /先审后信/ })
+    .click();
+  await expect(page).toHaveURL(/\/knowledge\/ai-code-security-review$/);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('先审后信');
+  await expect(page.getByRole('heading', { name: /相互否证/ })).toBeVisible();
+  await expect(page.locator('.content-back')).toHaveAttribute('href', '/knowledge');
+
+  await page.goto('/knowledge/what-green-gates-miss');
+  const authoredLegacyLink = page.getByRole('link', { name: '关于对抗式安全审查的笔记' });
+  await expect(authoredLegacyLink).toHaveAttribute('href', '/notes/ai-code-security-review');
+  await authoredLegacyLink.click();
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/knowledge/ai-code-security-review');
+});
+
+test('projects remain a single page with the one stable detail exception', async ({ page }) => {
+  await page.goto('/projects#praxis-foundation');
 
   await expect(page.getByRole('heading', { level: 1, name: '项目' })).toBeVisible();
-  await page.getByRole('link', { name: '构建 Praxis：从知到行的第一项长期实践' }).click();
+  const project = page.locator('#praxis-foundation');
+  await expect(project.getByRole('heading', { name: /构建 Praxis/ })).toBeVisible();
+  await expect(project.locator('.project-status')).toHaveText('进行中');
+  await project.getByRole('link', { name: '查看项目' }).click();
 
   await expect(page).toHaveURL(/\/projects\/praxis-foundation$/);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('构建 Praxis');
   await expect(page.getByRole('heading', { name: '长期沉淀' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '真实实践时间轴' })).toBeVisible();
+  await expect(page.locator('.content-back')).toHaveAttribute('href', '/projects');
 });
 
-test('empty content types render an intentional state', async ({ page }) => {
-  await page.goto('/blog');
+test('journey stays empty and about uses only confirmed site identity', async ({ page }) => {
+  await page.goto('/journey');
+  await expect(page.getByRole('heading', { level: 1, name: '旅程' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '旅程尚未开始记录' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '浏览知识' })).toHaveAttribute('href', '/knowledge');
+  await expect(page.getByRole('link', { name: '查看项目' })).toHaveAttribute('href', '/projects');
+  await expect(page.locator('.practice-timeline')).toHaveCount(0);
 
-  await expect(page.getByRole('heading', { level: 1, name: '博客' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '这里还没有正式内容' })).toBeVisible();
-});
-
-test('the notes list reaches the security review note', async ({ page }) => {
-  await page.goto('/notes');
-
-  await expect(page.getByRole('heading', { level: 1, name: '笔记' })).toBeVisible();
-  await page.getByRole('link', { name: /先审后信/ }).click();
-
-  await expect(page).toHaveURL(/\/notes\/ai-code-security-review$/);
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('先审后信');
-  await expect(page.getByRole('heading', { name: /相互否证/ })).toBeVisible();
-});
-
-test('the journal list reaches the first journal entry', async ({ page }) => {
-  await page.goto('/journal');
-
-  await expect(page.getByRole('heading', { level: 1, name: '日志' })).toBeVisible();
-  await page.getByRole('link', { name: /门禁全绿之后/ }).click();
-
-  await expect(page).toHaveURL(/\/journal\/what-green-gates-miss$/);
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('门禁全绿之后');
-  await expect(page.getByRole('heading', { name: '真实实践时间轴' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '长期沉淀' })).toHaveCount(0);
+  await page.goto('/about');
+  await expect(page.getByRole('heading', { level: 1, name: '关于 Praxis' })).toBeVisible();
+  await expect(page.getByText('一个关于长期思考、真实行动与持续复盘的个人实践站。')).toHaveCount(2);
 });
 
 test('missing routes use the branded 404', async ({ page }) => {
@@ -178,6 +288,22 @@ test('public pages expose canonical and social discovery metadata', async ({ pag
     '/rss.xml',
   );
 
+  await page.goto('/knowledge/ai-code-security-review');
+
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    absoluteUrl('/knowledge/ai-code-security-review'),
+  );
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    'content',
+    absoluteUrl('/knowledge/ai-code-security-review'),
+  );
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
+  await expect(page.locator('meta[property="article:published_time"]')).toHaveAttribute(
+    'content',
+    '2026-07-26',
+  );
+
   await page.goto('/projects/praxis-foundation');
 
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
@@ -198,14 +324,44 @@ test('public pages expose canonical and social discovery metadata', async ({ pag
   await expect(page.locator('style')).toHaveCount(0);
 });
 
+test('every new indexable shell shares the centralized metadata contract', async ({ page }) => {
+  for (const pathname of [
+    '/knowledge',
+    '/knowledge/agent-app-development',
+    '/projects',
+    '/journey',
+    '/about',
+  ]) {
+    await page.goto(pathname);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      absoluteUrl(pathname),
+    );
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+      'content',
+      absoluteUrl(pathname),
+    );
+    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary');
+    await expect(page.locator('link[type="application/rss+xml"]')).toHaveAttribute(
+      'href',
+      absoluteUrl('/rss.xml'),
+    );
+  }
+});
+
 test('RSS, Sitemap, and robots expose only public canonical routes', async ({ request }) => {
   const rssResponse = await request.get('/rss.xml');
   expect(rssResponse.ok()).toBe(true);
   const rss = await rssResponse.text();
   expect(rss).toContain('<language>zh-CN</language>');
   expect(rss).toContain(`<link>${absoluteUrl('/projects/praxis-foundation')}</link>`);
-  expect(rss).toContain(`<link>${absoluteUrl('/notes/ai-code-security-review')}</link>`);
-  expect(rss).toContain(`<link>${absoluteUrl('/journal/what-green-gates-miss')}</link>`);
+  expect(rss).toContain(`<link>${absoluteUrl('/knowledge/ai-code-security-review')}</link>`);
+  expect(rss).toContain(`<link>${absoluteUrl('/knowledge/what-green-gates-miss')}</link>`);
+  expect(rss).toContain('<guid isPermaLink="false">praxis-project-0001</guid>');
+  expect(rss).toContain('<guid isPermaLink="false">praxis-note-0001</guid>');
+  expect(rss).toContain('<guid isPermaLink="false">praxis-journal-0001</guid>');
+  expect(rss.match(/<guid /g)).toHaveLength(3);
   expect(rss.match(/<item>/g)).toHaveLength(3);
 
   const sitemapIndexResponse = await request.get('/sitemap-index.xml');
@@ -218,17 +374,32 @@ test('RSS, Sitemap, and robots expose only public canonical routes', async ({ re
   const sitemap = await sitemapResponse.text();
   for (const path of [
     '',
-    '/blog',
-    '/notes',
-    '/journal',
+    '/about',
+    '/journey',
+    '/knowledge',
+    '/knowledge/agent-app-development',
+    '/knowledge/llm-principles',
+    '/knowledge/fine-tuning-inference-deployment',
+    '/knowledge/practice-cases',
+    '/knowledge/knowledge-frontier',
+    '/knowledge/ai-code-security-review',
+    '/knowledge/what-green-gates-miss',
     '/projects',
     '/projects/praxis-foundation',
-    '/notes/ai-code-security-review',
-    '/journal/what-green-gates-miss',
   ]) {
     expect(sitemap).toContain(`<loc>${sitemapUrl(path)}</loc>`);
   }
-  for (const excludedPath of ['/404', '/rss.xml', '/robots.txt', '/generated/']) {
+  for (const excludedPath of [
+    '/404',
+    '/rss.xml',
+    '/robots.txt',
+    '/generated/',
+    '/blog',
+    '/notes',
+    '/journal',
+    '/notes/ai-code-security-review',
+    '/journal/what-green-gates-miss',
+  ]) {
     expect(sitemap).not.toContain(excludedPath);
   }
 
@@ -237,6 +408,32 @@ test('RSS, Sitemap, and robots expose only public canonical routes', async ({ re
   expect(await robotsResponse.text()).toBe(
     `User-agent: *\nAllow: /\nSitemap: ${absoluteUrl('/sitemap-index.xml')}\n`,
   );
+});
+
+test('the five legacy paths are noindex compatibility pages with one final target', async ({
+  page,
+  request,
+}) => {
+  const mappings = [
+    ['/blog', '/knowledge'],
+    ['/notes', '/knowledge'],
+    ['/journal', '/knowledge'],
+    ['/notes/ai-code-security-review', '/knowledge/ai-code-security-review'],
+    ['/journal/what-green-gates-miss', '/knowledge/what-green-gates-miss'],
+  ] as const;
+
+  for (const [from, to] of mappings) {
+    const response = await request.get(from);
+    expect(response.status()).toBe(200);
+    const html = await response.text();
+    expect(html).toContain(`<meta http-equiv="refresh" content="0;url=${to}">`);
+    expect(html).toContain('<meta name="robots" content="noindex">');
+    expect(html).toContain(`<link rel="canonical" href="${absoluteUrl(to)}">`);
+    expect(html).not.toContain('article-prose');
+
+    await page.goto(from);
+    await expect.poll(() => new URL(page.url()).pathname).toBe(to);
+  }
 });
 
 test('theme control persists an explicit dark theme', async ({ page }) => {
@@ -399,14 +596,87 @@ test('interactive styles avoid scroll handlers and layout-affecting transitions'
 
 test('a 320px viewport has no page-level horizontal overflow', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
-  await page.goto('/');
+  for (const path of [
+    '/',
+    '/knowledge',
+    '/knowledge/agent-app-development',
+    '/knowledge/ai-code-security-review',
+    '/projects#praxis-foundation',
+    '/projects/praxis-foundation',
+    '/journey',
+    '/about',
+  ]) {
+    await page.goto(path);
 
-  const dimensions = await page.evaluate(() => ({
-    clientWidth: document.documentElement.clientWidth,
-    scrollWidth: document.documentElement.scrollWidth,
-  }));
+    const dimensions = await page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
 
-  expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
+    expect(dimensions.scrollWidth, path).toBeLessThanOrEqual(dimensions.clientWidth);
+  }
+
+  await page.goto('/knowledge');
+  const headerTargets = await page
+    .locator('.brand, .nav-link, [data-theme-toggle]')
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        const rect = element.getBoundingClientRect();
+        const hitArea = element.classList.contains('nav-link')
+          ? getComputedStyle(element, '::before')
+          : undefined;
+        const leftInset = hitArea ? Number.parseFloat(hitArea.left) || 0 : 0;
+        const rightInset = hitArea ? Number.parseFloat(hitArea.right) || 0 : 0;
+
+        return {
+          label: element.textContent?.trim() || element.getAttribute('aria-label') || 'control',
+          left: rect.left + leftInset,
+          right: rect.right - rightInset,
+          top: rect.top,
+          bottom: rect.bottom,
+        };
+      }),
+    );
+
+  for (let leftIndex = 0; leftIndex < headerTargets.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < headerTargets.length; rightIndex += 1) {
+      const left = headerTargets[leftIndex];
+      const right = headerTargets[rightIndex];
+      const overlaps =
+        left.left < right.right &&
+        left.right > right.left &&
+        left.top < right.bottom &&
+        left.bottom > right.top;
+      expect(overlaps, `${left.label} overlaps ${right.label}`).toBe(false);
+    }
+  }
+});
+
+test('sticky header leaves headings, breadcrumbs, and project anchors visible', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const [path, selector] of [
+    ['/knowledge', 'h1'],
+    ['/knowledge/ai-code-security-review', '.content-back'],
+    ['/projects#praxis-foundation', '#praxis-foundation'],
+  ] as const) {
+    await page.goto(path);
+    const geometry = await page.locator(selector).evaluate((element) => {
+      const header = document.querySelector('.site-header');
+      if (!(header instanceof HTMLElement)) {
+        throw new Error('Missing site header');
+      }
+
+      return {
+        elementTop: element.getBoundingClientRect().top,
+        headerBottom: header.getBoundingClientRect().bottom,
+      };
+    });
+
+    expect(geometry.elementTop, path).toBeGreaterThanOrEqual(geometry.headerBottom);
+  }
 });
 
 test('the mobile hero preserves the full field artwork above its copy', async ({ page }) => {
@@ -478,16 +748,67 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
   await expect(page).toHaveURL(/#main-content$/);
 
   const transitionDuration = await page
-    .locator('a[href="/blog"]')
+    .locator('a[href="/knowledge"]')
+    .first()
     .evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration));
   expect(transitionDuration).toBeLessThanOrEqual(0.00001);
 });
 
-test('home and detail pages pass a basic automated accessibility scan', async ({ page }) => {
+test('keyboard order remains brand-first across the explicit navigation', async ({ page }) => {
+  await page.goto('/knowledge');
+
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: '跳到主要内容' })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('.brand')).toBeFocused();
+
+  for (const label of ['知识', '项目', '旅程', '关于']) {
+    await page.keyboard.press('Tab');
+    await expect(
+      page
+        .getByRole('navigation', { name: '主要导航' })
+        .getByRole('link', { name: label, exact: true }),
+    ).toBeFocused();
+  }
+
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: /切换到/ })).toBeFocused();
+
+  await page.keyboard.press('Shift+Tab');
+  const aboutLink = page
+    .getByRole('navigation', { name: '主要导航' })
+    .getByRole('link', { name: '关于', exact: true });
+  await expect(aboutLink).toBeFocused();
+
+  const focusedNavigationStyle = await aboutLink.evaluate((element) => {
+    const styles = getComputedStyle(element);
+    return { outlineStyle: styles.outlineStyle, outlineWidth: styles.outlineWidth };
+  });
+  expect(focusedNavigationStyle.outlineStyle).not.toBe('none');
+  expect(Number.parseFloat(focusedNavigationStyle.outlineWidth)).toBeGreaterThan(0);
+
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: /切换到/ })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('.knowledge-section-card').first().getByRole('link')).toBeFocused();
+});
+
+test('new primary, empty, and detail pages pass a basic automated accessibility scan', async ({
+  page,
+}) => {
   for (const colorScheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme });
 
-    for (const path of ['/', '/projects/praxis-foundation']) {
+    for (const path of [
+      '/',
+      '/knowledge',
+      '/knowledge/agent-app-development',
+      '/knowledge/ai-code-security-review',
+      '/projects',
+      '/projects/praxis-foundation',
+      '/journey',
+      '/about',
+    ]) {
       await page.goto(path);
       const results = await new AxeBuilder({ page }).analyze();
       expect(results.violations).toEqual([]);
@@ -499,9 +820,36 @@ test('core content remains readable without JavaScript', async ({ browser }) => 
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
 
-  await page.goto('/projects/praxis-foundation');
+  await page.goto('/knowledge');
+  await page.getByRole('link', { name: /Agent 应用开发/ }).click();
+  await expect(page.getByRole('heading', { name: '此入口尚无作者内容' })).toBeVisible();
+  await page.getByRole('link', { name: '返回知识总览' }).click();
+  await expect(page).toHaveURL(/\/knowledge$/);
+
+  await page
+    .locator('.recent-list h3')
+    .getByRole('link', { name: /先审后信/ })
+    .click();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('先审后信');
+  await page.locator('.content-back').click();
+  await expect(page).toHaveURL(/\/knowledge$/);
+
+  await page.goto('/projects#praxis-foundation');
+  await expect(page.locator('#praxis-foundation')).toBeVisible();
+  const projectDetailLink = page
+    .locator('#praxis-foundation')
+    .getByRole('link', { name: '查看项目' });
+  await projectDetailLink.focus();
+  await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('构建 Praxis');
   await expect(page.getByText('为什么开始 Praxis')).toBeVisible();
+  await page.locator('.content-back').click();
+  await expect(page).toHaveURL(/\/projects$/);
+
+  await page.goto('/journey');
+  await expect(page.getByRole('heading', { name: '旅程尚未开始记录' })).toBeVisible();
+  await page.goto('/about');
+  await expect(page.getByRole('heading', { level: 1, name: '关于 Praxis' })).toBeVisible();
 
   await context.close();
 });

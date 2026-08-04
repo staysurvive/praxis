@@ -1,0 +1,118 @@
+---
+import ContentCard from '../../components/ContentCard.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import PageHero from '../../components/PageHero.astro';
+import { uiCopy } from '../../config/copy';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentLayout from '../../layouts/ContentLayout.astro';
+import {
+  getContentEntries,
+  getEntryByContentId,
+  listKnowledgeSectionEntries,
+  renderContentEntry,
+  toContentSummary,
+} from '../../lib/content';
+import {
+  assertKnowledgeSlugAvailability,
+  getKnowledgeSectionByKey,
+  getKnowledgeUrl,
+  isPublicStatus,
+  knowledgeSections,
+} from '../../lib/content/domain';
+import type { KnowledgeSectionKey } from '../../lib/content/domain';
+import { normalizePracticeEvents, toPracticeSourceEntry } from '../../lib/practice';
+
+interface Props {
+  kind: 'section' | 'content';
+  sectionKey?: KnowledgeSectionKey;
+  contentId?: string;
+}
+
+export async function getStaticPaths() {
+  const authoredEntries = await getContentEntries({ includeDrafts: true });
+  assertKnowledgeSlugAvailability(authoredEntries.map((entry) => entry.data));
+
+  const publicKnowledgeEntries = authoredEntries.filter(
+    (entry) => entry.data.type !== 'project' && isPublicStatus(entry.data.status),
+  );
+
+  return [
+    ...knowledgeSections.map((section) => ({
+      params: { key: section.slug },
+      props: { kind: 'section' as const, sectionKey: section.key },
+    })),
+    ...publicKnowledgeEntries.map((entry) => ({
+      params: { key: entry.data.slug },
+      props: { kind: 'content' as const, contentId: entry.data.contentId },
+    })),
+  ];
+}
+
+const { kind, sectionKey, contentId } = Astro.props;
+const section = sectionKey ? getKnowledgeSectionByKey(sectionKey) : undefined;
+const sectionEntries = section ? await listKnowledgeSectionEntries(section.key) : [];
+
+const entry = contentId ? await getEntryByContentId(contentId) : undefined;
+if (
+  kind === 'content' &&
+  (!entry || entry.data.type === 'project' || !isPublicStatus(entry.data.status))
+) {
+  throw new Error(`无法为知识路由找到公开内容：${contentId ?? 'missing-content-id'}`);
+}
+if (kind === 'section' && !section) {
+  throw new Error(`无法为知识入口找到注册表定义：${sectionKey ?? 'missing-section-key'}`);
+}
+
+const summary = entry ? toContentSummary(entry) : undefined;
+const renderedEntry = entry ? await renderContentEntry(entry) : undefined;
+const Content = renderedEntry?.Content;
+const practiceEvents = entry ? normalizePracticeEvents([toPracticeSourceEntry(entry.data)]) : [];
+---
+
+{
+  section ? (
+    <BaseLayout title={section.label} description={section.description}>
+      <PageHero
+        eyebrow={uiCopy.knowledge.title}
+        title={section.label}
+        description={section.description}
+      />
+      <section class="section-entries">
+        <div class="page-shell">
+          {sectionEntries.length > 0 ? (
+            <div class="entry-list">
+              {sectionEntries.map((sectionEntry) => (
+                <ContentCard entry={sectionEntry} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title={uiCopy.knowledge.emptySectionTitle}
+              description={uiCopy.knowledge.emptySectionDescription}
+              actions={[{ label: uiCopy.actions.backToKnowledge, href: getKnowledgeUrl() }]}
+            />
+          )}
+        </div>
+      </section>
+    </BaseLayout>
+  ) : summary && Content ? (
+    <ContentLayout
+      summary={summary}
+      practiceEvents={practiceEvents}
+      backHref={getKnowledgeUrl()}
+      backLabel={uiCopy.knowledge.detailBackLabel}
+    >
+      <Content />
+    </ContentLayout>
+  ) : null
+}
+
+<style>
+  .section-entries {
+    padding-block: clamp(3.5rem, 8vw, 7rem);
+  }
+
+  .entry-list {
+    border-bottom: 1px solid var(--color-line);
+  }
+</style>

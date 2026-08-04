@@ -1,0 +1,193 @@
+---
+import ContentMeta from '../components/ContentMeta.astro';
+import JourneyPanel from '../components/JourneyPanel.astro';
+import PracticeTimeline from '../components/PracticeTimeline.astro';
+import { uiCopy } from '../config/copy';
+import type { ContentSummary } from '../lib/content';
+import { formatDateKey } from '../lib/date';
+import type { NormalizedPracticeEvent } from '../lib/practice';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  summary: ContentSummary;
+  practiceEvents: NormalizedPracticeEvent[];
+  backHref: string;
+  backLabel: string;
+}
+
+const { summary, practiceEvents, backHref, backLabel } = Astro.props;
+---
+
+<BaseLayout
+  title={summary.title}
+  description={summary.summary}
+  canonicalPath={summary.url}
+  seoType="article"
+  publishedAt={summary.publishedAt}
+  updatedAt={summary.updatedAt}
+  tags={summary.tags}
+>
+  <article>
+    <header class="content-hero rule-scotch--bottom">
+      <div class="content-hero-shell page-shell pt-16 pb-16 md:pt-24 md:pb-24">
+        <a class="content-back" href={backHref}>{backLabel}</a>
+        <div
+          class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(16rem,0.45fr)] lg:items-end"
+        >
+          <div>
+            <ContentMeta entry={summary} />
+            <h1 class="display-title display-title--secondary">{summary.title}</h1>
+          </div>
+          <p class="summary">{summary.summary}</p>
+        </div>
+      </div>
+    </header>
+
+    <div
+      class="content-body page-shell grid gap-12 py-16 md:py-24 lg:grid-cols-[minmax(0,1fr)_var(--rail-width)] lg:items-start lg:gap-[clamp(3rem,6vw,5rem)]"
+    >
+      <div class="article-prose">
+        <slot />
+      </div>
+      <aside class="content-aside">
+        <dl>
+          <div>
+            <dt>{uiCopy.detail.contentId}</dt>
+            <dd>{summary.contentId}</dd>
+          </div>
+          <div>
+            <dt>{uiCopy.detail.updatedAt}</dt>
+            <dd><time datetime={summary.updatedAt}>{formatDateKey(summary.updatedAt)}</time></dd>
+          </div>
+          <div>
+            <dt>{uiCopy.detail.tags}</dt>
+            <dd>
+              {
+                summary.tags.map((tag, index) => (
+                  <>
+                    {index > 0 && (
+                      <span class="tag-sep" aria-hidden="true">
+                        {' · '}
+                      </span>
+                    )}
+                    <span class="tag-item">{tag}</span>
+                  </>
+                ))
+              }
+            </dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+
+    <div class="page-shell">
+      <JourneyPanel journey={summary.journey} />
+      <PracticeTimeline events={practiceEvents} />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .content-back {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-meta);
+    font-weight: 500;
+    letter-spacing: var(--track-meta);
+    text-decoration: none;
+  }
+
+  .content-back::before {
+    content: '←';
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+
+  .content-back:hover {
+    color: var(--color-fg);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .content-back:hover::before {
+    transform: translateX(-0.25rem);
+  }
+
+  h1 {
+    margin: 1.75rem 0 0;
+  }
+
+  .summary {
+    margin: 0;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--color-line);
+    color: var(--color-fg-muted);
+    font-size: 1.05rem;
+    line-height: 1.9;
+  }
+
+  .content-aside {
+    position: sticky;
+    top: 2rem;
+  }
+
+  .content-aside dl,
+  .content-aside dd {
+    margin: 0;
+  }
+
+  .content-aside dl {
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .content-aside dl > div {
+    padding-block: 1.15rem;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .content-aside dt {
+    margin-bottom: 0.55rem;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-kicker);
+    font-weight: 500;
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+  }
+
+  .content-aside dd {
+    overflow-wrap: anywhere;
+    color: var(--color-fg-muted);
+    font-size: var(--text-meta);
+    line-height: 1.8;
+  }
+
+  .tag-sep {
+    color: var(--color-fg-subtle);
+  }
+
+  @media (min-width: 64rem) {
+    .content-hero,
+    .content-hero-shell,
+    .content-body {
+      min-block-size: var(--section-min-block-size);
+    }
+
+    .content-hero,
+    .content-hero-shell {
+      display: grid;
+      align-items: center;
+    }
+
+    .content-body {
+      align-content: center;
+    }
+  }
+
+  @media (max-width: 63.99rem) {
+    .content-aside {
+      position: static;
+      order: -1;
+    }
+  }
+</style>
