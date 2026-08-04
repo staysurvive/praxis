@@ -138,6 +138,27 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   await expect(directPrimaryLinks.nth(1)).toHaveAttribute('href', '/journey');
   await expect(directPrimaryLinks.nth(2)).toHaveAttribute('href', '/about');
 
+  const primaryLabelMetrics = await navigation
+    .locator('[data-knowledge-menu-trigger], .nav-item > a.nav-link')
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        const styles = getComputedStyle(element);
+
+        return {
+          display: styles.display,
+          fontSize: styles.fontSize,
+          fontWeight: styles.fontWeight,
+          lineHeight: styles.lineHeight,
+          letterSpacing: styles.letterSpacing,
+          height: element.getBoundingClientRect().height,
+        };
+      }),
+    );
+  expect(primaryLabelMetrics).toHaveLength(4);
+  for (const metrics of primaryLabelMetrics) {
+    expect(metrics).toEqual(primaryLabelMetrics[0]);
+  }
+
   const knowledgeLinks = knowledgeMenu.locator('[data-knowledge-menu-link]');
   await expect(knowledgeLinks).toHaveCount(knowledgeMenuItems.length);
   await expect(knowledgeLinks.locator('.knowledge-menu-label')).toHaveText(
@@ -952,6 +973,7 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
 });
 
 test('keyboard order remains brand-first across the explicit navigation', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/knowledge');
 
   const navigation = page.getByRole('navigation', { name: '主要导航' });
