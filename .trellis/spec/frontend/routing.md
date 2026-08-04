@@ -36,8 +36,12 @@ online single-hop verification remain an external deployment gate; do not add wi
 ## Navigation and filters
 
 Primary navigation is the explicit ordered list Knowledge, Projects, Journey, About; it is never derived from
-`contentTypes`. Use `aria-current="page"` on an exact primary page and `aria-current="location"` for its descendants.
-All navigation, section entries, empty-state exits, and detail return paths are real links and work without JavaScript.
+`contentTypes`. Knowledge is a native disclosure containing the overview and the five registry-backed section links;
+Projects, Journey, and About remain direct links. The Knowledge disclosure uses `aria-current="page"` on the overview
+and `aria-current="location"` on a descendant; the matching overview or section link uses `page` within the nested link
+set. Direct primary links use `page` on an exact route and `location` on a descendant. All navigation, section entries,
+empty-state exits, and detail return paths are real links and work without JavaScript; the menu enhancement may only add
+fine-pointer hover, outside-close, and Escape behavior.
 
 ## Metadata and errors
 

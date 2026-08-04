@@ -13,7 +13,8 @@ the offline-capable `check` command.
 - Domain units: type/stage/status filters, the public URL resolver, exact compatibility mappings, knowledge slug
   collision guards, explicit-only multi-section projections, practice-kind registry, publish de-duplication, multiple
   events on a day, and proof that `updatedAt` alone has no effect.
-- Browser smoke: Knowledge empty-section and recent-detail round trips, Projects → the one real detail exception,
+- Browser smoke: Knowledge disclosure hover/touch/keyboard/no-JavaScript paths, Knowledge empty-section and
+  recent-detail round trips, Projects → the one real detail exception,
   Journey/About, all five compatibility pages, plus a missing route/404.
 - Accessibility: keyboard navigation, visible focus, landmarks/headings, reduced motion, color-independent heatmap
   summary, and basic automated checks in both themes.

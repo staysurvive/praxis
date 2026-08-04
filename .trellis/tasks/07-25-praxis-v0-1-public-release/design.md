@@ -170,7 +170,11 @@ navigation: [
 ];
 ```
 
-品牌标识仍链接 `/`。首版知识的五个入口在 `/knowledge` 页面内展示，不要求页眉下拉菜单；这样可以在不增加 JavaScript、移动端拥挤和键盘交互复杂度的前提下建立清晰入口。底层 `uiCopy.contentTypes` 保留，继续服务 legacy redirect 文案、项目详情和 RSS 分类。
+品牌标识仍链接 `/`。共享页眉中的“知识”使用原生 `details/summary` 披露结构，并在面板中提供“知识总览”和五个固定
+section 的真实链接；section 名称、说明与 URL 继续来自中央注册表，不在组件内复制。桌面精细指针由一个 CSP 兼容的
+小型脚本增强为 hover 打开、离开/外部点击关闭与 Escape 收起；触屏、键盘和关闭 JavaScript 时仍由原生披露行为完成
+展开和导航。项目、旅程、关于保持普通一级链接，页眉不展示三级技术目录。底层 `uiCopy.contentTypes` 保留，继续服务
+legacy redirect 文案、项目详情和 RSS 分类。
 
 页眉 active 判断由简单 URL 前缀升级为显式 section context：`/knowledge`、五个 section、知识详情与 legacy redirect 终点均属于
 “知识”；`/projects` 与兼容项目详情属于“项目”；Journey 与 About 各自独立。精确一级页面与后代 location 使用不同的
@@ -268,13 +272,15 @@ URL owner 从 `getContentUrl(type, slug)` 收敛为接收完整内容身份的 p
 ### Rendering and accessibility boundaries
 
 - 新页面优先复用 `BaseLayout`、`ContentCard`、`EmptyState` 与现有设计 token；新增组件只承载可复用的结构，不复制内容查询或 metadata 逻辑。
-- 主要信息与所有导航必须由静态 HTML 提供，不以客户端 JavaScript 作为可读或可达前提。
+- 主要信息与所有导航必须由静态 HTML 提供，不以客户端 JavaScript 作为可读或可达前提；知识菜单的脚本仅增强
+  精细指针 hover、外部关闭和 Escape，原生披露与链接是无脚本基线。
 - 页面必须在 Light/Dark、320px 宽度、Pixel 7、键盘导航和 Axe 检查下可用。
 - 页面信息密度保持克制；空状态清楚说明“尚无作者内容”，不伪装成待发布教程目录。
 - `EmptyState` 支持可选结构性操作；知识 section 返回知识总览，Journey 前往知识或项目，不能把用户留在死胡同。
 - breadcrumb、H1 与项目 hash anchor 不能被 sticky 页眉遮挡。
-- 页眉精确页面使用 `aria-current="page"`，详情或 section 后代使用清晰的 location 语义；键盘顺序固定为品牌、四个一级导航、
-  主题按钮和页面首个操作，且移动端点击目标不互相覆盖。
+- 知识披露在总览使用 `aria-current="page"`、在详情或 section 后代使用 `location`；展开后的总览或对应 section 链接在
+  子链接集合内使用 `page`。其他一级链接在精确页面使用 `page`、后代使用 `location`。键盘顺序固定为品牌、知识披露、
+  展开后的知识总览与五个 section、项目、旅程、关于、主题按钮和页面首个操作，且移动端点击目标不互相覆盖。
 
 ### Test strategy for the extension
 
@@ -289,13 +295,16 @@ URL owner 从 `getContentUrl(type, slug)` 收敛为接收完整内容身份的 p
 #### E2E and build tests
 
 - 首页现有 Hero、资产、Heatmap、Latest Content 与区块顺序作为冻结回归基线；只更新页眉导航断言。
-- 验证四个一级导航、五个知识入口及数量、最近更新、知识空状态、项目真实内容、Journey 空状态与“关于 Praxis”。
+- 验证四个一级导航、知识披露菜单中的总览与五个 section 直达链接、五个知识入口及数量、最近更新、知识空状态、
+  项目真实内容、Journey 空状态与“关于 Praxis”。
 - 仅在单元层用最小内存对象验证 section 分类；不建立第二套公开 fixture 站点，不为关系、项目或 Journey 制造演示数据。
 - 验证新增页面 canonical、社交 metadata、RSS discovery、RSS GUID、Sitemap 收录，以及旧知识 URL 静态 compatibility
   page 的 meta refresh、noindex 与 canonical；生产 HTTP 301 留到部署 smoke。
 - 验证当前真实数据可完成：`知识 → 空 section → 知识`、`知识 → 最近更新 → 详情 → 知识` 与
   `项目 → 项目锚点 → 现有详情 → 项目`；详情页正确点亮所在一级 section。
 - 将新增主页面纳入桌面/移动、Light/Dark、320px overflow、键盘、Axe、no-JS 与全量 CSP 产物扫描。
+- 在桌面验证 hover 展开/离开关闭，在触屏验证点击展开，在键盘验证 Enter/Space、Tab、Escape 与焦点可见性，并在
+  no-JS 上下文验证原生披露仍可进入一个真实 section。
 - RSS 继续恰好包含当前三项真实内容，知识条目使用新 canonical、项目条目保持现有 canonical，GUID 对应稳定 `contentId`。
 - 断言 `content/`、`dist/`、RSS 与 Sitemap 没有新增示例文章、虚构项目或 Journey 节点；Practice Heatmap 数据保持不变。
 

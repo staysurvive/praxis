@@ -58,6 +58,8 @@ const { entry } = Astro.props satisfies Props;
 ## Client behavior
 
 - Static Astro markup is the default and must work without JavaScript.
+- Navigation disclosures use native `details/summary` with real nested links; a small progressive-enhancement script may
+  improve hover and dismissal behavior, but it must never be required to reveal or follow the links.
 - Hydrate only an explicit interaction such as a theme preference control. The Practice Heatmap is static HTML/SVG/CSS
   or a minimal island only if a demonstrated interaction requires it.
 - A component that calls a future API must isolate failure and preserve its surrounding article/navigation content.

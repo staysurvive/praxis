@@ -131,8 +131,10 @@ Checklist:
 - [ ] Replace navigation generated from `contentTypes` with the explicit order: 知识 `/knowledge`、项目 `/projects`、旅程 `/journey`、关于 `/about`.
 - [ ] Keep the brand link at `/` and preserve `uiCopy.contentTypes` for compatibility pages, details and RSS.
 - [ ] Add centralized labels, structural descriptions, count/empty copy and empty-state actions for the five knowledge sections and three new page shells.
-- [ ] Do not implement a knowledge dropdown or client-side menu in this release.
-- [ ] Make active navigation section-aware: exact primary pages use page semantics; knowledge/project descendants use location semantics. Preserve visible focus and brand-first keyboard order.
+- [ ] Render Knowledge as a native disclosure containing the overview plus all five registry-backed section links. Enhance fine-pointer hover,
+      outside close and Escape with one narrowly scoped CSP-compatible script; keep click/keyboard/no-JavaScript disclosure behavior native.
+- [ ] Keep Projects/Journey/About as direct links and add no third-level technical catalog. Make active navigation section-aware: exact primary
+      pages use page semantics; knowledge/project descendants use location semantics. Preserve visible focus and brand-first keyboard order.
 - [ ] Verify the shared header changes on the homepage while homepage body files, visible content, layout, assets and interactions remain untouched; only existing content-card hrefs may follow the approved public URL resolver.
 
 ### 3. Build the Knowledge overview, section pages and details
@@ -232,7 +234,9 @@ Primary file:
 Checklist:
 
 - [ ] Preserve existing homepage Hero, visual asset, Heatmap, Latest Content and section-order assertions as the zero-regression baseline.
-- [ ] Assert the four new primary navigation links, brand-home behavior, keyboard order, active state and visible focus.
+- [ ] Assert the four new primary navigation items, brand-home behavior, keyboard order, active state and visible focus.
+- [ ] Assert the Knowledge disclosure opens on desktop hover and touch click, exposes the overview plus five exact section links, closes on
+      pointer leave/outside click/Escape, and remains usable through native click with JavaScript disabled.
 - [ ] Cover the Knowledge overview, five section cards/counts, recent real content, all five empty section pages, the real Projects page, empty Journey and confirmed “关于 Praxis” content.
 - [ ] Keep production E2E on the current three real entries only; classification edge cases stay in focused unit data and no public fixture site is created.
 - [ ] Extend canonical, Open Graph, Twitter, RSS discovery/GUID and Sitemap assertions. For old URLs, inspect the generated compatibility HTML and final target; defer HTTP 301 status to production Caddy smoke.
@@ -255,7 +259,9 @@ npm run test:e2e
 ```
 
 - [ ] Inspect `git diff --check` after formatting and confirm no frozen homepage/content file changed.
-- [ ] Run `git diff --exit-code -- apps/web/src/pages/index.astro apps/web/src/config/home.ts apps/web/public content` against the clean pre-change baseline; any output is a frozen-boundary failure, not a formatting side effect to accept.
+- [ ] Run `git diff --exit-code -- apps/web/src/pages/index.astro apps/web/src/config/home.ts apps/web/public/brand content` against the clean
+      pre-change baseline; any output is a frozen-boundary failure. The only permitted new public asset is the scoped knowledge-menu behavior
+      script when the existing CSP pattern requires it.
 - [ ] Inspect generated HTML, redirect artifacts/mappings, RSS GUID/link values, Sitemap and robots with the deterministic test origin; verify legacy paths are absent from Sitemap and resolve in one hop.
 - [ ] Confirm both untouched, unclassified non-project entries appear in “最近更新” without an allowlist or build warning.
 - [ ] Assert `content/` and generated output contain no new article, project or Journey item; directly assert homepage Note/Journal cards use `/knowledge/:slug`, the project card keeps `/projects/praxis-foundation`, and visible order/text remain unchanged.
