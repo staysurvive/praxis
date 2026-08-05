@@ -180,9 +180,12 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
 
   .nav-item {
     position: relative;
+    display: flex;
+    align-items: center;
   }
 
   .nav-item--knowledge {
+    gap: 0.0625rem;
     font-size: 0.8125rem;
     line-height: 1.85;
     white-space: nowrap;
@@ -232,10 +235,10 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
   }
 
   .knowledge-menu {
-    display: inline-block;
-    margin-inline-start: 0.35rem;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
     position: relative;
-    vertical-align: bottom;
     --knowledge-menu-radius: 0.75rem;
     --knowledge-menu-border: var(--color-line-emphasis);
     --knowledge-menu-divider: color-mix(in srgb, var(--color-line) 56%, transparent);
@@ -266,7 +269,8 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
   .knowledge-menu-trigger::before {
     position: absolute;
     inset-block: -0.8rem;
-    inset-inline: -0.2rem;
+    inset-inline-start: 0;
+    inset-inline-end: -0.375rem;
     content: '';
   }
 
@@ -291,7 +295,7 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
     transform: translateY(0.075em);
   }
 
-  .knowledge-menu-trigger:focus {
+  .knowledge-menu-trigger:focus-visible {
     /* Keep an icon-only control visibly focused across desktop and touch browsers. */
     color: var(--color-fg);
     box-shadow: none;
@@ -313,7 +317,7 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
       transform var(--duration-fast) var(--ease-out);
   }
 
-  .knowledge-menu-trigger:focus::after {
+  .knowledge-menu-trigger:focus-visible::after {
     opacity: 1;
     transform: scaleX(1);
   }

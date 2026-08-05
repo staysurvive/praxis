@@ -188,6 +188,7 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
       ),
       iconCenterOffset:
         iconRect.top + iconRect.height / 2 - (overviewRect.top + overviewRect.height / 2),
+      controlGap: triggerRect.left - overviewRect.right,
       visualGap: iconRect.left - overviewRect.right,
     };
   });
@@ -195,7 +196,10 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   // The historical chevron uses a subtle optical downshift instead of mathematical centering.
   expect(knowledgeControlAlignment.iconCenterOffset).toBeGreaterThanOrEqual(0.5);
   expect(knowledgeControlAlignment.iconCenterOffset).toBeLessThanOrEqual(1.5);
-  expect(knowledgeControlAlignment.visualGap).toBeGreaterThanOrEqual(8);
+  expect(knowledgeControlAlignment.controlGap).toBeGreaterThanOrEqual(0.5);
+  expect(knowledgeControlAlignment.controlGap).toBeLessThanOrEqual(1.5);
+  expect(knowledgeControlAlignment.visualGap).toBeGreaterThanOrEqual(4);
+  expect(knowledgeControlAlignment.visualGap).toBeLessThanOrEqual(6);
 
   const knowledgeLinks = knowledgeMenu.locator('[data-knowledge-menu-link]');
   await expect(knowledgeLinks).toHaveCount(knowledgeMenuItems.length);
