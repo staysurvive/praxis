@@ -97,3 +97,38 @@ to sit naturally beside the Chinese label. Current evidence:
 - `.trellis/tasks/07-25-praxis-v0-1-public-release/evidence/knowledge-menu-chevron-premium-mobile-dark-320.png`
 
 final result: passed
+
+## Theme toggle design QA — CC Switch reference
+
+Date: 2026-08-05
+Scope: shared Praxis header theme control only.
+
+### Comparison target
+
+- Source visual: user-provided [CC Switch reference](C:/Users/npp_c/AppData/Local/Temp/codex-clipboard-34881a1a-8691-4c63-a515-45e0ea917097.png), light theme, normal state, `1920 × 980`.
+- Source behavior: `https://ccswitch.io/zh/docs?section=getting-started` (36px control, 12px radius, 20px outline icon, sequential 150ms exit/150ms entry on desktop).
+- Implementation: `http://localhost:4321/`, captured in the in-app browser at the same `1920 × 980` viewport in light and dark themes.
+
+The reference and the implementation were captured together in the same visual comparison input. The red rectangle in the reference is an annotation around the target, not part of the target control.
+
+### Findings
+
+No P0, P1, or P2 differences found in the scoped control.
+
+| Fidelity surface        | Result                                                                                                                                                                                                                                                                        |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fonts and typography    | No visible control text. The surrounding Praxis header typography remains unchanged.                                                                                                                                                                                          |
+| Spacing and layout      | The control is exactly `36 × 36px` with a `12px` radius and remains clear of the primary navigation at desktop and 320px widths.                                                                                                                                              |
+| Colors and tokens       | The source's muted, warm surface is reproduced with existing Praxis semantic color tokens rather than copying CC Switch's literal palette. Both light and dark surfaces preserve icon contrast.                                                                               |
+| Icons and image quality | Inline `Moon` and `Sun` SVGs render at `20px` with a 2px line stroke; no runtime icon dependency or raster asset was introduced.                                                                                                                                              |
+| Copy and accessibility  | The action-oriented Chinese `aria-label` and `title` continue to track the resolved next theme. Existing focus treatment, keyboard reachability, no-JavaScript fallback, and browser-chrome color sync remain intact.                                                         |
+| Interaction states      | Fine-pointer hover scales to `1.1`, press scales to `0.95`, and desktop theme changes use the reference's sequential handoff: outgoing icon exits down over 150ms, incoming icon enters from above over the following 150ms. Touch and reduced-motion contexts swap directly. |
+| Responsiveness          | Desktop and Pixel 7 Playwright runs pass, as does the 320px overflow regression.                                                                                                                                                                                              |
+
+### Evidence
+
+- `npm run check`: passed (76 unit tests).
+- `npm run test:e2e`: passed (67 tests; 5 expected device-specific skips), including desktop sequential-handoff, touch direct-swap, geometry, icon-state, reduced-motion, no-JavaScript browser-chrome fallback, and handler-load-failure coverage.
+- In-app browser inspection confirmed the normal light state, the dark-state sun glyph, 36px geometry, and label handoff at `1920 × 980`.
+
+final result: passed

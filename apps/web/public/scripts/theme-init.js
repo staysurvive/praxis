@@ -1,7 +1,8 @@
 (() => {
   const root = document.documentElement;
   const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
-  const themeColor = document.querySelector('meta[name="theme-color"]');
+  const themeColor = document.querySelector('[data-theme-color-override]');
+  const themeColorFallbacks = document.querySelectorAll('[data-theme-color-fallback]');
 
   function explicitTheme() {
     const theme = root.dataset.theme;
@@ -21,6 +22,11 @@
         : themeColor.dataset.themeColorLight;
 
     if (color) themeColor.content = color;
+
+    for (const fallback of themeColorFallbacks) {
+      if (fallback instanceof HTMLMetaElement) fallback.media = 'not all';
+    }
+    themeColor.media = 'all';
   }
 
   try {

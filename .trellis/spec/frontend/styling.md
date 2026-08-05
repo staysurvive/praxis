@@ -75,3 +75,6 @@ per page:
   the document to the heatmap's intrinsic width. Keep overflow on `.heatmap-scroll`; never hide it at page level.
 - Radii are intentionally flat (`--radius-sm/md/lg: 2px`) and `--shadow-soft: none`; depth comes from rules and
   surface tints, not shadows or rounding.
+- `ThemeToggle.astro` is a deliberate scoped exception for the shared header: it is a `36px` square with a `12px`
+  radius, modeled on CC Switch. Keep its warm muted surface token-based and do not generalize this radius to editorial
+  cards, rules, or article surfaces.

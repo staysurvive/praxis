@@ -700,6 +700,120 @@ test('theme control persists an explicit dark theme', async ({ page }) => {
   expect(storedTheme === 'light' || storedTheme === 'dark').toBe(true);
 });
 
+test('theme control remains hidden when its enhancement script cannot load', async ({ page }) => {
+  await page.route('**/scripts/theme-toggle.js', (route) => route.abort());
+  await page.goto('/');
+
+  await expect(page.locator('html')).toHaveClass(/\bjs\b/);
+  await expect(page.locator('[data-theme-toggle]')).toBeHidden();
+});
+
+test('theme control mirrors the CC Switch control geometry and desktop icon handoff', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === 'mobile-chromium',
+    'CC Switch swaps the icon directly on touch devices.',
+  );
+
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+
+  const toggle = page.locator('[data-theme-toggle]');
+  const control = await toggle.evaluate((element) => {
+    const styles = getComputedStyle(element);
+    const icons = Array.from(element.querySelectorAll<SVGElement>('[data-theme-icon]')).map(
+      (icon) => {
+        const iconStyles = getComputedStyle(icon);
+        return {
+          name: icon.dataset.themeIcon,
+          width: iconStyles.width,
+          height: iconStyles.height,
+          strokeWidth: icon.getAttribute('stroke-width'),
+          opacity: iconStyles.opacity,
+        };
+      },
+    );
+
+    return {
+      width: styles.width,
+      height: styles.height,
+      borderRadius: styles.borderRadius,
+      icons,
+    };
+  });
+
+  expect(control).toEqual({
+    width: '36px',
+    height: '36px',
+    borderRadius: '12px',
+    icons: [
+      { name: 'sun', width: '20px', height: '20px', strokeWidth: '2', opacity: '0' },
+      { name: 'moon', width: '20px', height: '20px', strokeWidth: '2', opacity: '1' },
+    ],
+  });
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('data-theme-transition', 'to-dark');
+  const handoff = await toggle.evaluate((element) => {
+    const animation = (iconName: string) => {
+      const icon = element.querySelector(`[data-theme-icon="${iconName}"]`);
+      if (!icon) throw new Error(`Missing ${iconName} theme icon`);
+
+      const styles = getComputedStyle(icon);
+      return {
+        name: styles.animationName,
+        duration: styles.animationDuration,
+        delay: styles.animationDelay,
+      };
+    };
+
+    return {
+      exiting: animation('moon'),
+      entering: animation('sun'),
+    };
+  });
+
+  expect(handoff).toEqual({
+    exiting: { name: 'theme-toggle-icon-exit', duration: '0.15s', delay: '0s' },
+    entering: { name: 'theme-toggle-icon-enter', duration: '0.15s', delay: '0.15s' },
+  });
+  await expect.poll(() => toggle.getAttribute('data-theme-transition')).toBeNull();
+  await expect(page.locator('[data-theme-icon="sun"]')).toHaveCSS('opacity', '1');
+  await expect(page.locator('[data-theme-icon="moon"]')).toHaveCSS('opacity', '0');
+});
+
+test('touch theme control swaps icons directly', async ({ page }, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'mobile-chromium',
+    'The direct-swap contract applies to touch devices only.',
+  );
+
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+
+  const toggle = page.locator('[data-theme-toggle]');
+  await toggle.click();
+
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(toggle).not.toHaveAttribute('data-theme-transition', /.+/);
+  await expect(page.locator('[data-theme-icon="sun"]')).toHaveCSS('opacity', '1');
+  await expect(page.locator('[data-theme-icon="moon"]')).toHaveCSS('opacity', '0');
+});
+
+test('theme icon handoff respects reduced-motion preferences', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+  await page.goto('/');
+
+  const toggle = page.locator('[data-theme-toggle]');
+  await toggle.click();
+
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(toggle).not.toHaveAttribute('data-theme-transition', /.+/);
+  await expect(page.locator('[data-theme-icon="sun"]')).toHaveCSS('opacity', '1');
+  await expect(page.locator('[data-theme-icon="moon"]')).toHaveCSS('opacity', '0');
+});
+
 test('theme changes keep color hierarchy and browser chrome in sync', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto('/');
@@ -723,7 +837,7 @@ test('theme changes keep color hierarchy and browser chrome in sync', async ({ p
     });
 
   const lightColors = await resolvedColors();
-  const themeColor = page.locator('meta[name="theme-color"]');
+  const themeColor = page.locator('[data-theme-color-override]');
   await expect(themeColor).toHaveAttribute('content', '#f4f1ea');
 
   await page.locator('[data-theme-toggle]').click();
@@ -742,13 +856,13 @@ test('theme control tracks system theme changes without an explicit preference',
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto('/');
 
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#f4f1ea');
+  await expect(page.locator('[data-theme-color-override]')).toHaveAttribute('content', '#f4f1ea');
 
   const toggle = page.getByRole('button', { name: '切换到深色主题' });
   await expect(toggle).toHaveAttribute('title', '切换到深色主题');
 
   await page.emulateMedia({ colorScheme: 'dark' });
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#171512');
+  await expect(page.locator('[data-theme-color-override]')).toHaveAttribute('content', '#171512');
   await expect(page.getByRole('button', { name: '切换到浅色主题' })).toHaveAttribute(
     'title',
     '切换到浅色主题',
@@ -1153,10 +1267,20 @@ test('new primary, empty, and detail pages pass a basic automated accessibility 
 });
 
 test('core content remains readable without JavaScript', async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
+  const context = await browser.newContext({ javaScriptEnabled: false, colorScheme: 'dark' });
   const page = await context.newPage();
 
   await page.goto('/');
+  await expect(page.locator('[data-theme-color-fallback="light"]')).toHaveAttribute(
+    'media',
+    '(prefers-color-scheme: light)',
+  );
+  await expect(page.locator('[data-theme-color-fallback="dark"]')).toHaveAttribute(
+    'media',
+    '(prefers-color-scheme: dark)',
+  );
+  await expect(page.locator('[data-theme-color-override]')).toHaveAttribute('media', 'not all');
+  await expect(page.locator('[data-theme-toggle]')).toBeHidden();
   const knowledgeOverviewLink = page.locator('[data-knowledge-overview-link]');
   await expect(knowledgeOverviewLink).toHaveAttribute('href', '/knowledge');
   await knowledgeOverviewLink.click();

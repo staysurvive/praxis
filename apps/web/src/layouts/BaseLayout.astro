@@ -47,6 +47,20 @@ const themeColors = {
     <meta
       name="theme-color"
       content={themeColors.light}
+      media="(prefers-color-scheme: light)"
+      data-theme-color-fallback="light"
+    />
+    <meta
+      name="theme-color"
+      content={themeColors.dark}
+      media="(prefers-color-scheme: dark)"
+      data-theme-color-fallback="dark"
+    />
+    <meta
+      name="theme-color"
+      content={themeColors.light}
+      media="not all"
+      data-theme-color-override
       data-theme-color-light={themeColors.light}
       data-theme-color-dark={themeColors.dark}
     />
