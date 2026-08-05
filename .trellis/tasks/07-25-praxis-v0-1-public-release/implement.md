@@ -131,8 +131,9 @@ Checklist:
 - [ ] Replace navigation generated from `contentTypes` with the explicit order: 知识 `/knowledge`、项目 `/projects`、旅程 `/journey`、关于 `/about`.
 - [ ] Keep the brand link at `/` and preserve `uiCopy.contentTypes` for compatibility pages, details and RSS.
 - [ ] Add centralized labels, structural descriptions, count/empty copy and empty-state actions for the five knowledge sections and three new page shells.
-- [ ] Render Knowledge as a native disclosure containing the overview plus all five registry-backed section links. Enhance fine-pointer hover,
-      outside close and Escape with one narrowly scoped CSP-compatible script; keep click/keyboard/no-JavaScript disclosure behavior native.
+- [ ] Render the visible Knowledge label as a direct overview link, with an adjacent native disclosure arrow containing only the five
+      registry-backed section links. Enhance fine-pointer hover, outside close and Escape with one narrowly scoped CSP-compatible script;
+      keep the direct-link and disclosure click/keyboard/no-JavaScript behaviors native and independently operable.
 - [ ] Keep Projects/Journey/About as direct links and add no third-level technical catalog. Make active navigation section-aware: exact primary
       pages use page semantics; knowledge/project descendants use location semantics. Preserve visible focus and brand-first keyboard order.
 - [ ] Verify the shared header changes on the homepage while homepage body files, visible content, layout, assets and interactions remain untouched; only existing content-card hrefs may follow the approved public URL resolver.
@@ -235,8 +236,9 @@ Checklist:
 
 - [ ] Preserve existing homepage Hero, visual asset, Heatmap, Latest Content and section-order assertions as the zero-regression baseline.
 - [ ] Assert the four new primary navigation items, brand-home behavior, keyboard order, active state and visible focus.
-- [ ] Assert the Knowledge disclosure opens on desktop hover and touch click, exposes the overview plus five exact section links, closes on
-      pointer leave/outside click/Escape, and remains usable through native click with JavaScript disabled.
+- [ ] Assert the visible Knowledge link navigates directly to the overview while its adjacent disclosure arrow opens on desktop hover and touch
+      click, exposes exactly five section links, closes on pointer leave/outside click/Escape, and remains independently usable through native
+      click with JavaScript disabled.
 - [ ] Cover the Knowledge overview, five section cards/counts, recent real content, all five empty section pages, the real Projects page, empty Journey and confirmed “关于 Praxis” content.
 - [ ] Keep production E2E on the current three real entries only; classification edge cases stay in focused unit data and no public fixture site is created.
 - [ ] Extend canonical, Open Graph, Twitter, RSS discovery/GUID and Sitemap assertions. For old URLs, inspect the generated compatibility HTML and final target; defer HTTP 301 status to production Caddy smoke.

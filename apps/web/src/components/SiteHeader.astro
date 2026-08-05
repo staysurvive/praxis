@@ -42,49 +42,38 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
               const currentState = getCurrentState(item.href);
 
               if (item.key === 'knowledge') {
-                const isKnowledgeOverview = currentPath === item.href;
-
                 return (
-                  <li class="nav-item nav-item--knowledge">
+                  <li class="nav-item nav-item--knowledge" data-knowledge-menu-container>
+                    <a
+                      class:list={[
+                        'nav-link',
+                        'knowledge-menu-overview-link',
+                        currentState && 'nav-link--active',
+                      ]}
+                      href={item.href}
+                      aria-current={currentState}
+                      data-knowledge-overview-link
+                    >
+                      {item.label}
+                    </a>
                     <details class="knowledge-menu" data-knowledge-menu>
                       <summary
-                        class:list={[
-                          'nav-link',
-                          'knowledge-menu-trigger',
-                          currentState && 'nav-link--active',
-                        ]}
-                        aria-current={currentState}
+                        class="knowledge-menu-trigger"
+                        aria-label={uiCopy.accessibility.knowledgeMenuTrigger}
                         data-knowledge-menu-trigger
                       >
-                        <span class="knowledge-menu-trigger-content">
-                          <span class="knowledge-menu-trigger-label">{item.label}</span>
-                          <svg
-                            class="knowledge-menu-trigger-icon"
-                            viewBox="0 0 10 6"
-                            aria-hidden="true"
-                            data-knowledge-menu-trigger-icon
-                          >
-                            <path d="M1 1.25 5 4.75 9 1.25" />
-                          </svg>
-                        </span>
+                        <svg
+                          class="knowledge-menu-trigger-icon"
+                          viewBox="0 0 10 6"
+                          aria-hidden="true"
+                          data-knowledge-menu-trigger-icon
+                        >
+                          <path d="M1 1.25 5 4.75 9 1.25" />
+                        </svg>
                       </summary>
 
                       <div class="knowledge-menu-flyout">
                         <div class="knowledge-menu-panel" data-knowledge-menu-panel>
-                          <a
-                            class="knowledge-menu-link knowledge-menu-link--overview"
-                            href={item.href}
-                            aria-current={isKnowledgeOverview ? 'page' : undefined}
-                            data-knowledge-menu-link
-                          >
-                            <span class="knowledge-menu-label">
-                              {uiCopy.navigation.knowledgeOverview}
-                            </span>
-                            <span class="knowledge-menu-description">
-                              {uiCopy.navigation.knowledgeOverviewDescription}
-                            </span>
-                          </a>
-
                           <ul
                             class="knowledge-menu-list"
                             aria-label={uiCopy.accessibility.knowledgeNavigation}
@@ -193,6 +182,12 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
     position: relative;
   }
 
+  .nav-item--knowledge {
+    font-size: 0.8125rem;
+    line-height: 1.85;
+    white-space: nowrap;
+  }
+
   .nav-link {
     position: relative;
     display: inline-flex;
@@ -232,8 +227,15 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
     color: var(--color-fg);
   }
 
+  .knowledge-menu-overview-link::before {
+    inset-inline-end: 0;
+  }
+
   .knowledge-menu {
+    display: inline-block;
+    margin-inline-start: 0.35rem;
     position: relative;
+    vertical-align: bottom;
     --knowledge-menu-radius: 0.75rem;
     --knowledge-menu-border: var(--color-line-emphasis);
     --knowledge-menu-divider: color-mix(in srgb, var(--color-line) 56%, transparent);
@@ -248,9 +250,24 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
   }
 
   .knowledge-menu-trigger {
+    position: relative;
+    display: inline-flex;
+    min-inline-size: 1.125rem;
+    min-block-size: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-fg-muted);
     cursor: pointer;
     list-style: none;
-    white-space: nowrap;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  /* Keep the arrow independently operable without letting its target cover the overview link. */
+  .knowledge-menu-trigger::before {
+    position: absolute;
+    inset-block: -0.8rem;
+    inset-inline: -0.2rem;
+    content: '';
   }
 
   .knowledge-menu-trigger::-webkit-details-marker {
@@ -259,16 +276,6 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
 
   .knowledge-menu-trigger::marker {
     content: '';
-  }
-
-  .knowledge-menu-trigger-content {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  .knowledge-menu-trigger-label {
-    unicode-bidi: isolate;
   }
 
   .knowledge-menu-trigger-icon {
@@ -284,15 +291,31 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
     transform: translateY(0.075em);
   }
 
-  /* Keep the compact nav treatment; keyboard focus is the stronger underline below. */
-  .knowledge-menu-trigger:focus-visible {
+  .knowledge-menu-trigger:focus {
+    /* Keep an icon-only control visibly focused across desktop and touch browsers. */
+    color: var(--color-fg);
     box-shadow: none;
     outline: 0;
   }
 
-  .knowledge-menu-trigger:focus-visible::after {
-    background: var(--color-focus-ring);
+  .knowledge-menu-trigger::after {
+    position: absolute;
+    right: 0;
+    bottom: -0.35rem;
+    left: 0;
     height: 2px;
+    background: var(--color-focus-ring);
+    content: '';
+    opacity: 0;
+    transform: scaleX(0.3);
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+  }
+
+  .knowledge-menu-trigger:focus::after {
+    opacity: 1;
+    transform: scaleX(1);
   }
 
   .knowledge-menu[open] > .knowledge-menu-trigger {
@@ -337,7 +360,7 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
       box-shadow var(--duration-fast) var(--ease-out);
   }
 
-  .knowledge-menu-link--overview {
+  .knowledge-menu-list > li:first-child .knowledge-menu-link {
     border-top: 0;
   }
 
@@ -384,6 +407,10 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
     .nav-link:hover::after {
       opacity: 1;
       transform: scaleX(1);
+    }
+
+    .knowledge-menu-trigger:hover {
+      color: var(--color-fg);
     }
 
     .knowledge-menu-link:hover {

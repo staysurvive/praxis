@@ -5,6 +5,9 @@
   for (const menu of menus) {
     if (!(menu instanceof HTMLDetailsElement)) continue;
 
+    const menuContainer = menu.closest('[data-knowledge-menu-container]');
+    if (!(menuContainer instanceof HTMLElement)) continue;
+
     const trigger = menu.querySelector('[data-knowledge-menu-trigger]');
     if (!(trigger instanceof HTMLElement)) continue;
 
@@ -21,15 +24,15 @@
       }
     };
 
-    menu.addEventListener('mouseenter', () => {
+    menuContainer.addEventListener('mouseenter', () => {
       if (!finePointer.matches || menu.open) return;
 
       menu.open = true;
       openedByHover = true;
     });
 
-    menu.addEventListener('mouseleave', () => {
-      if (finePointer.matches && !menu.matches(':focus-within')) closeMenu();
+    menuContainer.addEventListener('mouseleave', () => {
+      if (finePointer.matches && !menuContainer.matches(':focus-within')) closeMenu();
     });
 
     trigger.addEventListener('click', (event) => {
@@ -42,10 +45,10 @@
       openedByHover = false;
     });
 
-    menu.addEventListener('focusout', (event) => {
+    menuContainer.addEventListener('focusout', (event) => {
       const nextTarget = event.relatedTarget;
-      if (nextTarget instanceof Node && menu.contains(nextTarget)) return;
-      if (!menu.matches(':hover')) closeMenu();
+      if (nextTarget instanceof Node && menuContainer.contains(nextTarget)) return;
+      if (!menuContainer.matches(':hover')) closeMenu();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -57,7 +60,7 @@
 
     document.addEventListener('pointerdown', (event) => {
       const target = event.target;
-      if (!(target instanceof Node) || menu.contains(target)) return;
+      if (!(target instanceof Node) || menuContainer.contains(target)) return;
 
       const focusableTarget =
         target instanceof Element &&

@@ -60,10 +60,11 @@ const { entry } = Astro.props satisfies Props;
 - Static Astro markup is the default and must work without JavaScript.
 - Navigation disclosures use native `details/summary` with real nested links; a small progressive-enhancement script may
   improve hover and dismissal behavior, but it must never be required to reveal or follow the links.
-- When a primary navigation group mixes a `summary` trigger with direct links, its shared navigation class owns the outer
-  `display`, vertical alignment, and typography metrics. A flex `summary` beside inline links can produce visibly
-  different boxes even when the inherited font styles match; keep an E2E assertion for matching display, font metrics,
-  and rendered height.
+- When a primary navigation group pairs a direct overview link with a `summary` trigger, keep them as sibling controls:
+  the link owns the canonical href and `aria-current`, while the icon-only `summary` owns only disclosure and has its own
+  accessible name. Do not nest a link inside `summary` or repeat the overview in the flyout. Its shared navigation class
+  owns the outer `display`, vertical alignment, and typography metrics; keep an E2E assertion for matching direct-label
+  metrics, independent keyboard order, and non-overlapping hit targets.
 - Hydrate only an explicit interaction such as a theme preference control. The Practice Heatmap is static HTML/SVG/CSS
   or a minimal island only if a demonstrated interaction requires it.
 - A component that calls a future API must isolate failure and preserve its surrounding article/navigation content.

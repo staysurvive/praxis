@@ -36,12 +36,14 @@ online single-hop verification remain an external deployment gate; do not add wi
 ## Navigation and filters
 
 Primary navigation is the explicit ordered list Knowledge, Projects, Journey, About; it is never derived from
-`contentTypes`. Knowledge is a native disclosure containing the overview and the five registry-backed section links;
-Projects, Journey, and About remain direct links. The Knowledge disclosure uses `aria-current="page"` on the overview
-and `aria-current="location"` on a descendant; the matching overview or section link uses `page` within the nested link
-set. Direct primary links use `page` on an exact route and `location` on a descendant. All navigation, section entries,
-empty-state exits, and detail return paths are real links and work without JavaScript; the menu enhancement may only add
-fine-pointer hover, outside-close, and Escape behavior.
+`contentTypes`. The visible Knowledge label is a direct `/knowledge` link, and its adjacent native disclosure arrow
+contains exactly the five registry-backed section links; do not repeat a Knowledge-overview menu item or nest the link
+inside `summary`. Projects, Journey, and About remain direct links. The Knowledge label uses `aria-current="page"` on
+the overview and `aria-current="location"` on a descendant; the matching section link uses `page` within the nested
+link set. The icon-only disclosure has its own accessible name but no competing current-page state. Direct primary links
+use `page` on an exact route and `location` on a descendant. All navigation, section entries, empty-state exits, and
+detail return paths are real links and work without JavaScript; the menu enhancement may only add fine-pointer hover,
+outside-close, and Escape behavior.
 
 ## Metadata and errors
 

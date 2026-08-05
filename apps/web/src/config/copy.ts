@@ -5,8 +5,6 @@ export const uiCopy = {
   navigation: {
     home: '首页',
     knowledge: '知识',
-    knowledgeOverview: '知识总览',
-    knowledgeOverviewDescription: '浏览全部知识入口与最近更新',
     projects: '项目',
     journey: '旅程',
     about: '关于',
@@ -51,6 +49,7 @@ export const uiCopy = {
     skipToContent: '跳到主要内容',
     primaryNavigation: '主要导航',
     knowledgeNavigation: '知识子页面',
+    knowledgeMenuTrigger: '展开知识导航',
     themeControl: '主题设置',
     heatmapSummary: '实践热力图摘要',
   },

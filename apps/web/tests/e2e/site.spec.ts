@@ -13,10 +13,10 @@ const absoluteUrl = (pathname: string) => new URL(pathname, siteOrigin).toString
 const sitemapUrl = (pathname: string) => (pathname ? absoluteUrl(pathname) : siteOrigin);
 const firstKnowledgeSection = knowledgeSections[0];
 const firstKnowledgeSectionUrl = getKnowledgeUrl(firstKnowledgeSection.slug);
-const knowledgeMenuItems = [
-  { label: uiCopy.navigation.knowledgeOverview, href: getKnowledgeUrl() },
-  ...knowledgeSections.map(({ label, slug }) => ({ label, href: getKnowledgeUrl(slug) })),
-];
+const knowledgeMenuItems = knowledgeSections.map(({ label, slug }) => ({
+  label,
+  href: getKnowledgeUrl(slug),
+}));
 
 test('editorial homepage exposes the real Praxis project and local practice data', async ({
   page,
@@ -125,42 +125,84 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
 
   const knowledgeMenu = primaryItems.nth(0).locator('details[data-knowledge-menu]');
   const knowledgeTrigger = knowledgeMenu.locator('summary[data-knowledge-menu-trigger]');
-  await expect(knowledgeTrigger).toHaveText('知识');
+  const knowledgeOverviewLink = primaryItems.nth(0).locator('a[data-knowledge-overview-link]');
+  await expect(knowledgeOverviewLink).toHaveText('知识');
+  await expect(knowledgeOverviewLink).toHaveAttribute('href', '/knowledge');
+  await expect(
+    primaryItems
+      .nth(0)
+      .locator(':scope > a[data-knowledge-overview-link] + details[data-knowledge-menu]'),
+  ).toHaveCount(1);
+  await expect(knowledgeTrigger).toHaveAccessibleName(uiCopy.accessibility.knowledgeMenuTrigger);
+  await expect(knowledgeTrigger).toHaveAttribute(
+    'aria-label',
+    uiCopy.accessibility.knowledgeMenuTrigger,
+  );
   const knowledgeTriggerIcon = knowledgeTrigger.locator('[data-knowledge-menu-trigger-icon]');
   await expect(knowledgeTriggerIcon).toHaveAttribute('aria-hidden', 'true');
   await expect(knowledgeTriggerIcon).toHaveAttribute('viewBox', '0 0 10 6');
   await expect(knowledgeTriggerIcon.locator('path')).toHaveAttribute('d', 'M1 1.25 5 4.75 9 1.25');
 
   const directPrimaryLinks = navigation.locator(':scope > ul.nav-list > li.nav-item > a.nav-link');
-  await expect(directPrimaryLinks).toHaveCount(3);
-  await expect(directPrimaryLinks).toHaveText(['项目', '旅程', '关于']);
-  await expect(directPrimaryLinks.nth(0)).toHaveAttribute('href', '/projects');
-  await expect(directPrimaryLinks.nth(1)).toHaveAttribute('href', '/journey');
-  await expect(directPrimaryLinks.nth(2)).toHaveAttribute('href', '/about');
+  await expect(directPrimaryLinks).toHaveCount(4);
+  await expect(directPrimaryLinks).toHaveText(['知识', '项目', '旅程', '关于']);
+  await expect(directPrimaryLinks.nth(0)).toHaveAttribute('href', '/knowledge');
+  await expect(directPrimaryLinks.nth(1)).toHaveAttribute('href', '/projects');
+  await expect(directPrimaryLinks.nth(2)).toHaveAttribute('href', '/journey');
+  await expect(directPrimaryLinks.nth(3)).toHaveAttribute('href', '/about');
 
-  const primaryLabelMetrics = await navigation
-    .locator('[data-knowledge-menu-trigger], .nav-item > a.nav-link')
-    .evaluateAll((elements) =>
-      elements.map((element) => {
-        const styles = getComputedStyle(element);
+  const primaryLabelMetrics = await directPrimaryLinks.evaluateAll((elements) =>
+    elements.map((element) => {
+      const styles = getComputedStyle(element);
 
-        return {
-          display: styles.display,
-          fontSize: styles.fontSize,
-          fontWeight: styles.fontWeight,
-          lineHeight: styles.lineHeight,
-          letterSpacing: styles.letterSpacing,
-          height: element.getBoundingClientRect().height,
-        };
-      }),
-    );
+      return {
+        display: styles.display,
+        fontSize: styles.fontSize,
+        fontWeight: styles.fontWeight,
+        lineHeight: styles.lineHeight,
+        letterSpacing: styles.letterSpacing,
+        height: element.getBoundingClientRect().height,
+      };
+    }),
+  );
   expect(primaryLabelMetrics).toHaveLength(4);
   for (const metrics of primaryLabelMetrics) {
     expect(metrics).toEqual(primaryLabelMetrics[0]);
   }
 
+  const knowledgeControlAlignment = await primaryItems.nth(0).evaluate((item) => {
+    const overviewLink = item.querySelector<HTMLElement>('[data-knowledge-overview-link]');
+    const trigger = item.querySelector<HTMLElement>('[data-knowledge-menu-trigger]');
+    const icon = item.querySelector<HTMLElement>('[data-knowledge-menu-trigger-icon]');
+
+    if (!overviewLink || !trigger || !icon)
+      throw new Error('Missing knowledge navigation controls.');
+
+    const overviewRect = overviewLink.getBoundingClientRect();
+    const triggerRect = trigger.getBoundingClientRect();
+    const iconRect = icon.getBoundingClientRect();
+
+    return {
+      controlCenterOffset: Math.abs(
+        overviewRect.top + overviewRect.height / 2 - (triggerRect.top + triggerRect.height / 2),
+      ),
+      iconCenterOffset:
+        iconRect.top + iconRect.height / 2 - (overviewRect.top + overviewRect.height / 2),
+      visualGap: iconRect.left - overviewRect.right,
+    };
+  });
+  expect(knowledgeControlAlignment.controlCenterOffset).toBeLessThanOrEqual(0.5);
+  // The historical chevron uses a subtle optical downshift instead of mathematical centering.
+  expect(knowledgeControlAlignment.iconCenterOffset).toBeGreaterThanOrEqual(0.5);
+  expect(knowledgeControlAlignment.iconCenterOffset).toBeLessThanOrEqual(1.5);
+  expect(knowledgeControlAlignment.visualGap).toBeGreaterThanOrEqual(8);
+
   const knowledgeLinks = knowledgeMenu.locator('[data-knowledge-menu-link]');
   await expect(knowledgeLinks).toHaveCount(knowledgeMenuItems.length);
+  await expect(knowledgeMenu.locator('a')).toHaveCount(knowledgeMenuItems.length);
+  await expect(knowledgeMenu.locator('[data-knowledge-menu-link][href="/knowledge"]')).toHaveCount(
+    0,
+  );
   await expect(knowledgeLinks.locator('.knowledge-menu-label')).toHaveText(
     knowledgeMenuItems.map(({ label }) => label),
   );
@@ -170,12 +212,15 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   await expect(page.locator('.brand')).toHaveAttribute('href', '/');
 
   await page.goto('/knowledge');
-  await expect(knowledgeTrigger).toHaveClass(/nav-link--active/);
-  await expect(knowledgeTrigger).toHaveAttribute('aria-current', 'page');
-  await expect(knowledgeLinks.nth(0)).toHaveAttribute('aria-current', 'page');
+  await expect(knowledgeOverviewLink).toHaveClass(/nav-link--active/);
+  await expect(knowledgeOverviewLink).toHaveAttribute('aria-current', 'page');
+  expect(await knowledgeTrigger.getAttribute('aria-current')).toBeNull();
+  await expect(knowledgeLinks.locator('[aria-current]')).toHaveCount(0);
 
   await page.goto(firstKnowledgeSectionUrl);
-  await expect(knowledgeTrigger).toHaveAttribute('aria-current', 'location');
+  await expect(knowledgeOverviewLink).toHaveAttribute('aria-current', 'location');
+  await expect(knowledgeOverviewLink).toHaveClass(/nav-link--active/);
+  expect(await knowledgeTrigger.getAttribute('aria-current')).toBeNull();
   await expect(
     knowledgeMenu.locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`),
   ).toHaveAttribute('aria-current', 'page');
@@ -193,14 +238,30 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   }
 
   await page.goto('/knowledge/ai-code-security-review');
-  await expect(knowledgeTrigger).toHaveAttribute('aria-current', 'location');
-  await expect(knowledgeTrigger).toHaveClass(/nav-link--active/);
+  await expect(knowledgeOverviewLink).toHaveAttribute('aria-current', 'location');
+  await expect(knowledgeOverviewLink).toHaveClass(/nav-link--active/);
+  expect(await knowledgeTrigger.getAttribute('aria-current')).toBeNull();
 
   await page.goto('/projects/praxis-foundation');
   await expect(navigation.getByRole('link', { name: '项目' })).toHaveAttribute(
     'aria-current',
     'location',
   );
+});
+
+test('the visible Knowledge link navigates directly to its overview independently of the disclosure', async ({
+  page,
+}) => {
+  await page.goto('/journey');
+
+  const knowledgeOverviewLink = page.locator('[data-knowledge-overview-link]');
+  const knowledgeMenu = page.locator('details[data-knowledge-menu]');
+  await expect(knowledgeOverviewLink).toHaveAttribute('href', '/knowledge');
+  await expect(knowledgeMenu).toHaveJSProperty('open', false);
+
+  await knowledgeOverviewLink.click();
+  await expect(page).toHaveURL(/\/knowledge$/);
+  await expect(page.getByRole('heading', { level: 1, name: '知识' })).toBeVisible();
 });
 
 test('knowledge menu opens on desktop hover and dismisses without moving focus', async ({
@@ -213,10 +274,10 @@ test('knowledge menu opens on desktop hover and dismisses without moving focus',
   await page.goto('/');
 
   const menu = page.locator('details[data-knowledge-menu]');
-  const trigger = menu.locator('summary[data-knowledge-menu-trigger]');
+  const overviewLink = page.locator('[data-knowledge-overview-link]');
   const panel = menu.locator('[data-knowledge-menu-panel]');
 
-  await trigger.hover();
+  await overviewLink.hover();
   await expect(menu).toHaveJSProperty('open', true);
   await expect(panel).toBeVisible();
 
@@ -246,7 +307,7 @@ test('knowledge menu opens on desktop hover and dismisses without moving focus',
   if (!viewport) throw new Error('Missing desktop viewport');
   await page.mouse.move(viewport.width - 2, viewport.height - 2);
 
-  await trigger.hover();
+  await overviewLink.hover();
   await expect(menu).toHaveJSProperty('open', true);
   await page.mouse.move(viewport.width - 2, viewport.height - 2);
 
@@ -837,13 +898,12 @@ test('a 320px viewport has no page-level horizontal overflow', async ({ page }) 
   await expect(knowledgeMenu).toHaveJSProperty('open', false);
 
   const headerTargets = await page
-    .locator('.brand, .nav-link, [data-theme-toggle]')
+    .locator('.brand, .nav-link, [data-knowledge-menu-trigger], [data-theme-toggle]')
     .evaluateAll((elements) =>
       elements.map((element) => {
         const rect = element.getBoundingClientRect();
-        const hitArea = element.classList.contains('nav-link')
-          ? getComputedStyle(element, '::before')
-          : undefined;
+        const hasExtendedHitArea = element.matches('.nav-link, [data-knowledge-menu-trigger]');
+        const hitArea = hasExtendedHitArea ? getComputedStyle(element, '::before') : undefined;
         const leftInset = hitArea ? Number.parseFloat(hitArea.left) || 0 : 0;
         const rightInset = hitArea ? Number.parseFloat(hitArea.right) || 0 : 0;
 
@@ -978,6 +1038,7 @@ test('keyboard order remains brand-first across the explicit navigation', async 
 
   const navigation = page.getByRole('navigation', { name: '主要导航' });
   const knowledgeMenu = navigation.locator('details[data-knowledge-menu]');
+  const knowledgeOverviewLink = navigation.locator('[data-knowledge-overview-link]');
   const knowledgeTrigger = knowledgeMenu.locator('summary[data-knowledge-menu-trigger]');
 
   await page.keyboard.press('Tab');
@@ -986,15 +1047,32 @@ test('keyboard order remains brand-first across the explicit navigation', async 
   await expect(page.locator('.brand')).toBeFocused();
 
   await page.keyboard.press('Tab');
+  await expect(knowledgeOverviewLink).toBeFocused();
+  const knowledgeOverviewStyle = await knowledgeOverviewLink.evaluate((element) => {
+    const indicator = getComputedStyle(element, '::after');
+    return {
+      opacity: indicator.opacity,
+      height: indicator.height,
+    };
+  });
+  expect(knowledgeOverviewStyle.opacity).toBe('1');
+  expect(Number.parseFloat(knowledgeOverviewStyle.height)).toBeGreaterThan(0);
+
+  await page.keyboard.press('Tab');
   await expect(knowledgeTrigger).toBeFocused();
+  await expect
+    .poll(() =>
+      knowledgeTrigger.evaluate((element) => getComputedStyle(element, '::after').opacity),
+    )
+    .toBe('1');
   const knowledgeTriggerStyle = await knowledgeTrigger.evaluate((element) => {
     const indicator = getComputedStyle(element, '::after');
     const trigger = getComputedStyle(element);
     return {
       boxShadow: trigger.boxShadow,
+      outlineStyle: trigger.outlineStyle,
       opacity: indicator.opacity,
       height: indicator.height,
-      outlineStyle: trigger.outlineStyle,
     };
   });
   expect(knowledgeTriggerStyle.outlineStyle).toBe('none');
@@ -1011,22 +1089,17 @@ test('keyboard order remains brand-first across the explicit navigation', async 
     if (index === 0) {
       const firstKnowledgeLinkStyle = await knowledgeLinks.nth(index).evaluate((element) => {
         const styles = getComputedStyle(element);
-        const label = element.querySelector('.knowledge-menu-label');
         return {
           outlineStyle: styles.outlineStyle,
           outlineWidth: styles.outlineWidth,
           background: styles.backgroundColor,
           edge: styles.boxShadow,
-          labelWeight: label ? getComputedStyle(label).fontWeight : null,
         };
       });
       expect(firstKnowledgeLinkStyle.outlineStyle).not.toBe('none');
       expect(Number.parseFloat(firstKnowledgeLinkStyle.outlineWidth)).toBeGreaterThan(0);
       expect(firstKnowledgeLinkStyle.background).not.toBe('rgba(0, 0, 0, 0)');
       expect(firstKnowledgeLinkStyle.edge).not.toBe('none');
-      expect(
-        Number.parseInt(firstKnowledgeLinkStyle.labelWeight ?? '0', 10),
-      ).toBeGreaterThanOrEqual(600);
     }
   }
 
@@ -1084,6 +1157,11 @@ test('core content remains readable without JavaScript', async ({ browser }) => 
   const page = await context.newPage();
 
   await page.goto('/');
+  const knowledgeOverviewLink = page.locator('[data-knowledge-overview-link]');
+  await expect(knowledgeOverviewLink).toHaveAttribute('href', '/knowledge');
+  await knowledgeOverviewLink.click();
+  await expect(page).toHaveURL(/\/knowledge$/);
+
   const knowledgeMenu = page.locator('details[data-knowledge-menu]');
   await knowledgeMenu.locator('summary[data-knowledge-menu-trigger]').click();
   await expect(knowledgeMenu).toHaveJSProperty('open', true);
