@@ -283,6 +283,23 @@ URL owner 从 `getContentUrl(type, slug)` 收敛为接收完整内容身份的 p
   `location`。键盘顺序固定为品牌、知识直达链接、知识披露箭头、展开后的五个 section、项目、旅程、关于、主题按钮和页面
   首个操作，且移动端点击目标不互相覆盖。
 
+### 2026-08-05 primary-page exhibition Hero extension
+
+四个一级根路由通过独立 `EditorialHero.astro` 使用同一个语义和响应式骨架：`eyebrow`、唯一 `h1`、描述和以
+`data-page-hero` 标识的装饰性图像。图像配置位于 `src/config/editorial-heroes.ts`，只引用本地 `/art/` 下的固定 WebP、
+尺寸和变体；路由继续只负责编排既有 copy 与内容区。
+
+- `/knowledge` 使用纸本认知地形，`/projects` 使用构建结构，`/journey` 使用向远方延展的路径，`/about` 使用纸、墨、光的
+  Praxis 精神意象。背景不写入标题、Logo 或作者事实，不成为内容数据。
+- 桌面 Hero 使用 `--section-min-block-size`，所以视窗由“sticky header + Hero”恰好构成一屏；Hero 自身而非 `main` 或内容
+  section 承担 `overflow: clip`/图层裁切，避免破坏项目 hash anchor。
+- 图像 `alt=""` 且在 `aria-hidden` 容器中，使用 eager/high-priority 本地加载和显式宽高；文字由独立的语义 DOM 呈现。
+- 大屏中图像为背景式融合，左侧为文字安全区；小屏改为“文字在上、图像在下”的静态分层，优先保证中文标题和说明清晰。
+- 只在 `prefers-reduced-motion: no-preference` 运行 transform/opacity 的一次性 CSS 入场，不监听 scroll、不以 JavaScript
+  设定隐藏状态；减少透明度时使用接近实底的 veil，强制颜色模式直接隐藏装饰图。
+- 旧 `PageHero.astro` 继续供 `knowledge/[key].astro` 使用。它与 `ContentLayout`、文章详情、首页都不导入新的展厅组件，
+  从结构上保护内容阅读壳和首页冻结边界。
+
 ### Test strategy for the extension
 
 #### Unit and schema tests
@@ -304,6 +321,8 @@ URL owner 从 `getContentUrl(type, slug)` 收敛为接收完整内容身份的 p
 - 验证当前真实数据可完成：`知识 → 空 section → 知识`、`知识 → 最近更新 → 详情 → 知识` 与
   `项目 → 项目锚点 → 现有详情 → 项目`；详情页正确点亮所在一级 section。
 - 将新增主页面纳入桌面/移动、Light/Dark、320px overflow、键盘、Axe、no-JS 与全量 CSP 产物扫描。
+- 验证四个 `data-page-hero` 都有一个 H1、本地装饰图和 `object-fit: cover`；在桌面断言 Hero 恰好在首屏底部结束，
+  并断言知识 section 仍使用原有 `.page-hero` 而不出现展厅 Hero。
 - 在桌面验证 hover 展开/离开关闭，在触屏验证点击展开，在键盘验证 Enter/Space、Tab、Escape 与焦点可见性，并在
   no-JS 上下文验证原生披露仍可进入一个真实 section。
 - RSS 继续恰好包含当前三项真实内容，知识条目使用新 canonical、项目条目保持现有 canonical，GUID 对应稳定 `contentId`。

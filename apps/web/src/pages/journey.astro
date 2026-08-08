@@ -1,15 +1,16 @@
 ---
 import EmptyState from '../components/EmptyState.astro';
-import PageHero from '../components/PageHero.astro';
+import EditorialHero from '../components/EditorialHero.astro';
 import { uiCopy } from '../config/copy';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title={uiCopy.journeyPage.title} description={uiCopy.journeyPage.description}>
-  <PageHero
+  <EditorialHero
     eyebrow={uiCopy.journeyPage.eyebrow}
     title={uiCopy.journeyPage.title}
     description={uiCopy.journeyPage.description}
+    variant="journey"
   />
   <section class="journey-empty">
     <div class="page-shell">

@@ -6,6 +6,7 @@ import { expect, test } from '@playwright/test';
 
 import { resolveSiteUrl } from '../../config/site-url';
 import { uiCopy } from '../../src/config/copy';
+import { editorialHeroArt } from '../../src/config/editorial-heroes';
 import { getKnowledgeUrl, knowledgeSections } from '../../src/lib/content/domain';
 
 const siteOrigin = resolveSiteUrl(process.env.SITE_URL);
@@ -500,6 +501,74 @@ test('journey stays empty and about uses only confirmed site identity', async ({
   await page.goto('/about');
   await expect(page.getByRole('heading', { level: 1, name: '关于 Praxis' })).toBeVisible();
   await expect(page.getByText('一个关于长期思考、真实行动与持续复盘的个人实践站。')).toHaveCount(2);
+});
+
+test('primary pages use their own editorial art while knowledge interiors keep the reading shell', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1536, height: 791 });
+
+  await page.goto('/');
+  const homepageDesktopOverlay = await page
+    .locator('.hero-overlay')
+    .evaluate((element) => getComputedStyle(element).backgroundImage);
+
+  for (const [pathname, variant, heading] of [
+    ['/knowledge', 'knowledge', '知识'],
+    ['/projects', 'projects', '项目'],
+    ['/journey', 'journey', '旅程'],
+    ['/about', 'about', '关于 Praxis'],
+  ] as const) {
+    await page.goto(pathname);
+
+    const hero = page.locator(`[data-page-hero="${variant}"]`);
+    await expect(hero).toHaveCount(1);
+    await expect(hero.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+    await expect(hero.locator('img')).toHaveAttribute('src', editorialHeroArt[variant].src);
+    await expect(hero.locator('img')).toHaveAttribute('srcset', editorialHeroArt[variant].srcset);
+    await expect(hero.locator('img')).toHaveAttribute('alt', '');
+
+    const geometry = await hero.evaluate((element) => {
+      const headingElement = element.querySelector('h1');
+      const image = element.querySelector('img');
+      const header = document.querySelector('.site-header');
+      if (!(headingElement instanceof HTMLElement) || !(image instanceof HTMLImageElement)) {
+        throw new Error('Editorial hero is missing its semantic heading or decorative image');
+      }
+
+      return {
+        heroBottom: element.getBoundingClientRect().bottom,
+        headerBottom: header?.getBoundingClientRect().bottom ?? 0,
+        headingTop: headingElement.getBoundingClientRect().top,
+        imageObjectFit: getComputedStyle(image).objectFit,
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      };
+    });
+
+    expect(geometry.headingTop, pathname).toBeGreaterThanOrEqual(geometry.headerBottom);
+    expect(Math.abs(geometry.heroBottom - 791), pathname).toBeLessThanOrEqual(1);
+    expect(geometry.imageObjectFit, pathname).toBe('cover');
+    expect(geometry.scrollWidth, pathname).toBeLessThanOrEqual(geometry.clientWidth);
+
+    const desktopVeil = await hero
+      .locator('.editorial-hero__veil')
+      .evaluate((element) => getComputedStyle(element).backgroundImage);
+    expect(desktopVeil, pathname).toBe(homepageDesktopOverlay);
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/knowledge');
+  const knowledgeMobileVeil = await page
+    .locator('[data-page-hero="knowledge"] .editorial-hero__veil')
+    .evaluate((element) => getComputedStyle(element).backgroundImage);
+  expect(knowledgeMobileVeil).toContain('linear-gradient(0deg');
+  expect(knowledgeMobileVeil).not.toContain('90deg');
+  expect(knowledgeMobileVeil).not.toBe(homepageDesktopOverlay);
+
+  await page.goto(firstKnowledgeSectionUrl);
+  await expect(page.locator('[data-page-hero]')).toHaveCount(0);
+  await expect(page.locator('.page-hero')).toHaveCount(1);
 });
 
 test('missing routes use the branded 404', async ({ page }) => {
@@ -1148,6 +1217,21 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
     .locator('[data-knowledge-menu-trigger]')
     .evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration));
   expect(transitionDuration).toBeLessThanOrEqual(0.00001);
+
+  await page.goto('/knowledge');
+  const editorialArtAnimation = await page
+    .locator('[data-page-hero="knowledge"] img')
+    .evaluate((image) => getComputedStyle(image).animationName);
+  expect(editorialArtAnimation).toBe('none');
+
+});
+
+test('editorial hero artwork is excluded in forced-colors mode', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto('/knowledge');
+
+  await expect(page.locator('[data-page-hero="knowledge"] img')).toBeHidden();
+  await expect(page.getByRole('heading', { level: 1, name: '知识' })).toBeVisible();
 });
 
 test('keyboard order remains brand-first across the explicit navigation', async ({ page }) => {

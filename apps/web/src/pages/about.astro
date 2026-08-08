@@ -1,15 +1,16 @@
 ---
-import PageHero from '../components/PageHero.astro';
+import EditorialHero from '../components/EditorialHero.astro';
 import { uiCopy } from '../config/copy';
 import { siteConfig } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title={uiCopy.about.title} description={siteConfig.author.bio}>
-  <PageHero
+  <EditorialHero
     eyebrow={uiCopy.about.eyebrow}
     title={`关于 ${siteConfig.author.name}`}
     description={siteConfig.author.bio}
+    variant="about"
   />
   <section class="about-body">
     <div class="page-shell about-profile">

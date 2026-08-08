@@ -70,6 +70,24 @@ const { entry } = Astro.props satisfies Props;
 - A component that calls a future API must isolate failure and preserve its surrounding article/navigation content.
 - Do not introduce React hooks, a global client store, or a component library for the foundation slice.
 
+## Root-page exhibition heroes
+
+`EditorialHero.astro` is the root-page-only visual shell for `/knowledge`, `/projects`, `/journey`, and `/about`.
+It receives `eyebrow`, `title`, `description`, and a typed art `variant`; the associated local image source and dimensions
+live in `src/config/editorial-heroes.ts`. It must preserve one real H1 and expose imagery only as `alt=""` decoration.
+
+- Keep `PageHero.astro` as the quiet reading shell for `knowledge/[key].astro`; do not add root-page art or motion to it,
+  because that would also alter empty knowledge sections and future content reading routes.
+- Root Hero art is local, text-free, eager with explicit width/height, and layered inside the Hero only. Do not put a
+  background URL in inline styles, introduce remote art, or add a browser script merely for reveal/parallax.
+- Use `--section-min-block-size` on desktop; at narrow widths, place semantic copy above the image rather than relying on
+  contrast over a crop. Keep `overflow: clip` scoped to the Hero so project anchors and main content remain unaffected.
+- Any entrance animation is a one-time `transform`/`opacity` CSS enhancement inside `prefers-reduced-motion: no-preference`.
+  Reduced motion must leave copy immediately visible; reduced transparency needs an opaque veil and forced-colors can hide
+  decorative imagery.
+- Extend browser coverage whenever a root Hero variant changes: one H1, exact local source, first-viewport geometry,
+  narrow-screen overflow, reduced-motion static state, and a regression that knowledge sections still use `PageHero`.
+
 ## Accessibility
 
 - Use landmarks (`header`, `nav`, `main`, `footer`) and one clear page heading.

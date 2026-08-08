@@ -96,6 +96,17 @@
 - [ ] Confirm the current three public entries, their `contentId` values and type-first URLs before changing shared routing code.
 - [ ] Do not create example articles, knowledge tutorials, project narratives, Journey nodes or inferred author biography.
 
+### Primary-page exhibition visual extension (approved 2026-08-05)
+
+- [x] Generate and visually inspect four text-free local art backgrounds; publish optimized WebP assets for the four root Hero variants.
+- [x] Add a typed, root-only `EditorialHero.astro` plus a central visual asset registry. Replace `PageHero` only in
+      `/knowledge`、`/projects`、`/journey`、`/about`; do not touch `PageHero.astro`、`knowledge/[key].astro`、article layouts,
+      homepage files or content projections.
+- [x] Keep the desktop Hero at `--section-min-block-size`, mobile copy/media split, semantic text and decorative images separate,
+      and token-based Light/Dark overlays. Restrict motion to a CSS transform/opacity entrance in the no-preference branch.
+- [x] Add E2E coverage for each root Hero's semantic H1, dedicated asset, full first desktop viewport, no horizontal overflow,
+      reduced-motion static state and the unchanged knowledge section shell.
+
 ### 1. Add the minimum knowledge structure contract
 
 Files:

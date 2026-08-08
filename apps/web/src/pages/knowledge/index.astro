@@ -1,7 +1,7 @@
 ---
 import ContentCard from '../../components/ContentCard.astro';
 import KnowledgeSectionCard from '../../components/KnowledgeSectionCard.astro';
-import PageHero from '../../components/PageHero.astro';
+import EditorialHero from '../../components/EditorialHero.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import { uiCopy } from '../../config/copy';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -20,10 +20,11 @@ const recentEntries = await listRecentKnowledge();
 ---
 
 <BaseLayout title={uiCopy.knowledge.title} description={uiCopy.knowledge.description}>
-  <PageHero
+  <EditorialHero
     eyebrow={uiCopy.knowledge.eyebrow}
     title={uiCopy.knowledge.title}
     description={uiCopy.knowledge.description}
+    variant="knowledge"
   />
 
   <section class="knowledge-sections" aria-label={uiCopy.knowledge.title}>

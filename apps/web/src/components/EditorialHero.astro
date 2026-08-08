@@ -1,0 +1,248 @@
+---
+import { editorialHeroArt, type EditorialHeroVariant } from '../config/editorial-heroes';
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  description: string;
+  variant: EditorialHeroVariant;
+}
+
+const { eyebrow, title, description, variant } = Astro.props satisfies Props;
+const art = editorialHeroArt[variant];
+---
+
+<header
+  class:list={['editorial-hero', `editorial-hero--${variant}`, 'rule-scotch--bottom']}
+  data-page-hero={variant}
+>
+  <div class="editorial-hero__media" aria-hidden="true">
+    <img
+      class="editorial-hero__art"
+      src={art.src}
+      srcset={art.srcset}
+      sizes="100vw"
+      width={art.width}
+      height={art.height}
+      alt=""
+      loading="eager"
+      decoding="async"
+      fetchpriority="high"
+    />
+    <div class="editorial-hero__veil"></div>
+  </div>
+
+  <div class="page-shell editorial-hero__content">
+    <div class="editorial-hero__copy">
+      <p class="eyebrow editorial-hero__eyebrow">{eyebrow}</p>
+      <h1 class="display-title display-title--wide editorial-hero__title">{title}</h1>
+      <p class="editorial-hero__description">{description}</p>
+    </div>
+  </div>
+</header>
+
+<style>
+  .editorial-hero {
+    position: relative;
+    display: grid;
+    min-block-size: var(--section-min-block-size);
+    overflow: clip;
+    isolation: isolate;
+    background: var(--color-bg-surface);
+  }
+
+  .editorial-hero__media {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .editorial-hero__art,
+  .editorial-hero__veil {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .editorial-hero__art {
+    display: block;
+    object-fit: cover;
+    object-position: 50% center;
+  }
+
+  .editorial-hero__veil {
+    background: linear-gradient(
+      90deg,
+      var(--color-overlay-hero-strong) 0%,
+      var(--color-overlay-hero) 32%,
+      transparent 56%
+    );
+  }
+
+  .editorial-hero__content {
+    z-index: 0;
+    display: grid;
+    align-items: center;
+    padding-block: clamp(4.5rem, 10vh, 8rem);
+  }
+
+  .editorial-hero__copy {
+    max-width: 43rem;
+  }
+
+  .editorial-hero__eyebrow,
+  .editorial-hero__title,
+  .editorial-hero__description {
+    margin: 0;
+  }
+
+  .editorial-hero__title {
+    margin-top: 1.35rem;
+  }
+
+  .editorial-hero__description {
+    max-width: 30rem;
+    margin-top: clamp(1.75rem, 3vw, 2.5rem);
+    color: var(--color-fg-muted);
+    font-size: var(--text-lead);
+    line-height: 1.85;
+    text-wrap: pretty;
+  }
+
+  .editorial-hero--knowledge .editorial-hero__art {
+    object-position: 58% center;
+  }
+
+  .editorial-hero--projects .editorial-hero__art {
+    object-position: 56% center;
+  }
+
+  .editorial-hero--journey .editorial-hero__art {
+    object-position: 54% center;
+  }
+
+  .editorial-hero--about .editorial-hero__art {
+    object-position: 57% center;
+  }
+
+  @media (max-width: 47.99rem) {
+    .editorial-hero {
+      grid-template-rows: auto minmax(14rem, 40svh);
+    }
+
+    .editorial-hero__media {
+      position: relative;
+      z-index: 0;
+      grid-row: 2;
+      min-block-size: 14rem;
+    }
+
+    .editorial-hero__veil {
+      background:
+        linear-gradient(
+          180deg,
+          var(--color-bg) 0%,
+          color-mix(in srgb, var(--color-bg) 68%, transparent) 16%,
+          transparent 48%
+        ),
+        linear-gradient(0deg, var(--color-bg) 0%, transparent 34%);
+    }
+
+    .editorial-hero__content {
+      grid-row: 1;
+      padding-block: clamp(3.25rem, 10svh, 5.5rem) clamp(2.5rem, 6svh, 4rem);
+    }
+
+    .editorial-hero__title {
+      margin-top: 1rem;
+    }
+
+    .editorial-hero__description {
+      max-width: 31rem;
+      margin-top: 1.5rem;
+      font-size: 1.06rem;
+      line-height: 1.8;
+    }
+
+    .editorial-hero--knowledge .editorial-hero__art {
+      object-position: 74% center;
+    }
+
+    .editorial-hero--projects .editorial-hero__art {
+      object-position: 73% center;
+    }
+
+    .editorial-hero--journey .editorial-hero__art {
+      object-position: 72% center;
+    }
+
+    .editorial-hero--about .editorial-hero__art {
+      object-position: 74% center;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .editorial-hero__art {
+      animation: editorial-art-reveal 960ms var(--ease-out) both;
+      will-change: opacity, transform;
+    }
+
+    .editorial-hero__eyebrow,
+    .editorial-hero__title,
+    .editorial-hero__description {
+      animation: editorial-copy-reveal 760ms var(--ease-out) both;
+      will-change: opacity, transform;
+    }
+
+    .editorial-hero__eyebrow {
+      animation-delay: 80ms;
+    }
+
+    .editorial-hero__title {
+      animation-delay: 150ms;
+    }
+
+    .editorial-hero__description {
+      animation-delay: 230ms;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .editorial-hero__veil {
+      background: var(--color-bg);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .editorial-hero__media {
+      display: none;
+    }
+  }
+
+  @keyframes editorial-art-reveal {
+    from {
+      opacity: 0.5;
+      transform: scale(1.025);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes editorial-copy-reveal {
+    from {
+      opacity: 0.55;
+      transform: translateY(0.6rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

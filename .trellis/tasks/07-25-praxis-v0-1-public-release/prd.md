@@ -184,6 +184,18 @@ Sitemap 路由清单的描述不同，以 R8–R14 的迁移后目标为准，�
 - 类型化关系、Journey 节点、项目证据模型、搜索、RAG、Learning Companion 与作者工作流重构，都必须由真实内容或真实使用需求
   触发独立设计和验收，不能作为本轮页面骨架的隐藏前置工程。
 
+### R15 — Root-page exhibition visual layer (2026-08-05)
+
+- 仅为 `/knowledge`、`/projects`、`/journey`、`/about` 四个一级根页面建立沉浸式首屏；首页与五个知识 section、
+  知识正文、项目详情及其内容区保持原样。
+- 四页各使用一张本地、无文字、无 Logo 的原创艺术背景，以“认知、创造、成长、Praxis 精神”形成不同叙事；图像只作装饰，
+  不承载文字或页面语义。
+- 新首屏保持唯一 H1、真实副标题与静态 HTML 可读性，桌面采用页眉以下完整视窗高度；移动端将文字和图像自然分层，不能压缩
+  标题可读性或制造横向溢出。
+- 视觉只能复用现有语义色彩、排版和动效 token；可使用克制的 CSS 入场动效，但不新增运行时依赖、浏览器脚本、外部资源、
+  内联样式或必须依赖 JavaScript 的效果。`prefers-reduced-motion`、`prefers-reduced-transparency` 与强制颜色模式必须保留清晰降级。
+- 共用 `PageHero` 是知识内部 section 的阅读壳，不得改造为图像首屏；一级页专用 Hero 必须与它隔离。
+
 ## Acceptance criteria
 
 - [x] AC1：首页、Practice Heatmap、项目详情和 404 在桌面/移动端及 Light/Dark 下通过现有与新增 E2E 审计。
@@ -219,6 +231,8 @@ Sitemap 路由清单的描述不同，以 R8–R14 的迁移后目标为准，�
       知识菜单在桌面悬浮、键盘展开、触屏点击和无 JavaScript 点击四种路径下都可进入真实 section。
 - [x] AC20：320px 与无 JavaScript 环境均可完成当前真实数据支持的“知识 → 空 section → 知识”、
       “知识 → 最近更新 → 详情 → 知识”和“项目 → 项目锚点 → 现有详情 → 项目”往返；sticky 页眉不遮挡 H1、breadcrumb 或项目锚点。
+- [x] AC21：四个一级根页面各有独立的本地艺术首屏，且在桌面/移动端、Light/Dark、减少动态偏好、Axe 与无 JavaScript 下保持可读；
+      首页与知识内部页面未被该视觉层改动。
 
 ## Out of scope
 
@@ -231,6 +245,7 @@ Sitemap 路由清单的描述不同，以 R8–R14 的迁移后目标为准，�
 - Note/Guide/Thinking/Review/Case 筛选 UI，以及尚未被真实内容验证的内容形式或成熟度 taxonomy。
 - 代写、改写、扩写或发布新的文章正文、项目案例、Journey 叙事，以及任何虚构的 blog、note、journal 或 project 内容。
 - 首页主体内容、视觉资产、区块顺序、文案或动效重设计；仅全站共用页眉可以同步信息架构。
+- 把一级页专用展厅 Hero 泛化到首页、知识 section、知识正文或项目详情；这些页面继续使用原有阅读/首页壳。
 - 类型化内容关系、反向关系投影、Journey 事件 schema、项目证据/角色/成果/仓库/Demo/Star schema、通用 alias 管理平台。
 - 对现有 `type`、`stage`、`status`、draft 发布规则或作者写作工作流做系统性重构。
 - 自动关系建议、猜你喜欢、关系图可视化、AI 生成分类或将私人草稿自动加入公开知识投影。
