@@ -582,8 +582,10 @@ test('wide knowledge pages expose three non-overlapping document columns', async
       const sidebarRect = sidebar.getBoundingClientRect();
       const contentRect = content.getBoundingClientRect();
       const tocRect = toc.getBoundingClientRect();
-      const chapterRows = [...sidebar.querySelectorAll('.knowledge-sidebar__group ol a')];
-      const chapterCounts = [...sidebar.querySelectorAll('.knowledge-sidebar__count')];
+      const chapterRows = [...sidebar.querySelectorAll('[data-knowledge-section-link]')];
+      const chapterCounts = [...sidebar.querySelectorAll('[data-knowledge-section-count]')];
+      const overview = sidebar.querySelector('[data-knowledge-overview-link]');
+      const shortcut = filter.querySelector('kbd');
       return {
         rootLeft: rootRect.left,
         rootWidth: rootRect.width,
@@ -602,11 +604,31 @@ test('wide knowledge pages expose three non-overlapping document columns', async
         tocPosition: getComputedStyle(toc).position,
         sidebarOverflowY: getComputedStyle(sidebar).overflowY,
         tocOverflowY: getComputedStyle(toc).overflowY,
+        filterHeight: filter.getBoundingClientRect().height,
+        filterRadius: getComputedStyle(filter).borderRadius,
+        searchIconCount: filter.querySelectorAll('svg').length,
+        shortcutText: shortcut?.textContent?.trim() ?? '',
+        overviewHeight:
+          overview instanceof HTMLElement ? overview.getBoundingClientRect().height : 0,
+        overviewRadius:
+          overview instanceof HTMLElement ? getComputedStyle(overview).borderRadius : '',
+        chapterIconCount: sidebar.querySelectorAll('.knowledge-sidebar__nav-icon--section').length,
+        chapterRowHeights: chapterRows.map((row) => row.getBoundingClientRect().height),
+        chapterRowRadii: chapterRows.map((row) => getComputedStyle(row).borderRadius),
+        chapterRowBorderTops: chapterRows.map((row) => getComputedStyle(row).borderTopWidth),
         countTexts: chapterCounts.map((count) => count.textContent?.trim() ?? ''),
-        countPaddingInline: chapterCounts.map((count) => {
+        countsAreVisuallyHidden: chapterCounts.every((count) => {
           const styles = getComputedStyle(count);
-          return [styles.paddingInlineStart, styles.paddingInlineEnd];
+          return (
+            styles.position === 'absolute' &&
+            styles.width === '1px' &&
+            styles.height === '1px' &&
+            styles.overflow === 'hidden'
+          );
         }),
+        visibleTaxonomyColumns: sidebar.querySelectorAll(
+          '.knowledge-sidebar__number, .knowledge-sidebar__count',
+        ).length,
         chapterRowsAreSingleLine: chapterRows.every((row) => {
           const title = row.querySelector('strong');
           return (
@@ -631,7 +653,7 @@ test('wide knowledge pages expose three non-overlapping document columns', async
       (viewport.width - geometry.rootWidth) / 2,
       0,
     );
-    expect(geometry.sidebarWidth).toBeGreaterThanOrEqual(288);
+    expect(geometry.sidebarWidth).toBeCloseTo(288, 0);
     expect(geometry.tocWidth).toBeGreaterThanOrEqual(240);
     expect(geometry.sidebarRight).toBeLessThanOrEqual(geometry.contentLeft);
     expect(geometry.contentRight).toBeLessThanOrEqual(geometry.tocLeft);
@@ -643,13 +665,26 @@ test('wide knowledge pages expose three non-overlapping document columns', async
     expect(geometry.tocPosition).toBe('sticky');
     expect(geometry.sidebarOverflowY).toBe('visible');
     expect(geometry.tocOverflowY).toBe('visible');
-    expect(geometry.countTexts).toHaveLength(knowledgeSections.length);
-    expect(
-      geometry.countTexts.every((count) => count !== '' && String(Number(count)) === count),
-    ).toBe(true);
-    expect(geometry.countPaddingInline).toEqual(
-      Array.from({ length: knowledgeSections.length }, () => ['0px', '0px']),
+    expect(geometry.filterHeight).toBeGreaterThanOrEqual(42);
+    expect(geometry.filterHeight).toBeLessThanOrEqual(46);
+    expect(geometry.filterRadius).toBe('12px');
+    expect(geometry.searchIconCount).toBe(1);
+    expect(geometry.shortcutText).toBe('Ctrl K');
+    expect(geometry.overviewHeight).toBeCloseTo(40, 0);
+    expect(geometry.overviewRadius).toBe('12px');
+    expect(geometry.chapterIconCount).toBe(knowledgeSections.length);
+    expect(geometry.chapterRowHeights).toHaveLength(knowledgeSections.length);
+    expect(geometry.chapterRowHeights.every((height) => Math.abs(height - 40) <= 1)).toBe(true);
+    expect(geometry.chapterRowRadii).toEqual(
+      Array.from({ length: knowledgeSections.length }, () => '12px'),
     );
+    expect(geometry.chapterRowBorderTops).toEqual(
+      Array.from({ length: knowledgeSections.length }, () => '0px'),
+    );
+    expect(geometry.countTexts).toHaveLength(knowledgeSections.length);
+    expect(geometry.countTexts.every((count) => count !== '')).toBe(true);
+    expect(geometry.countsAreVisuallyHidden).toBe(true);
+    expect(geometry.visibleTaxonomyColumns).toBe(0);
     expect(geometry.chapterRowsAreSingleLine).toBe(true);
     expect(geometry.descriptionsAreHidden).toBe(true);
     expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);

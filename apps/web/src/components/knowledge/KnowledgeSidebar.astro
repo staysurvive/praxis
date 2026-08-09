@@ -1,4 +1,17 @@
 ---
+import {
+  BookOpenText,
+  BrainCircuit,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  FlaskConical,
+  Rocket,
+  Search,
+  ServerCog,
+  Telescope,
+} from 'lucide-astro';
+
 import { uiCopy } from '../../config/copy';
 import { getKnowledgeUrl } from '../../lib/content/domain';
 import type { KnowledgeSidebarEntry, KnowledgeSidebarSection } from './types';
@@ -10,18 +23,49 @@ interface Props {
 
 const { sections, recentEntries } = Astro.props satisfies Props;
 const itemCount = sections.length + recentEntries.length;
+const sectionIcons = {
+  'agent-app-development': Rocket,
+  'llm-principles': BrainCircuit,
+  'fine-tuning-inference-deployment': ServerCog,
+  'practice-cases': FlaskConical,
+  'knowledge-frontier': Telescope,
+};
+const sectionLinks = sections.map((section) => ({
+  section,
+  Icon: sectionIcons[section.key],
+}));
 ---
 
 <aside class="knowledge-sidebar" data-knowledge-sidebar>
   <details class="knowledge-sidebar__disclosure" open>
     <summary class="knowledge-sidebar__summary">
+      <BookOpenText
+        class="knowledge-sidebar__icon knowledge-sidebar__summary-icon"
+        size={18}
+        strokeWidth={1.8}
+        aria-hidden="true"
+      />
       <span>{uiCopy.knowledge.chaptersLabel}</span>
+      <ChevronDown
+        class="knowledge-sidebar__icon knowledge-sidebar__summary-chevron"
+        size={16}
+        strokeWidth={1.8}
+        aria-hidden="true"
+      />
     </summary>
 
     <div class="knowledge-sidebar__body">
       <div class="knowledge-filter" data-knowledge-filter>
-        <label for="knowledge-filter-input">{uiCopy.accessibility.knowledgeFilter}</label>
+        <label class="sr-only" for="knowledge-filter-input">
+          {uiCopy.accessibility.knowledgeFilter}
+        </label>
         <div class="knowledge-filter__control">
+          <Search
+            class="knowledge-sidebar__icon knowledge-filter__icon"
+            size={16}
+            strokeWidth={1.8}
+            aria-hidden="true"
+          />
           <input
             id="knowledge-filter-input"
             type="search"
@@ -29,6 +73,7 @@ const itemCount = sections.length + recentEntries.length;
             autocomplete="off"
             data-knowledge-filter-input
           />
+          <kbd>{uiCopy.knowledge.filterShortcut}</kbd>
         </div>
         <p class="sr-only" role="status" aria-live="polite" data-knowledge-filter-status>
           {uiCopy.knowledge.filterResultPrefix}
@@ -38,33 +83,69 @@ const itemCount = sections.length + recentEntries.length;
       </div>
 
       <nav aria-label={uiCopy.accessibility.knowledgeDocsNavigation}>
-        <a class="knowledge-overview-link" href={getKnowledgeUrl()}>
-          <span>{uiCopy.knowledge.overviewLabel}</span>
+        <a
+          class="knowledge-sidebar__nav-link knowledge-sidebar__nav-link--overview"
+          href={getKnowledgeUrl()}
+          data-knowledge-overview-link
+        >
+          <BookOpenText
+            class="knowledge-sidebar__icon knowledge-sidebar__nav-icon"
+            size={16}
+            strokeWidth={1.8}
+            aria-hidden="true"
+          />
+          <span class="knowledge-sidebar__item-copy">
+            <strong>{uiCopy.knowledge.overviewLabel}</strong>
+          </span>
+          <ChevronRight
+            class="knowledge-sidebar__icon knowledge-sidebar__chevron"
+            size={16}
+            strokeWidth={1.8}
+            aria-hidden="true"
+          />
         </a>
 
-        <section class="knowledge-sidebar__group" aria-labelledby="knowledge-chapters-title">
-          <h2 id="knowledge-chapters-title">{uiCopy.knowledge.chaptersLabel}</h2>
+        <section
+          class="knowledge-sidebar__group knowledge-sidebar__group--chapters"
+          aria-labelledby="knowledge-chapters-title"
+        >
+          <h2 id="knowledge-chapters-title" class="sr-only">
+            {uiCopy.knowledge.chaptersLabel}
+          </h2>
           <ol>
             {
-              sections.map((section) => (
+              sectionLinks.map(({ section, Icon }) => (
                 <li
                   data-knowledge-filter-item
                   data-knowledge-filter-text={`${section.label} ${section.description} ${section.topics.join(' ')}`}
                 >
-                  <a href={section.href} aria-current={section.isCurrent ? 'page' : undefined}>
-                    <span class="knowledge-sidebar__number" aria-hidden="true">
-                      {section.number}
-                    </span>
+                  <a
+                    class="knowledge-sidebar__nav-link"
+                    href={section.href}
+                    title={section.label}
+                    aria-current={section.isCurrent ? 'page' : undefined}
+                    data-knowledge-section-link
+                    data-knowledge-section-number={section.number}
+                  >
+                    <Icon
+                      class="knowledge-sidebar__icon knowledge-sidebar__nav-icon knowledge-sidebar__nav-icon--section"
+                      size={16}
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                    />
                     <span class="knowledge-sidebar__item-copy">
                       <strong>{section.label}</strong>
                       <small class="knowledge-sidebar__description">{section.description}</small>
                     </span>
-                    <span
-                      class="knowledge-sidebar__count"
-                      aria-label={uiCopy.knowledge.sectionCount(section.count)}
-                    >
-                      {section.count}
+                    <span class="sr-only" data-knowledge-section-count>
+                      {uiCopy.knowledge.sectionCount(section.count)}
                     </span>
+                    <ChevronRight
+                      class="knowledge-sidebar__icon knowledge-sidebar__chevron"
+                      size={16}
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                    />
                   </a>
                 </li>
               ))
@@ -72,7 +153,10 @@ const itemCount = sections.length + recentEntries.length;
           </ol>
         </section>
 
-        <section class="knowledge-sidebar__group" aria-labelledby="knowledge-recent-title">
+        <section
+          class="knowledge-sidebar__group knowledge-sidebar__group--recent"
+          aria-labelledby="knowledge-recent-title"
+        >
           <h2 id="knowledge-recent-title">{uiCopy.knowledge.recentLabel}</h2>
           <ul>
             {
@@ -81,11 +165,29 @@ const itemCount = sections.length + recentEntries.length;
                   data-knowledge-filter-item
                   data-knowledge-filter-text={`${entry.title} ${entry.summary} ${entry.tags.join(' ')} ${entry.typeLabel}`}
                 >
-                  <a href={entry.href} aria-current={entry.isCurrent ? 'page' : undefined}>
+                  <a
+                    class="knowledge-sidebar__nav-link knowledge-sidebar__nav-link--article"
+                    href={entry.href}
+                    title={entry.title}
+                    aria-current={entry.isCurrent ? 'page' : undefined}
+                    data-knowledge-recent-link
+                  >
+                    <FileText
+                      class="knowledge-sidebar__icon knowledge-sidebar__nav-icon"
+                      size={16}
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                    />
                     <span class="knowledge-sidebar__item-copy">
                       <strong>{entry.title}</strong>
-                      <small>{entry.typeLabel}</small>
+                      <small class="sr-only">{entry.typeLabel}</small>
                     </span>
+                    <ChevronRight
+                      class="knowledge-sidebar__icon knowledge-sidebar__chevron"
+                      size={16}
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                    />
                   </a>
                 </li>
               ))
@@ -99,6 +201,8 @@ const itemCount = sections.length + recentEntries.length;
 
 <style>
   .knowledge-sidebar {
+    --knowledge-nav-radius: 0.75rem;
+
     min-width: 0;
   }
 
@@ -108,61 +212,74 @@ const itemCount = sections.length + recentEntries.length;
   }
 
   .knowledge-sidebar__summary {
-    display: list-item;
-    min-block-size: 3rem;
-    padding: 0.75rem 0;
-    border-block: 1px solid var(--color-line);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.65rem;
+    align-items: center;
+    min-block-size: 2.75rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--knowledge-nav-radius);
+    background: var(--color-bg-surface);
     color: var(--color-fg);
     cursor: pointer;
-    font-size: var(--text-meta);
+    font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0;
-    line-height: 1.5;
+    line-height: 1.45;
+    list-style: none;
   }
 
   .knowledge-sidebar__summary::marker,
   .knowledge-sidebar__summary::-webkit-details-marker {
-    color: var(--color-brand);
+    display: none;
+    content: '';
+  }
+
+  .knowledge-sidebar__summary-chevron {
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+
+  .knowledge-sidebar__disclosure[open] .knowledge-sidebar__summary-chevron {
+    transform: rotate(180deg);
   }
 
   .knowledge-sidebar__body {
-    padding-block: 1.25rem;
+    padding-block: 1rem;
   }
 
   .knowledge-filter {
     display: none;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
 
   :global([data-knowledge-docs-ready]) .knowledge-filter {
-    display: grid;
-  }
-
-  .knowledge-filter label,
-  .knowledge-sidebar__group h2 {
-    color: var(--color-fg-subtle);
-    font-size: var(--text-kicker);
-    font-weight: 600;
-    letter-spacing: 0;
-    line-height: 1.5;
-    text-transform: uppercase;
+    display: block;
   }
 
   .knowledge-filter__control {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.5rem;
     align-items: center;
     min-block-size: 2.75rem;
-    padding-inline: 0.7rem;
+    padding: 0.625rem 0.75rem;
     border: 1px solid var(--color-line);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-surface);
+    border-radius: var(--knowledge-nav-radius);
+    background: color-mix(in srgb, var(--color-bg-surface) 72%, transparent);
     color: var(--color-fg-subtle);
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .knowledge-filter__control:hover {
+    background: var(--color-bg-surface);
   }
 
   .knowledge-filter__control:focus-within {
     border-color: var(--color-focus-ring);
+    background: var(--color-bg-surface);
     box-shadow: var(--shadow-focus);
   }
 
@@ -173,39 +290,54 @@ const itemCount = sections.length + recentEntries.length;
     outline: 0;
     background: transparent;
     color: var(--color-fg);
-    font-size: var(--text-meta);
+    font-size: 0.875rem;
+    line-height: 1.45;
   }
 
   .knowledge-filter input::placeholder {
     color: var(--color-fg-subtle);
   }
 
-  .knowledge-overview-link {
-    display: flex;
+  .knowledge-filter kbd {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 0;
-    border-block: 1px solid var(--color-line);
-    color: var(--color-fg);
-    font-size: var(--text-meta);
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .knowledge-overview-link:hover {
-    color: var(--color-brand-strong);
+    min-block-size: 1.4rem;
+    padding-inline: 0.4rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.35rem;
+    background: var(--color-bg);
+    color: var(--color-fg-subtle);
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    line-height: 1;
+    white-space: nowrap;
   }
 
   .knowledge-sidebar__group {
+    margin-top: 0;
+  }
+
+  .knowledge-sidebar__group--chapters {
+    margin-top: 0.25rem;
+  }
+
+  .knowledge-sidebar__group--recent {
     margin-top: 1.5rem;
   }
 
   .knowledge-sidebar__group h2 {
-    margin: 0 0 0.6rem;
+    margin: 0 0 0.65rem;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-kicker);
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.5;
   }
 
   .knowledge-sidebar__group ol,
   .knowledge-sidebar__group ul {
+    display: grid;
+    gap: 0.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -215,44 +347,31 @@ const itemCount = sections.length + recentEntries.length;
     display: none;
   }
 
-  .knowledge-sidebar__group a {
+  .knowledge-sidebar__nav-link {
     display: grid;
-    grid-template-columns: 1.7rem minmax(0, 1fr) auto;
-    gap: 0.55rem;
+    grid-template-columns: 1rem minmax(0, 1fr) 1rem;
+    gap: 0.75rem;
     align-items: start;
-    padding: 0.72rem 0.35rem;
-    border-top: 1px solid var(--color-line-subtle);
+    min-width: 0;
+    min-block-size: 2.5rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--knowledge-nav-radius);
     color: var(--color-fg-muted);
     text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
   }
 
-  .knowledge-sidebar__group ul a {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .knowledge-sidebar__group a:hover,
-  .knowledge-sidebar__group a[aria-current='page'] {
-    background: var(--color-brand-tint);
+  .knowledge-sidebar__nav-link:hover {
+    background: var(--color-bg-surface);
     color: var(--color-fg);
   }
 
-  .knowledge-sidebar__group a[aria-current='page'] {
-    box-shadow: inset 2px 0 0 var(--color-brand);
-  }
-
-  .knowledge-sidebar__group
-    a[aria-current='page']
-    :is(.knowledge-sidebar__number, .knowledge-sidebar__count, small) {
-    color: var(--color-fg-muted);
-  }
-
-  .knowledge-sidebar__number,
-  .knowledge-sidebar__count {
-    color: var(--color-fg-subtle);
-    font-family: var(--font-serif);
-    font-size: 0.72rem;
-    font-variant-numeric: tabular-nums;
-    line-height: 1.65;
+  .knowledge-sidebar__nav-link[aria-current='page'] {
+    background: color-mix(in srgb, var(--color-brand-tint) 82%, transparent);
+    color: var(--color-brand-strong);
+    font-weight: 500;
   }
 
   .knowledge-sidebar__item-copy {
@@ -262,12 +381,13 @@ const itemCount = sections.length + recentEntries.length;
   }
 
   .knowledge-sidebar__item-copy strong {
+    min-width: 0;
     overflow-wrap: anywhere;
     color: inherit;
-    font-size: var(--text-meta);
-    font-weight: 500;
+    font-size: 0.875rem;
+    font-weight: inherit;
     letter-spacing: 0;
-    line-height: 1.55;
+    line-height: 1.45;
   }
 
   .knowledge-sidebar__item-copy small {
@@ -275,6 +395,30 @@ const itemCount = sections.length + recentEntries.length;
     color: var(--color-fg-subtle);
     font-size: 0.72rem;
     line-height: 1.5;
+  }
+
+  .knowledge-sidebar :global(.knowledge-sidebar__icon) {
+    flex: 0 0 auto;
+    color: var(--color-fg-subtle);
+  }
+
+  .knowledge-sidebar :global(.knowledge-sidebar__nav-icon) {
+    margin-top: 0.12rem;
+    color: color-mix(in srgb, var(--color-brand) 72%, var(--color-fg-subtle));
+  }
+
+  .knowledge-sidebar :global(.knowledge-sidebar__chevron) {
+    margin-top: 0.12rem;
+    color: var(--color-fg-subtle);
+  }
+
+  .knowledge-sidebar__nav-link:hover :global(.knowledge-sidebar__chevron) {
+    color: var(--color-fg-muted);
+  }
+
+  .knowledge-sidebar__nav-link[aria-current='page']
+    :global(:is(.knowledge-sidebar__nav-icon, .knowledge-sidebar__chevron)) {
+    color: var(--color-brand);
   }
 
   @media (min-width: 64rem) {
@@ -296,42 +440,29 @@ const itemCount = sections.length + recentEntries.length;
       padding-block: 0;
     }
 
-    .knowledge-filter label {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .knowledge-sidebar__group ol a {
-      grid-template-columns: 1.7rem minmax(0, 1fr) auto;
+    .knowledge-sidebar__nav-link {
       align-items: center;
-      min-block-size: 2.65rem;
-      padding-block: 0.5rem;
+      height: 2.5rem;
     }
 
-    .knowledge-sidebar__group ol .knowledge-sidebar__item-copy {
+    .knowledge-sidebar__item-copy {
       display: block;
     }
 
-    .knowledge-sidebar__group ol .knowledge-sidebar__item-copy strong {
+    .knowledge-sidebar__item-copy strong {
       display: block;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .knowledge-sidebar__group ol .knowledge-sidebar__description {
+    .knowledge-sidebar__description {
       display: none;
     }
 
-    .knowledge-sidebar__group ol :is(.knowledge-sidebar__number, .knowledge-sidebar__count) {
-      font-family: var(--font-sans);
-      line-height: 1;
+    .knowledge-sidebar :global(.knowledge-sidebar__nav-icon),
+    .knowledge-sidebar :global(.knowledge-sidebar__chevron) {
+      margin-top: 0;
     }
   }
 

@@ -17,7 +17,7 @@ interface Props {
 const { entry, compact = false } = Astro.props satisfies Props;
 ---
 
-<article class:list={["content-card", compact && "content-card--compact"]}>
+<article class:list={['content-card', compact && 'content-card--compact']}>
   <a href={entry.url}>
     <span>{entry.typeLabel}</span>
     <h2>{entry.title}</h2>
@@ -80,10 +80,12 @@ live in `src/config/editorial-heroes.ts`. It must preserve one real H1 and expos
   `knowledge/[key].astro` section and article uses the shared `KnowledgeDocsLayout.astro` document shell with typed
   sidebar and table-of-contents view models; those presentational components do not query content or infer section
   membership.
-- The wide knowledge shell caps at `108rem` and uses a compact chapter rail, flexible reading column, and page TOC.
-  Desktop chapter rows keep number, title, and an unpadded real count on one line while retaining descriptions for
-  filtering and narrow disclosures. Rails use document scrolling; if the viewport is too short for safe sticky
-  positioning, return them to normal flow instead of adding nested scroll containers.
+- The wide knowledge shell caps at `108rem` and uses an `18rem` product-navigation rail, flexible reading column, and
+  page TOC. The rail adapts CC Switch's verified 44px search and 40px row geometry with library icons, 12px scoped
+  navigation radii, a light brand-tint current state, and 4px row rhythm while retaining Praxis tokens and typography.
+  Chapter numbers stay in the reading header; real counts remain accessible but are not repeated visually in the rail.
+  Descriptions remain filter data and reappear in narrow disclosures. Rails use document scrolling; if the viewport is
+  too short for safe sticky positioning, return them to normal flow instead of adding nested scroll containers.
 - Root Hero art is local, text-free, eager with explicit width/height, and layered inside the Hero only. Do not put a
   background URL in inline styles, introduce remote art, or add a browser script merely for reveal/parallax.
 - Use `--section-min-block-size` on desktop; at narrow widths, place semantic copy above the image rather than relying on

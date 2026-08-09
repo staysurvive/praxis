@@ -140,6 +140,7 @@ export const uiCopy = {
     tableOfContentsTitle: '本页内容',
     emptyTableOfContents: '本页暂无可跳转的小节。',
     filterPlaceholder: '筛选章节与文章…',
+    filterShortcut: 'Ctrl K',
     filterResultPrefix: '已显示',
     filterResultSuffix: '个知识入口',
     filterEmptyResult: '没有匹配的知识入口',
