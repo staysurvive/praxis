@@ -1,0 +1,343 @@
+---
+import { uiCopy } from '../../config/copy';
+import { getKnowledgeUrl } from '../../lib/content/domain';
+import type { KnowledgeSidebarEntry, KnowledgeSidebarSection } from './types';
+
+interface Props {
+  sections: readonly KnowledgeSidebarSection[];
+  recentEntries: readonly KnowledgeSidebarEntry[];
+}
+
+const { sections, recentEntries } = Astro.props satisfies Props;
+const itemCount = sections.length + recentEntries.length;
+---
+
+<aside class="knowledge-sidebar" data-knowledge-sidebar>
+  <details class="knowledge-sidebar__disclosure" open>
+    <summary class="knowledge-sidebar__summary">
+      <span>{uiCopy.knowledge.chaptersLabel}</span>
+    </summary>
+
+    <div class="knowledge-sidebar__body">
+      <div class="knowledge-filter" data-knowledge-filter>
+        <label for="knowledge-filter-input">{uiCopy.accessibility.knowledgeFilter}</label>
+        <div class="knowledge-filter__control">
+          <input
+            id="knowledge-filter-input"
+            type="search"
+            placeholder={uiCopy.knowledge.filterPlaceholder}
+            autocomplete="off"
+            data-knowledge-filter-input
+          />
+        </div>
+        <p class="sr-only" role="status" aria-live="polite" data-knowledge-filter-status>
+          {uiCopy.knowledge.filterResultPrefix}
+          {itemCount}
+          {uiCopy.knowledge.filterResultSuffix}
+        </p>
+      </div>
+
+      <nav aria-label={uiCopy.accessibility.knowledgeDocsNavigation}>
+        <a class="knowledge-overview-link" href={getKnowledgeUrl()}>
+          <span>{uiCopy.knowledge.overviewLabel}</span>
+        </a>
+
+        <section class="knowledge-sidebar__group" aria-labelledby="knowledge-chapters-title">
+          <h2 id="knowledge-chapters-title">{uiCopy.knowledge.chaptersLabel}</h2>
+          <ol>
+            {
+              sections.map((section) => (
+                <li
+                  data-knowledge-filter-item
+                  data-knowledge-filter-text={`${section.label} ${section.description} ${section.topics.join(' ')}`}
+                >
+                  <a href={section.href} aria-current={section.isCurrent ? 'page' : undefined}>
+                    <span class="knowledge-sidebar__number" aria-hidden="true">
+                      {section.number}
+                    </span>
+                    <span class="knowledge-sidebar__item-copy">
+                      <strong>{section.label}</strong>
+                      <small class="knowledge-sidebar__description">{section.description}</small>
+                    </span>
+                    <span
+                      class="knowledge-sidebar__count"
+                      aria-label={uiCopy.knowledge.sectionCount(section.count)}
+                    >
+                      {section.count}
+                    </span>
+                  </a>
+                </li>
+              ))
+            }
+          </ol>
+        </section>
+
+        <section class="knowledge-sidebar__group" aria-labelledby="knowledge-recent-title">
+          <h2 id="knowledge-recent-title">{uiCopy.knowledge.recentLabel}</h2>
+          <ul>
+            {
+              recentEntries.map((entry) => (
+                <li
+                  data-knowledge-filter-item
+                  data-knowledge-filter-text={`${entry.title} ${entry.summary} ${entry.tags.join(' ')} ${entry.typeLabel}`}
+                >
+                  <a href={entry.href} aria-current={entry.isCurrent ? 'page' : undefined}>
+                    <span class="knowledge-sidebar__item-copy">
+                      <strong>{entry.title}</strong>
+                      <small>{entry.typeLabel}</small>
+                    </span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      </nav>
+    </div>
+  </details>
+</aside>
+
+<style>
+  .knowledge-sidebar {
+    min-width: 0;
+  }
+
+  .knowledge-sidebar__disclosure,
+  .knowledge-sidebar__body {
+    min-width: 0;
+  }
+
+  .knowledge-sidebar__summary {
+    display: list-item;
+    min-block-size: 3rem;
+    padding: 0.75rem 0;
+    border-block: 1px solid var(--color-line);
+    color: var(--color-fg);
+    cursor: pointer;
+    font-size: var(--text-meta);
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.5;
+  }
+
+  .knowledge-sidebar__summary::marker,
+  .knowledge-sidebar__summary::-webkit-details-marker {
+    color: var(--color-brand);
+  }
+
+  .knowledge-sidebar__body {
+    padding-block: 1.25rem;
+  }
+
+  .knowledge-filter {
+    display: none;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  :global([data-knowledge-docs-ready]) .knowledge-filter {
+    display: grid;
+  }
+
+  .knowledge-filter label,
+  .knowledge-sidebar__group h2 {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-kicker);
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  .knowledge-filter__control {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    min-block-size: 2.75rem;
+    padding-inline: 0.7rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
+    color: var(--color-fg-subtle);
+  }
+
+  .knowledge-filter__control:focus-within {
+    border-color: var(--color-focus-ring);
+    box-shadow: var(--shadow-focus);
+  }
+
+  .knowledge-filter input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--color-fg);
+    font-size: var(--text-meta);
+  }
+
+  .knowledge-filter input::placeholder {
+    color: var(--color-fg-subtle);
+  }
+
+  .knowledge-overview-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-block: 1px solid var(--color-line);
+    color: var(--color-fg);
+    font-size: var(--text-meta);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .knowledge-overview-link:hover {
+    color: var(--color-brand-strong);
+  }
+
+  .knowledge-sidebar__group {
+    margin-top: 1.5rem;
+  }
+
+  .knowledge-sidebar__group h2 {
+    margin: 0 0 0.6rem;
+  }
+
+  .knowledge-sidebar__group ol,
+  .knowledge-sidebar__group ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .knowledge-sidebar__group li[hidden] {
+    display: none;
+  }
+
+  .knowledge-sidebar__group a {
+    display: grid;
+    grid-template-columns: 1.7rem minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    align-items: start;
+    padding: 0.72rem 0.35rem;
+    border-top: 1px solid var(--color-line-subtle);
+    color: var(--color-fg-muted);
+    text-decoration: none;
+  }
+
+  .knowledge-sidebar__group ul a {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .knowledge-sidebar__group a:hover,
+  .knowledge-sidebar__group a[aria-current='page'] {
+    background: var(--color-brand-tint);
+    color: var(--color-fg);
+  }
+
+  .knowledge-sidebar__group a[aria-current='page'] {
+    box-shadow: inset 2px 0 0 var(--color-brand);
+  }
+
+  .knowledge-sidebar__group
+    a[aria-current='page']
+    :is(.knowledge-sidebar__number, .knowledge-sidebar__count, small) {
+    color: var(--color-fg-muted);
+  }
+
+  .knowledge-sidebar__number,
+  .knowledge-sidebar__count {
+    color: var(--color-fg-subtle);
+    font-family: var(--font-serif);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.65;
+  }
+
+  .knowledge-sidebar__item-copy {
+    display: grid;
+    min-width: 0;
+    gap: 0.18rem;
+  }
+
+  .knowledge-sidebar__item-copy strong {
+    overflow-wrap: anywhere;
+    color: inherit;
+    font-size: var(--text-meta);
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.55;
+  }
+
+  .knowledge-sidebar__item-copy small {
+    overflow-wrap: anywhere;
+    color: var(--color-fg-subtle);
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 64rem) {
+    .knowledge-sidebar {
+      position: sticky;
+      top: calc(var(--header-height) + 1.5rem);
+      align-self: start;
+    }
+
+    .knowledge-sidebar__summary {
+      display: none;
+    }
+
+    .knowledge-sidebar__disclosure:not([open]) > .knowledge-sidebar__body {
+      display: block;
+    }
+
+    .knowledge-sidebar__body {
+      padding-block: 0;
+    }
+
+    .knowledge-filter label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .knowledge-sidebar__group ol a {
+      grid-template-columns: 1.7rem minmax(0, 1fr) auto;
+      align-items: center;
+      min-block-size: 2.65rem;
+      padding-block: 0.5rem;
+    }
+
+    .knowledge-sidebar__group ol .knowledge-sidebar__item-copy {
+      display: block;
+    }
+
+    .knowledge-sidebar__group ol .knowledge-sidebar__item-copy strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .knowledge-sidebar__group ol .knowledge-sidebar__description {
+      display: none;
+    }
+
+    .knowledge-sidebar__group ol :is(.knowledge-sidebar__number, .knowledge-sidebar__count) {
+      font-family: var(--font-sans);
+      line-height: 1;
+    }
+  }
+
+  @media (min-width: 64rem) and (max-height: 45rem) {
+    .knowledge-sidebar {
+      position: static;
+    }
+  }
+</style>

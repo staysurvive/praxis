@@ -444,10 +444,21 @@ test('knowledge exposes five truthful sections and all recent knowledge', async 
   );
 });
 
-test('knowledge section empty state and detail keep a knowledge return path', async ({ page }) => {
+test('knowledge interiors share the documentation shell and keep truthful return paths', async ({
+  page,
+}) => {
   for (const section of knowledgeSections) {
     await page.goto(getKnowledgeUrl(section.slug));
+    await expect(page.locator('[data-knowledge-docs]')).toHaveCount(1);
+    await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.getByRole('heading', { level: 1, name: section.label })).toBeVisible();
+    await expect(page.getByText(`Chapter ${section.number}`)).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: '本章定位' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: '主题范围' })).toBeVisible();
+    await expect(page.locator('[data-knowledge-sidebar] [aria-current="page"]')).toHaveAttribute(
+      'href',
+      getKnowledgeUrl(section.slug),
+    );
     await expect(page.getByRole('heading', { name: '此入口尚无作者内容' })).toBeVisible();
     await expect(page.getByRole('link', { name: '返回知识总览' })).toHaveAttribute(
       'href',
@@ -463,15 +474,191 @@ test('knowledge section empty state and detail keep a knowledge return path', as
     .getByRole('link', { name: /先审后信/ })
     .click();
   await expect(page).toHaveURL(/\/knowledge\/ai-code-security-review$/);
+  await expect(page.locator('[data-knowledge-docs]')).toHaveCount(1);
+  await expect(page.locator('h1')).toHaveCount(1);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('先审后信');
   await expect(page.getByRole('heading', { name: /相互否证/ })).toBeVisible();
+  await expect(page.locator('.meta-line')).toContainText('笔记');
+  await expect(page.locator('.meta-line')).toContainText('行而成');
+  await expect(page.locator('.meta-line')).toContainText('已复盘');
+  await expect(page.locator('.knowledge-article-facts')).toContainText('praxis-note-0001');
+  await expect(page.locator('.knowledge-article-facts')).toContainText('安全');
+  await expect(page.getByRole('heading', { level: 2, name: '长期沉淀' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: '真实实践时间轴' })).toBeVisible();
   await expect(page.locator('.content-back')).toHaveAttribute('href', '/knowledge');
+  await expect(page.locator('[data-knowledge-toc-link]')).toHaveCount(6);
+  await expect(
+    page.locator('[data-knowledge-toc-link="方法不是看一遍而是相互否证"]'),
+  ).toHaveAttribute('href', '#方法不是看一遍而是相互否证');
+  await expect(page.locator('[data-knowledge-sidebar] [aria-current="page"]')).toHaveAttribute(
+    'href',
+    '/knowledge/ai-code-security-review',
+  );
 
   await page.goto('/knowledge/what-green-gates-miss');
+  await expect(page.locator('h1')).toHaveCount(1);
+  await expect(page.locator('[data-knowledge-docs]')).toHaveAttribute(
+    'data-knowledge-docs-ready',
+    'true',
+  );
+  await expect(page.locator('[data-knowledge-sidebar] [aria-current="page"]')).toHaveAttribute(
+    'href',
+    '/knowledge/what-green-gates-miss',
+  );
+  await expect(page.locator('[data-knowledge-toc-link]')).toHaveCount(0);
+  const emptyTocMessage = page.getByText('本页暂无可跳转的小节。');
+  if (!(await emptyTocMessage.isVisible())) {
+    await page.locator('[data-knowledge-toc] summary').click();
+  }
+  await expect(emptyTocMessage).toBeVisible();
   const authoredLegacyLink = page.getByRole('link', { name: '关于对抗式安全审查的笔记' });
   await expect(authoredLegacyLink).toHaveAttribute('href', '/notes/ai-code-security-review');
   await authoredLegacyLink.click();
   await expect.poll(() => new URL(page.url()).pathname).toBe('/knowledge/ai-code-security-review');
+});
+
+test('knowledge filter and shortcut progressively enhance the rendered navigation', async ({
+  page,
+}) => {
+  await page.goto('/knowledge/ai-code-security-review');
+
+  const sidebarDisclosure = page.locator('[data-knowledge-sidebar] details');
+  const sidebarSummary = sidebarDisclosure.locator('summary');
+  const input = page.locator('[data-knowledge-filter-input]');
+  if (!(await input.isVisible()) && (await sidebarSummary.isVisible())) {
+    await sidebarSummary.click();
+  }
+
+  await expect(input).toBeVisible();
+  await page.keyboard.press('Control+k');
+  await expect(input).toBeFocused();
+
+  await input.fill('安全');
+  await expect(page.locator('[data-knowledge-filter-item]:not([hidden])')).toHaveCount(1);
+  await expect(page.locator('[data-knowledge-filter-status]')).toHaveText('已显示 1 个知识入口');
+
+  await input.fill('不存在的入口');
+  await expect(page.locator('[data-knowledge-filter-item]:not([hidden])')).toHaveCount(0);
+  await expect(page.locator('[data-knowledge-filter-status]')).toHaveText('没有匹配的知识入口');
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('[data-knowledge-filter-item]:not([hidden])')).toHaveCount(
+    knowledgeSections.length + 2,
+  );
+});
+
+test('wide knowledge pages expose three non-overlapping document columns', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile-chromium', 'Desktop document geometry only.');
+
+  for (const viewport of [
+    { width: 1536, height: 900 },
+    { width: 1920, height: 1021 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/knowledge/ai-code-security-review');
+
+    const geometry = await page.locator('[data-knowledge-docs]').evaluate((root) => {
+      const sidebar = root.querySelector('[data-knowledge-sidebar]');
+      const content = root.querySelector('[data-knowledge-article-view]');
+      const toc = root.querySelector('[data-knowledge-toc]');
+      const filter = root.querySelector('.knowledge-filter__control');
+      const heading = content?.querySelector('h1');
+      const tocTitle = toc?.querySelector('.knowledge-toc__body h2');
+      if (
+        !(root instanceof HTMLElement) ||
+        !(sidebar instanceof HTMLElement) ||
+        !(content instanceof HTMLElement) ||
+        !(toc instanceof HTMLElement) ||
+        !(filter instanceof HTMLElement) ||
+        !(heading instanceof HTMLElement) ||
+        !(tocTitle instanceof HTMLElement)
+      ) {
+        throw new Error('Knowledge document columns are missing.');
+      }
+
+      const rootRect = root.getBoundingClientRect();
+      const sidebarRect = sidebar.getBoundingClientRect();
+      const contentRect = content.getBoundingClientRect();
+      const tocRect = toc.getBoundingClientRect();
+      const chapterRows = [...sidebar.querySelectorAll('.knowledge-sidebar__group ol a')];
+      const chapterCounts = [...sidebar.querySelectorAll('.knowledge-sidebar__count')];
+      return {
+        rootLeft: rootRect.left,
+        rootWidth: rootRect.width,
+        sidebarRight: sidebarRect.right,
+        sidebarWidth: sidebarRect.width,
+        contentLeft: contentRect.left,
+        contentRight: contentRect.right,
+        tocLeft: tocRect.left,
+        tocWidth: tocRect.width,
+        firstViewportTops: [
+          filter.getBoundingClientRect().top,
+          heading.getBoundingClientRect().top,
+          tocTitle.getBoundingClientRect().top,
+        ],
+        sidebarPosition: getComputedStyle(sidebar).position,
+        tocPosition: getComputedStyle(toc).position,
+        sidebarOverflowY: getComputedStyle(sidebar).overflowY,
+        tocOverflowY: getComputedStyle(toc).overflowY,
+        countTexts: chapterCounts.map((count) => count.textContent?.trim() ?? ''),
+        countPaddingInline: chapterCounts.map((count) => {
+          const styles = getComputedStyle(count);
+          return [styles.paddingInlineStart, styles.paddingInlineEnd];
+        }),
+        chapterRowsAreSingleLine: chapterRows.every((row) => {
+          const title = row.querySelector('strong');
+          return (
+            title instanceof HTMLElement &&
+            getComputedStyle(title).whiteSpace === 'nowrap' &&
+            row.scrollHeight <= row.clientHeight
+          );
+        }),
+        descriptionsAreHidden: [
+          ...sidebar.querySelectorAll('.knowledge-sidebar__description'),
+        ].every((description) => getComputedStyle(description).display === 'none'),
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      };
+    });
+
+    expect(geometry.rootWidth, `${viewport.width}px shell width`).toBeCloseTo(
+      Math.min(viewport.width - 48, 1728),
+      0,
+    );
+    expect(geometry.rootLeft, `${viewport.width}px shell centering`).toBeCloseTo(
+      (viewport.width - geometry.rootWidth) / 2,
+      0,
+    );
+    expect(geometry.sidebarWidth).toBeGreaterThanOrEqual(288);
+    expect(geometry.tocWidth).toBeGreaterThanOrEqual(240);
+    expect(geometry.sidebarRight).toBeLessThanOrEqual(geometry.contentLeft);
+    expect(geometry.contentRight).toBeLessThanOrEqual(geometry.tocLeft);
+    expect(
+      Math.max(...geometry.firstViewportTops) - Math.min(...geometry.firstViewportTops),
+      `${viewport.width}px first viewport alignment`,
+    ).toBeLessThanOrEqual(96);
+    expect(geometry.sidebarPosition).toBe('sticky');
+    expect(geometry.tocPosition).toBe('sticky');
+    expect(geometry.sidebarOverflowY).toBe('visible');
+    expect(geometry.tocOverflowY).toBe('visible');
+    expect(geometry.countTexts).toHaveLength(knowledgeSections.length);
+    expect(
+      geometry.countTexts.every((count) => count !== '' && String(Number(count)) === count),
+    ).toBe(true);
+    expect(geometry.countPaddingInline).toEqual(
+      Array.from({ length: knowledgeSections.length }, () => ['0px', '0px']),
+    );
+    expect(geometry.chapterRowsAreSingleLine).toBe(true);
+    expect(geometry.descriptionsAreHidden).toBe(true);
+    expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
+  }
+
+  await page.setViewportSize({ width: 1536, height: 700 });
+  await page.goto('/knowledge/ai-code-security-review');
+  await expect(page.locator('[data-knowledge-sidebar]')).toHaveCSS('position', 'static');
+  await expect(page.locator('[data-knowledge-toc]')).toHaveCSS('position', 'static');
 });
 
 test('projects remain a single page with the one stable detail exception', async ({ page }) => {
@@ -503,7 +690,7 @@ test('journey stays empty and about uses only confirmed site identity', async ({
   await expect(page.getByText('一个关于长期思考、真实行动与持续复盘的个人实践站。')).toHaveCount(2);
 });
 
-test('primary pages use their own editorial art while knowledge interiors keep the reading shell', async ({
+test('primary pages use their own editorial art while knowledge interiors keep the docs shell', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1536, height: 791 });
@@ -568,7 +755,9 @@ test('primary pages use their own editorial art while knowledge interiors keep t
 
   await page.goto(firstKnowledgeSectionUrl);
   await expect(page.locator('[data-page-hero]')).toHaveCount(0);
-  await expect(page.locator('.page-hero')).toHaveCount(1);
+  await expect(page.locator('.page-hero')).toHaveCount(0);
+  await expect(page.locator('[data-knowledge-docs]')).toHaveCount(1);
+  await expect(page.locator('[data-knowledge-section-view]')).toHaveCount(1);
 });
 
 test('missing routes use the branded 404', async ({ page }) => {
@@ -1057,6 +1246,27 @@ test('a 320px viewport has no page-level horizontal overflow', async ({ page }) 
     expect(dimensions.scrollWidth, path).toBeLessThanOrEqual(dimensions.clientWidth);
   }
 
+  await page.goto(firstKnowledgeSectionUrl);
+  const docsDisclosure = page.locator('[data-knowledge-sidebar] details');
+  if (
+    !(await docsDisclosure.evaluate(
+      (details) => details instanceof HTMLDetailsElement && details.open,
+    ))
+  ) {
+    await docsDisclosure.locator('summary').click();
+  }
+  const chapterDescriptions = docsDisclosure.locator('.knowledge-sidebar__description');
+  await expect(chapterDescriptions).toHaveCount(knowledgeSections.length);
+  expect(
+    await chapterDescriptions.evaluateAll((descriptions) =>
+      descriptions.every(
+        (description) =>
+          getComputedStyle(description).display !== 'none' &&
+          description.getBoundingClientRect().height > 0,
+      ),
+    ),
+  ).toBe(true);
+
   await page.goto('/knowledge');
   const knowledgeMenu = page.locator('details[data-knowledge-menu]');
   await knowledgeMenu.locator('summary[data-knowledge-menu-trigger]').click();
@@ -1223,7 +1433,6 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
     .locator('[data-page-hero="knowledge"] img')
     .evaluate((image) => getComputedStyle(image).animationName);
   expect(editorialArtAnimation).toBe('none');
-
 });
 
 test('editorial hero artwork is excluded in forced-colors mode', async ({ page }) => {
@@ -1381,6 +1590,9 @@ test('core content remains readable without JavaScript', async ({ browser }) => 
     .locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`)
     .click();
   await expect(page).toHaveURL(new RegExp(`${firstKnowledgeSectionUrl}$`));
+  await expect(page.locator('[data-knowledge-sidebar] [data-knowledge-filter-item]')).toHaveCount(
+    knowledgeSections.length + 2,
+  );
   await expect(page.getByRole('heading', { name: '此入口尚无作者内容' })).toBeVisible();
   await page.getByRole('link', { name: '返回知识总览' }).click();
   await expect(page).toHaveURL(/\/knowledge$/);
@@ -1390,7 +1602,13 @@ test('core content remains readable without JavaScript', async ({ browser }) => 
     .getByRole('link', { name: /先审后信/ })
     .click();
   await expect(page.getByRole('heading', { level: 1 })).toContainText('先审后信');
-  await page.locator('.content-back').click();
+  const firstTocLink = page.locator('[data-knowledge-toc-link]').first();
+  const firstTocHref = await firstTocLink.getAttribute('href');
+  expect(firstTocHref).toMatch(/^#.+/);
+  await firstTocLink.click();
+  await expect.poll(() => decodeURIComponent(new URL(page.url()).hash)).toBe(firstTocHref);
+  await page.locator('.content-back').focus();
+  await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/knowledge$/);
 
   await page.goto('/projects#praxis-foundation');

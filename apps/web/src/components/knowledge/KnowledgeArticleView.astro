@@ -1,0 +1,167 @@
+---
+import { uiCopy } from '../../config/copy';
+import type { ContentSummary } from '../../lib/content';
+import { getKnowledgeUrl } from '../../lib/content/domain';
+import { formatDateKey } from '../../lib/date';
+import type { NormalizedPracticeEvent } from '../../lib/practice';
+import ContentMeta from '../ContentMeta.astro';
+import JourneyPanel from '../JourneyPanel.astro';
+import PracticeTimeline from '../PracticeTimeline.astro';
+
+interface Props {
+  summary: ContentSummary;
+  practiceEvents: readonly NormalizedPracticeEvent[];
+}
+
+const { summary, practiceEvents } = Astro.props satisfies Props;
+---
+
+<article class="knowledge-article-view" data-knowledge-article-view>
+  <header class="knowledge-article-header">
+    <div class="knowledge-article-header__utility">
+      <a class="content-back" href={getKnowledgeUrl()}>{uiCopy.knowledge.detailBackLabel}</a>
+      <div class="knowledge-article-header__meta">
+        <ContentMeta entry={summary} />
+      </div>
+    </div>
+    <h1>{summary.title}</h1>
+    <p class="knowledge-article-summary">{summary.summary}</p>
+
+    <dl class="knowledge-article-facts">
+      <div>
+        <dt>{uiCopy.detail.contentId}</dt>
+        <dd>{summary.contentId}</dd>
+      </div>
+      <div>
+        <dt>{uiCopy.detail.updatedAt}</dt>
+        <dd><time datetime={summary.updatedAt}>{formatDateKey(summary.updatedAt)}</time></dd>
+      </div>
+      <div>
+        <dt>{uiCopy.detail.tags}</dt>
+        <dd>{summary.tags.join(' · ')}</dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="knowledge-article-body article-prose">
+    <slot />
+  </div>
+
+  <JourneyPanel journey={summary.journey} />
+  <PracticeTimeline events={[...practiceEvents]} />
+</article>
+
+<style>
+  .knowledge-article-view {
+    min-width: 0;
+  }
+
+  .knowledge-article-header {
+    padding-block: 1.5rem 2.75rem;
+    border-bottom: 2px solid var(--color-line-strong);
+  }
+
+  .knowledge-article-header__utility {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .content-back {
+    display: inline-flex;
+    align-items: baseline;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-meta);
+    font-weight: 500;
+    letter-spacing: 0;
+    text-decoration: none;
+  }
+
+  .content-back:hover {
+    color: var(--color-brand-strong);
+    text-decoration: underline;
+  }
+
+  .knowledge-article-header__meta {
+    min-width: 0;
+  }
+
+  .knowledge-article-header h1 {
+    max-width: 19ch;
+    margin: 1rem 0 0;
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .knowledge-article-summary {
+    max-width: var(--measure-cjk);
+    margin: 1rem 0 0;
+    color: var(--color-fg-muted);
+    font-size: 1.05rem;
+    line-height: 1.95;
+  }
+
+  .knowledge-article-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    margin: 1.75rem 0 0;
+    border-block: 1px solid var(--color-line);
+    background: var(--color-line);
+  }
+
+  .knowledge-article-facts div {
+    min-width: 0;
+    padding: 0.85rem 1rem;
+    background: var(--color-bg);
+  }
+
+  .knowledge-article-facts dt,
+  .knowledge-article-facts dd {
+    margin: 0;
+  }
+
+  .knowledge-article-facts dt {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-kicker);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .knowledge-article-facts dd {
+    margin-top: 0.35rem;
+    color: var(--color-fg-muted);
+    font-size: var(--text-meta);
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+
+  .knowledge-article-body {
+    margin-inline: auto;
+    padding-block: clamp(3rem, 5vw, 4.5rem);
+  }
+
+  @media (max-width: 47.99rem) {
+    .knowledge-article-facts {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .knowledge-article-header {
+      padding-block: 0 3rem;
+    }
+
+    .knowledge-article-header h1 {
+      font-size: 3.5rem;
+    }
+  }
+</style>

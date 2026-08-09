@@ -1,0 +1,249 @@
+---
+import { uiCopy } from '../../config/copy';
+import type { ContentSummary } from '../../lib/content';
+import { getKnowledgeUrl } from '../../lib/content/domain';
+import type { KnowledgeSection } from '../../lib/content/domain';
+import ContentCard from '../ContentCard.astro';
+import EmptyState from '../EmptyState.astro';
+
+interface Props {
+  section: KnowledgeSection;
+  entries: readonly ContentSummary[];
+  previousSection?: KnowledgeSection;
+  nextSection?: KnowledgeSection;
+}
+
+const { section, entries, previousSection, nextSection } = Astro.props satisfies Props;
+---
+
+<article class="knowledge-section-view" data-knowledge-section-view>
+  <header class="knowledge-section-header">
+    <p class="eyebrow">{`${uiCopy.knowledge.chapterEyebrow} ${section.number}`}</p>
+    <h1>{section.label}</h1>
+    <p class="knowledge-section-description">{section.description}</p>
+  </header>
+
+  <section id="section-positioning" class="knowledge-section-block">
+    <h2>{uiCopy.knowledge.positioningTitle}</h2>
+    <p>{section.introduction}</p>
+  </section>
+
+  <section id="section-topics" class="knowledge-section-block">
+    <h2>{uiCopy.knowledge.topicsTitle}</h2>
+    <ul class="knowledge-topic-list">
+      {section.topics.map((topic) => <li>{topic}</li>)}
+    </ul>
+  </section>
+
+  <section id="section-entries" class="knowledge-section-block">
+    <h2>{uiCopy.knowledge.entriesTitle}</h2>
+    {
+      entries.length > 0 ? (
+        <div class="knowledge-entry-list">
+          {entries.map((entry) => (
+            <ContentCard entry={entry} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title={uiCopy.knowledge.emptySectionTitle}
+          description={uiCopy.knowledge.emptySectionDescription}
+          actions={[{ label: uiCopy.actions.backToKnowledge, href: getKnowledgeUrl() }]}
+        />
+      )
+    }
+  </section>
+
+  <nav
+    id="section-navigation"
+    class="knowledge-section-navigation"
+    aria-labelledby="section-navigation-title"
+  >
+    <h2 id="section-navigation-title">{uiCopy.knowledge.continueTitle}</h2>
+    <div class="knowledge-section-navigation__links">
+      {
+        previousSection && (
+          <a href={getKnowledgeUrl(previousSection.slug)} rel="prev">
+            <span>{uiCopy.knowledge.previousChapter}</span>
+            <strong>{previousSection.label}</strong>
+          </a>
+        )
+      }
+      <a class="knowledge-section-navigation__overview" href={getKnowledgeUrl()}>
+        <span>{uiCopy.knowledge.eyebrow}</span>
+        <strong>{uiCopy.knowledge.overviewLabel}</strong>
+      </a>
+      {
+        nextSection && (
+          <a href={getKnowledgeUrl(nextSection.slug)} rel="next">
+            <span>{uiCopy.knowledge.nextChapter}</span>
+            <strong>{nextSection.label}</strong>
+          </a>
+        )
+      }
+    </div>
+  </nav>
+</article>
+
+<style>
+  .knowledge-section-view {
+    min-width: 0;
+  }
+
+  .knowledge-section-header {
+    padding-block: 1.5rem 2.75rem;
+    border-bottom: 2px solid var(--color-line-strong);
+  }
+
+  .knowledge-section-header .eyebrow {
+    margin: 0 0 1.1rem;
+    letter-spacing: 0;
+  }
+
+  .knowledge-section-header h1 {
+    max-width: 16ch;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 2.75rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.14;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .knowledge-section-description {
+    max-width: 40rem;
+    margin: 0.9rem 0 0;
+    color: var(--color-fg-muted);
+    font-size: 1.05rem;
+    line-height: 1.9;
+  }
+
+  .knowledge-section-block,
+  .knowledge-section-navigation {
+    padding-block: clamp(2.25rem, 4vw, 3.5rem);
+    border-bottom: 1px solid var(--color-line);
+    scroll-margin-top: calc(var(--header-height) + 1.5rem);
+  }
+
+  .knowledge-section-block > h2,
+  .knowledge-section-navigation > h2 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+
+  .knowledge-section-block > p {
+    max-width: var(--measure-cjk);
+    margin: 0.9rem 0 0;
+    color: var(--color-fg-muted);
+    font-size: var(--text-body);
+    line-height: 2;
+  }
+
+  .knowledge-topic-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    margin: 1.25rem 0 0;
+    padding-inline-start: 1.4rem;
+    border-top: 1px solid var(--color-line);
+    list-style: square;
+  }
+
+  .knowledge-topic-list li {
+    min-width: 0;
+    padding: 1rem 0.5rem 1rem 0.2rem;
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-fg-muted);
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+  }
+
+  .knowledge-topic-list li::marker {
+    color: var(--color-brand);
+  }
+
+  .knowledge-entry-list {
+    margin-top: 1.25rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .knowledge-section-block :global(.empty-state) {
+    margin-top: 1.25rem;
+  }
+
+  .knowledge-section-navigation__links {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    margin-top: 1.25rem;
+    background: var(--color-line);
+    border-block: 1px solid var(--color-line);
+  }
+
+  .knowledge-section-navigation a {
+    display: grid;
+    align-content: center;
+    min-width: 0;
+    min-height: 7rem;
+    padding: 1rem;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    text-decoration: none;
+  }
+
+  .knowledge-section-navigation a:hover {
+    background: var(--color-brand-tint);
+  }
+
+  .knowledge-section-navigation a span {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-kicker);
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .knowledge-section-navigation a strong {
+    margin-top: 0.4rem;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .knowledge-section-navigation__overview {
+    text-align: center;
+  }
+
+  @media (max-width: 47.99rem) {
+    .knowledge-topic-list,
+    .knowledge-section-navigation__links {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .knowledge-section-navigation__overview {
+      text-align: left;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .knowledge-section-header {
+      padding-block: 0 3rem;
+    }
+
+    .knowledge-section-header h1 {
+      font-size: 3.5rem;
+    }
+
+    .knowledge-section-block > h2,
+    .knowledge-section-navigation > h2 {
+      font-size: 1.875rem;
+    }
+  }
+</style>

@@ -19,6 +19,10 @@ author's explicit values, may contain zero, one, or multiple keys from the centr
 rejected on project content. Do not infer it from `type`, tags, titles, paths, or Markdown body text. Adding a type or
 classification capability must not create a second collection, schema, or copied route/query family.
 
+The same registry owns each section's stable two-digit display number, navigation description, chapter introduction,
+and non-empty topic-scope list. Topic scopes explain the information architecture; they are not published entries and
+must never be used to infer `knowledgeSections` membership.
+
 ## Journey versus practiceLog
 
 `journey` is a cumulative optional object for the durable result of thinking and practice:

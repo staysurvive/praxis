@@ -1,15 +1,18 @@
 ---
-import ContentCard from '../../components/ContentCard.astro';
-import EmptyState from '../../components/EmptyState.astro';
-import PageHero from '../../components/PageHero.astro';
+import KnowledgeArticleView from '../../components/knowledge/KnowledgeArticleView.astro';
+import KnowledgeSectionView from '../../components/knowledge/KnowledgeSectionView.astro';
+import type {
+  KnowledgeSidebarEntry,
+  KnowledgeSidebarSection,
+  KnowledgeTocItem,
+} from '../../components/knowledge/types';
 import { uiCopy } from '../../config/copy';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import ContentLayout from '../../layouts/ContentLayout.astro';
+import KnowledgeDocsLayout from '../../layouts/KnowledgeDocsLayout.astro';
 import {
   getContentEntries,
-  getEntryByContentId,
-  listKnowledgeSectionEntries,
   renderContentEntry,
+  selectKnowledgeSectionEntries,
+  selectRecentKnowledge,
   toContentSummary,
 } from '../../lib/content';
 import {
@@ -28,12 +31,19 @@ interface Props {
   contentId?: string;
 }
 
+const sectionTocItems = [
+  { id: 'section-positioning', text: uiCopy.knowledge.positioningTitle, depth: 2 },
+  { id: 'section-topics', text: uiCopy.knowledge.topicsTitle, depth: 2 },
+  { id: 'section-entries', text: uiCopy.knowledge.entriesTitle, depth: 2 },
+  { id: 'section-navigation', text: uiCopy.knowledge.continueTitle, depth: 2 },
+] satisfies readonly KnowledgeTocItem[];
+
 export async function getStaticPaths() {
   const authoredEntries = await getContentEntries({ includeDrafts: true });
   assertKnowledgeSlugAvailability(authoredEntries.map((entry) => entry.data));
 
-  const publicKnowledgeEntries = authoredEntries.filter(
-    (entry) => entry.data.type !== 'project' && isPublicStatus(entry.data.status),
+  const publicKnowledgeEntries = selectRecentKnowledge(
+    authoredEntries.filter((entry) => isPublicStatus(entry.data.status)).map(toContentSummary),
   );
 
   return [
@@ -42,21 +52,26 @@ export async function getStaticPaths() {
       props: { kind: 'section' as const, sectionKey: section.key },
     })),
     ...publicKnowledgeEntries.map((entry) => ({
-      params: { key: entry.data.slug },
-      props: { kind: 'content' as const, contentId: entry.data.contentId },
+      params: { key: entry.slug },
+      props: { kind: 'content' as const, contentId: entry.contentId },
     })),
   ];
 }
 
 const { kind, sectionKey, contentId } = Astro.props;
 const section = sectionKey ? getKnowledgeSectionByKey(sectionKey) : undefined;
-const sectionEntries = section ? await listKnowledgeSectionEntries(section.key) : [];
 
-const entry = contentId ? await getEntryByContentId(contentId) : undefined;
-if (
-  kind === 'content' &&
-  (!entry || entry.data.type === 'project' || !isPublicStatus(entry.data.status))
-) {
+const publicEntries = await getContentEntries();
+const recentEntries = selectRecentKnowledge(publicEntries.map(toContentSummary));
+const recentEntryIds = new Set(recentEntries.map((candidate) => candidate.contentId));
+const entry = contentId
+  ? publicEntries.find(
+      (candidate) =>
+        candidate.data.contentId === contentId && recentEntryIds.has(candidate.data.contentId),
+    )
+  : undefined;
+
+if (kind === 'content' && !entry) {
   throw new Error(`无法为知识路由找到公开内容：${contentId ?? 'missing-content-id'}`);
 }
 if (kind === 'section' && !section) {
@@ -67,52 +82,97 @@ const summary = entry ? toContentSummary(entry) : undefined;
 const renderedEntry = entry ? await renderContentEntry(entry) : undefined;
 const Content = renderedEntry?.Content;
 const practiceEvents = entry ? normalizePracticeEvents([toPracticeSourceEntry(entry.data)]) : [];
+const articleTocItems =
+  renderedEntry?.headings.flatMap((heading): KnowledgeTocItem[] => {
+    if (heading.depth !== 2 && heading.depth !== 3) {
+      return [];
+    }
+
+    return [{ id: heading.slug, text: heading.text, depth: heading.depth }];
+  }) ?? [];
+
+const sectionEntries = section ? selectKnowledgeSectionEntries(recentEntries, section.key) : [];
+const sectionIndex = section
+  ? knowledgeSections.findIndex((candidate) => candidate.key === section.key)
+  : -1;
+const previousSection = sectionIndex > 0 ? knowledgeSections[sectionIndex - 1] : undefined;
+const nextSection =
+  sectionIndex >= 0 && sectionIndex < knowledgeSections.length - 1
+    ? knowledgeSections[sectionIndex + 1]
+    : undefined;
+
+const sidebarSections = knowledgeSections.map((candidate): KnowledgeSidebarSection => ({
+  key: candidate.key,
+  href: getKnowledgeUrl(candidate.slug),
+  number: candidate.number,
+  label: candidate.label,
+  description: candidate.description,
+  topics: candidate.topics,
+  count: selectKnowledgeSectionEntries(recentEntries, candidate.key).length,
+  isCurrent: section?.key === candidate.key,
+}));
+const sidebarEntries = recentEntries.map((candidate): KnowledgeSidebarEntry => ({
+  href: candidate.url,
+  title: candidate.title,
+  summary: candidate.summary,
+  tags: candidate.tags,
+  typeLabel: candidate.typeLabel,
+  isCurrent: candidate.contentId === contentId,
+}));
+
+const pageMetadata = section
+  ? {
+      title: section.label,
+      description: section.description,
+      canonicalPath: getKnowledgeUrl(section.slug),
+      seoType: 'website' as const,
+      publishedAt: undefined,
+      updatedAt: undefined,
+      tags: [] as const,
+      tocItems: sectionTocItems,
+    }
+  : summary
+    ? {
+        title: summary.title,
+        description: summary.summary,
+        canonicalPath: summary.url,
+        seoType: 'article' as const,
+        publishedAt: summary.publishedAt,
+        updatedAt: summary.updatedAt,
+        tags: summary.tags,
+        tocItems: articleTocItems,
+      }
+    : undefined;
+
+if (!pageMetadata) {
+  throw new Error('知识文档页面缺少可渲染的数据。');
+}
 ---
 
-{
-  section ? (
-    <BaseLayout title={section.label} description={section.description}>
-      <PageHero
-        eyebrow={uiCopy.knowledge.title}
-        title={section.label}
-        description={section.description}
+<KnowledgeDocsLayout
+  title={pageMetadata.title}
+  description={pageMetadata.description}
+  canonicalPath={pageMetadata.canonicalPath}
+  seoType={pageMetadata.seoType}
+  publishedAt={pageMetadata.publishedAt}
+  updatedAt={pageMetadata.updatedAt}
+  tags={pageMetadata.tags}
+  sidebarSections={sidebarSections}
+  recentEntries={sidebarEntries}
+  tocItems={pageMetadata.tocItems}
+>
+  {
+    section ? (
+      <KnowledgeSectionView
+        section={section}
+        entries={sectionEntries}
+        previousSection={previousSection}
+        nextSection={nextSection}
       />
-      <section class="section-entries">
-        <div class="page-shell">
-          {sectionEntries.length > 0 ? (
-            <div class="entry-list">
-              {sectionEntries.map((sectionEntry) => (
-                <ContentCard entry={sectionEntry} />
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title={uiCopy.knowledge.emptySectionTitle}
-              description={uiCopy.knowledge.emptySectionDescription}
-              actions={[{ label: uiCopy.actions.backToKnowledge, href: getKnowledgeUrl() }]}
-            />
-          )}
-        </div>
-      </section>
-    </BaseLayout>
-  ) : summary && Content ? (
-    <ContentLayout
-      summary={summary}
-      practiceEvents={practiceEvents}
-      backHref={getKnowledgeUrl()}
-      backLabel={uiCopy.knowledge.detailBackLabel}
-    >
-      <Content />
-    </ContentLayout>
-  ) : null
-}
-
-<style>
-  .section-entries {
-    padding-block: clamp(3.5rem, 8vw, 7rem);
+    ) : summary && Content ? (
+      <KnowledgeArticleView summary={summary} practiceEvents={practiceEvents}>
+        <Content />
+      </KnowledgeArticleView>
+    ) : null
   }
-
-  .entry-list {
-    border-bottom: 1px solid var(--color-line);
-  }
-</style>
+</KnowledgeDocsLayout>

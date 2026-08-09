@@ -14,16 +14,40 @@ import {
 
 describe('knowledge section registry', () => {
   it('keeps the approved names and slugs in one stable order', () => {
-    expect(knowledgeSections.map(({ label, slug }) => ({ label, slug }))).toEqual([
-      { label: 'Agent 应用开发', slug: 'agent-app-development' },
-      { label: '大模型原理与实现', slug: 'llm-principles' },
+    expect(knowledgeSections.map(({ key, label, slug }) => ({ key, label, slug }))).toEqual([
       {
+        key: 'agent-app-development',
+        label: 'Agent 应用开发',
+        slug: 'agent-app-development',
+      },
+      { key: 'llm-principles', label: '大模型原理与实现', slug: 'llm-principles' },
+      {
+        key: 'fine-tuning-inference-deployment',
         label: '微调、推理与部署',
         slug: 'fine-tuning-inference-deployment',
       },
-      { label: '实践与案例', slug: 'practice-cases' },
-      { label: '知识前沿', slug: 'knowledge-frontier' },
+      { key: 'practice-cases', label: '实践与案例', slug: 'practice-cases' },
+      { key: 'knowledge-frontier', label: '知识前沿', slug: 'knowledge-frontier' },
     ]);
+  });
+
+  it('provides complete and uniquely numbered documentation metadata', () => {
+    expect(knowledgeSections.map((section) => section.number)).toEqual([
+      '01',
+      '02',
+      '03',
+      '04',
+      '05',
+    ]);
+    expect(new Set(knowledgeSections.map((section) => section.number)).size).toBe(
+      knowledgeSections.length,
+    );
+
+    for (const section of knowledgeSections) {
+      expect(section.introduction.trim().length).toBeGreaterThan(0);
+      expect(section.topics.length).toBeGreaterThan(0);
+      expect(section.topics.every((topic) => topic.trim().length > 0)).toBe(true);
+    }
   });
 });
 

@@ -76,8 +76,14 @@ const { entry } = Astro.props satisfies Props;
 It receives `eyebrow`, `title`, `description`, and a typed art `variant`; the associated local image source and dimensions
 live in `src/config/editorial-heroes.ts`. It must preserve one real H1 and expose imagery only as `alt=""` decoration.
 
-- Keep `PageHero.astro` as the quiet reading shell for `knowledge/[key].astro`; do not add root-page art or motion to it,
-  because that would also alter empty knowledge sections and future content reading routes.
+- Keep `PageHero.astro` for quiet single-page introductions outside the knowledge namespace. Every
+  `knowledge/[key].astro` section and article uses the shared `KnowledgeDocsLayout.astro` document shell with typed
+  sidebar and table-of-contents view models; those presentational components do not query content or infer section
+  membership.
+- The wide knowledge shell caps at `108rem` and uses a compact chapter rail, flexible reading column, and page TOC.
+  Desktop chapter rows keep number, title, and an unpadded real count on one line while retaining descriptions for
+  filtering and narrow disclosures. Rails use document scrolling; if the viewport is too short for safe sticky
+  positioning, return them to normal flow instead of adding nested scroll containers.
 - Root Hero art is local, text-free, eager with explicit width/height, and layered inside the Hero only. Do not put a
   background URL in inline styles, introduce remote art, or add a browser script merely for reveal/parallax.
 - Use `--section-min-block-size` on desktop; at narrow widths, place semantic copy above the image rather than relying on
@@ -86,7 +92,8 @@ live in `src/config/editorial-heroes.ts`. It must preserve one real H1 and expos
   Reduced motion must leave copy immediately visible; reduced transparency needs an opaque veil and forced-colors can hide
   decorative imagery.
 - Extend browser coverage whenever a root Hero variant changes: one H1, exact local source, first-viewport geometry,
-  narrow-screen overflow, reduced-motion static state, and a regression that knowledge sections still use `PageHero`.
+  narrow-screen overflow, reduced-motion static state, and a regression that knowledge interiors remain in the shared
+  document shell without root-page artwork.
 
 ## Accessibility
 

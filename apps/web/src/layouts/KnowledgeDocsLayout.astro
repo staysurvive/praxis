@@ -1,0 +1,117 @@
+---
+import KnowledgeSidebar from '../components/knowledge/KnowledgeSidebar.astro';
+import KnowledgeTableOfContents from '../components/knowledge/KnowledgeTableOfContents.astro';
+import type {
+  KnowledgeSidebarEntry,
+  KnowledgeSidebarSection,
+  KnowledgeTocItem,
+} from '../components/knowledge/types';
+import { uiCopy } from '../config/copy';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath: string;
+  seoType?: 'website' | 'article';
+  publishedAt?: string;
+  updatedAt?: string;
+  tags?: readonly string[];
+  sidebarSections: readonly KnowledgeSidebarSection[];
+  recentEntries: readonly KnowledgeSidebarEntry[];
+  tocItems: readonly KnowledgeTocItem[];
+}
+
+const {
+  title,
+  description,
+  canonicalPath,
+  seoType = 'website',
+  publishedAt,
+  updatedAt,
+  tags = [],
+  sidebarSections,
+  recentEntries,
+  tocItems,
+} = Astro.props satisfies Props;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  seoType={seoType}
+  publishedAt={publishedAt}
+  updatedAt={updatedAt}
+  tags={tags}
+>
+  <div
+    class="knowledge-docs"
+    data-knowledge-docs
+    data-filter-result-prefix={uiCopy.knowledge.filterResultPrefix}
+    data-filter-result-suffix={uiCopy.knowledge.filterResultSuffix}
+    data-filter-empty-result={uiCopy.knowledge.filterEmptyResult}
+  >
+    <KnowledgeSidebar sections={sidebarSections} recentEntries={recentEntries} />
+    <KnowledgeTableOfContents items={tocItems} />
+    <div class="knowledge-docs__content">
+      <slot />
+    </div>
+  </div>
+  <script is:inline src="/scripts/knowledge-docs.js"></script>
+</BaseLayout>
+
+<style>
+  .knowledge-docs {
+    display: grid;
+    grid-template-areas:
+      'sidebar'
+      'toc'
+      'content';
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    width: min(calc(100% - 3rem), 108rem);
+    margin-inline: auto;
+    padding-block: 1.5rem clamp(4rem, 8vw, 7rem);
+  }
+
+  .knowledge-docs :global(.knowledge-sidebar) {
+    grid-area: sidebar;
+  }
+
+  .knowledge-docs :global(.knowledge-toc) {
+    grid-area: toc;
+  }
+
+  .knowledge-docs__content {
+    grid-area: content;
+    min-width: 0;
+  }
+
+  @media (min-width: 64rem) {
+    .knowledge-docs {
+      grid-template-areas:
+        'sidebar toc'
+        'sidebar content';
+      grid-template-columns: minmax(16rem, 18rem) minmax(0, 1fr);
+      gap: 1.5rem clamp(2rem, 4vw, 4rem);
+      padding-block-start: 2rem;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .knowledge-docs {
+      grid-template-areas: 'sidebar content toc';
+      grid-template-columns: minmax(18rem, 20rem) minmax(0, 1fr) minmax(15rem, 18rem);
+      gap: clamp(2rem, 2.25vw, 2.75rem);
+      align-items: start;
+      padding-block-start: 2.5rem;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .knowledge-docs {
+      width: calc(100% - 2.5rem);
+    }
+  }
+</style>

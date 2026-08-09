@@ -1,0 +1,140 @@
+---
+import { uiCopy } from '../../config/copy';
+import type { KnowledgeTocItem } from './types';
+
+interface Props {
+  items: readonly KnowledgeTocItem[];
+}
+
+const { items } = Astro.props satisfies Props;
+---
+
+<aside class="knowledge-toc" aria-labelledby="knowledge-toc-title" data-knowledge-toc>
+  <details class="knowledge-toc__disclosure" open>
+    <summary class="knowledge-toc__summary">
+      <span>{uiCopy.knowledge.tableOfContentsTitle}</span>
+    </summary>
+    <div class="knowledge-toc__body">
+      <h2 id="knowledge-toc-title">{uiCopy.knowledge.tableOfContentsTitle}</h2>
+      {
+        items.length > 0 ? (
+          <ol>
+            {items.map((item) => (
+              <li class:list={[item.depth === 3 && 'knowledge-toc__item--nested']}>
+                <a href={`#${item.id}`} data-knowledge-toc-link={item.id}>
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p>{uiCopy.knowledge.emptyTableOfContents}</p>
+        )
+      }
+    </div>
+  </details>
+</aside>
+
+<style>
+  .knowledge-toc {
+    min-width: 0;
+  }
+
+  .knowledge-toc__summary {
+    display: list-item;
+    min-block-size: 3rem;
+    padding: 0.75rem 0;
+    border-block: 1px solid var(--color-line);
+    color: var(--color-fg);
+    cursor: pointer;
+    font-size: var(--text-meta);
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.5;
+  }
+
+  .knowledge-toc__summary::marker,
+  .knowledge-toc__summary::-webkit-details-marker {
+    color: var(--color-brand);
+  }
+
+  .knowledge-toc__body {
+    padding-block: 1rem 0;
+  }
+
+  .knowledge-toc__body h2 {
+    margin: 0 0 0.8rem;
+    color: var(--color-fg);
+    font-size: var(--text-meta);
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .knowledge-toc ol {
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--color-line);
+    list-style: none;
+  }
+
+  .knowledge-toc li {
+    margin: 0;
+  }
+
+  .knowledge-toc a {
+    display: block;
+    padding: 0.45rem 0.65rem;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-meta);
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+  }
+
+  .knowledge-toc a:hover,
+  .knowledge-toc a[data-active] {
+    color: var(--color-brand-strong);
+  }
+
+  .knowledge-toc a[data-active] {
+    box-shadow: -2px 0 0 var(--color-brand);
+  }
+
+  .knowledge-toc__item--nested a {
+    padding-inline-start: 1.4rem;
+    font-size: 0.76rem;
+  }
+
+  .knowledge-toc p {
+    margin: 0;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-meta);
+    line-height: 1.7;
+  }
+
+  @media (min-width: 80rem) {
+    .knowledge-toc {
+      position: sticky;
+      top: calc(var(--header-height) + 1.5rem);
+      align-self: start;
+    }
+
+    .knowledge-toc__summary {
+      display: none;
+    }
+
+    .knowledge-toc__disclosure:not([open]) > .knowledge-toc__body {
+      display: block;
+    }
+
+    .knowledge-toc__body {
+      padding-block: 0;
+    }
+  }
+
+  @media (min-width: 80rem) and (max-height: 45rem) {
+    .knowledge-toc {
+      position: static;
+    }
+  }
+</style>

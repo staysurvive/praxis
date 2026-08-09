@@ -5,32 +5,51 @@ export const knowledgeSections = [
   {
     key: 'agent-app-development',
     slug: 'agent-app-development',
+    number: '01',
     label: 'Agent 应用开发',
     description: 'Agent 应用层知识',
+    introduction:
+      '聚焦 Agent 应用从问题定义到稳定交付的完整链路，记录可复用的架构选择、交互模式与工程判断。',
+    topics: ['Agent 架构与运行循环', '工具调用与上下文管理', 'Agent 应用评估与工程化'],
   },
   {
     key: 'llm-principles',
     slug: 'llm-principles',
+    number: '02',
     label: '大模型原理与实现',
     description: '模型原理和实现知识',
+    introduction:
+      '从模型机制出发理解能力与限制，为应用设计、训练选择和效果判断建立可靠的技术基础。',
+    topics: ['模型结构与训练目标', '上下文、推理与生成机制', '能力边界与评估方法'],
   },
   {
     key: 'fine-tuning-inference-deployment',
     slug: 'fine-tuning-inference-deployment',
+    number: '03',
     label: '微调、推理与部署',
     description: '模型工程与交付知识',
+    introduction: '覆盖模型从适配、推理优化到线上部署的工程路径，关注可验证、可维护和可持续交付。',
+    topics: ['数据准备与微调策略', '推理性能与资源优化', '部署架构、监控与迭代'],
   },
   {
     key: 'practice-cases',
     slug: 'practice-cases',
+    number: '04',
     label: '实践与案例',
     description: '从真实项目和实验中提炼的可迁移知识',
+    introduction:
+      '以真实项目和实验为证据，复盘问题、选择、行动与结果，沉淀可以迁移到下一次实践的方法。',
+    topics: ['真实项目复盘', '实验设计与结果验证', '可迁移方法与工程契约'],
   },
   {
     key: 'knowledge-frontier',
     slug: 'knowledge-frontier',
+    number: '05',
     label: '知识前沿',
     description: '正在研究的问题、假设和认知边界',
+    introduction:
+      '收纳仍在探索中的问题、假设与认知边界，清楚区分已验证结论、工作假设和待研究方向。',
+    topics: ['新兴方法与工具', '待验证的技术假设', '能力边界与开放问题'],
   },
 ] as const;
 export type KnowledgeSection = (typeof knowledgeSections)[number];
