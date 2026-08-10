@@ -54,6 +54,7 @@ export const knowledgeSections = [
 ] as const;
 export type KnowledgeSection = (typeof knowledgeSections)[number];
 export type KnowledgeSectionKey = KnowledgeSection['key'];
+export const defaultKnowledgeSection = knowledgeSections[0];
 
 export const stages = ['know-think', 'think-act', 'act-achieve'] as const;
 export type Stage = (typeof stages)[number];
@@ -149,6 +150,16 @@ export function getContentUrl(type: ContentType, slug?: string): string {
 
 export function getKnowledgeUrl(slug?: string): string {
   return slug ? `${knowledgePath}/${slug}` : knowledgePath;
+}
+
+export function getKnowledgeContextUrl(path: string, section?: KnowledgeSectionKey): string {
+  if (!section) {
+    return path;
+  }
+
+  const url = new URL(path, 'https://praxis.local');
+  url.searchParams.set('section', section);
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
 export function getPublicContentUrl(entry: PublicContentIdentity): string {

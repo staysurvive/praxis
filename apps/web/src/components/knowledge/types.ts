@@ -18,10 +18,12 @@ export interface KnowledgeSidebarSection {
 }
 
 export interface KnowledgeSidebarEntry {
+  key: string;
   href: string;
   title: string;
   summary: string;
   tags: readonly string[];
   typeLabel: string;
+  updatedAt: string;
   isCurrent: boolean;
 }

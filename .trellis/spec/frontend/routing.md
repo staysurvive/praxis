@@ -36,14 +36,17 @@ online single-hop verification remain an external deployment gate; do not add wi
 ## Navigation and filters
 
 Primary navigation is the explicit ordered list Knowledge, Projects, Journey, About; it is never derived from
-`contentTypes`. The visible Knowledge label is a direct `/knowledge` link, and its adjacent native disclosure arrow
-contains exactly the five registry-backed section links; do not repeat a Knowledge-overview menu item or nest the link
-inside `summary`. Projects, Journey, and About remain direct links. The Knowledge label uses `aria-current="page"` on
-the overview and `aria-current="location"` on a descendant; the matching section link uses `page` within the nested
+`contentTypes`. The visible Knowledge label directly enters the default knowledge section with a shareable
+`?section=<section-key>` context query, and its adjacent native disclosure arrow contains exactly the five
+registry-backed section links; do not repeat a Knowledge-overview menu item or nest the link inside `summary`.
+`/knowledge` remains a document-workspace index reached from the docs rail and contextual return links. Projects,
+Journey, and About remain direct links. The Knowledge label uses `aria-current="page"` on the default section and
+`aria-current="location"` on any other knowledge descendant; the matching section link uses `page` within the nested
 link set. The icon-only disclosure has its own accessible name but no competing current-page state. Direct primary links
 use `page` on an exact route and `location` on a descendant. All navigation, section entries, empty-state exits, and
 detail return paths are real links and work without JavaScript; the menu enhancement may only add fine-pointer hover,
-outside-close, and Escape behavior.
+outside-close, and Escape behavior. The `section` query is navigation context only and never changes canonical metadata,
+content selection, RSS, or Sitemap output.
 
 ## Metadata and errors
 
@@ -60,9 +63,9 @@ const summary = toContentSummary(entry);
 return summary.url; // knowledge canonical, project anchor, or the one project-detail exception
 ```
 
-Knowledge details return to `/knowledge` without guessing a primary section from a multi-select. The historical project
-detail returns to `/projects`. Unknown paths are handled by `apps/web/src/pages/404.astro`; no raw exception text is
-sent to visitors.
+Knowledge details return to their first explicitly assigned section when one exists, otherwise to `/knowledge`, without
+changing the canonical detail URL. The historical project detail returns to `/projects`. Unknown paths are handled by
+`apps/web/src/pages/404.astro`; no raw exception text is sent to visitors.
 
 ## Public discovery contract
 

@@ -1,7 +1,13 @@
 ---
 import { uiCopy } from '../config/copy';
 import { siteConfig } from '../config/site';
-import { getKnowledgeUrl, knowledgeSections } from '../lib/content/domain';
+import {
+  defaultKnowledgeSection,
+  getKnowledgeContextUrl,
+  getKnowledgeUrl,
+  knowledgePath,
+  knowledgeSections,
+} from '../lib/content/domain';
 import ThemeToggle from './ThemeToggle.astro';
 
 interface Props {
@@ -16,6 +22,16 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
   }
 
   return currentPath.startsWith(`${href}/`) ? 'location' : undefined;
+}
+
+function getKnowledgeCurrentState(): 'page' | 'location' | undefined {
+  if (currentPath === getKnowledgeUrl(defaultKnowledgeSection.slug)) {
+    return 'page';
+  }
+
+  return currentPath === knowledgePath || currentPath.startsWith(`${knowledgePath}/`)
+    ? 'location'
+    : undefined;
 }
 ---
 
@@ -39,7 +55,8 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
         <ul class="nav-list flex flex-wrap items-center justify-end gap-x-4 gap-y-1 sm:gap-x-5">
           {
             siteConfig.navigation.map((item) => {
-              const currentState = getCurrentState(item.href);
+              const currentState =
+                item.key === 'knowledge' ? getKnowledgeCurrentState() : getCurrentState(item.href);
 
               if (item.key === 'knowledge') {
                 return (
@@ -53,6 +70,7 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
                       href={item.href}
                       aria-current={currentState}
                       data-knowledge-overview-link
+                      data-astro-prefetch="hover"
                     >
                       {item.label}
                     </a>
@@ -79,14 +97,18 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
                             aria-label={uiCopy.accessibility.knowledgeNavigation}
                           >
                             {knowledgeSections.map((section) => {
-                              const href = getKnowledgeUrl(section.slug);
+                              const canonicalHref = getKnowledgeUrl(section.slug);
+                              const href = getKnowledgeContextUrl(canonicalHref, section.key);
                               return (
                                 <li>
                                   <a
                                     class="knowledge-menu-link"
                                     href={href}
-                                    aria-current={currentPath === href ? 'page' : undefined}
+                                    aria-current={
+                                      currentPath === canonicalHref ? 'page' : undefined
+                                    }
                                     data-knowledge-menu-link
+                                    data-astro-prefetch="hover"
                                   >
                                     <span class="knowledge-menu-label">{section.label}</span>
                                     <span class="knowledge-menu-description">

@@ -1,7 +1,8 @@
 ---
 import { uiCopy } from '../../config/copy';
 import type { ContentSummary } from '../../lib/content';
-import { getKnowledgeUrl } from '../../lib/content/domain';
+import { getKnowledgeContextUrl, getKnowledgeUrl } from '../../lib/content/domain';
+import type { KnowledgeSection } from '../../lib/content/domain';
 import { formatDateKey } from '../../lib/date';
 import type { NormalizedPracticeEvent } from '../../lib/practice';
 import ContentMeta from '../ContentMeta.astro';
@@ -11,15 +12,20 @@ import PracticeTimeline from '../PracticeTimeline.astro';
 interface Props {
   summary: ContentSummary;
   practiceEvents: readonly NormalizedPracticeEvent[];
+  section?: KnowledgeSection;
 }
 
-const { summary, practiceEvents } = Astro.props satisfies Props;
+const { summary, practiceEvents, section } = Astro.props satisfies Props;
+const backHref = section
+  ? getKnowledgeContextUrl(getKnowledgeUrl(section.slug), section.key)
+  : getKnowledgeUrl();
+const backLabel = section?.label ?? uiCopy.knowledge.detailBackLabel;
 ---
 
 <article class="knowledge-article-view" data-knowledge-article-view>
   <header class="knowledge-article-header">
     <div class="knowledge-article-header__utility">
-      <a class="content-back" href={getKnowledgeUrl()}>{uiCopy.knowledge.detailBackLabel}</a>
+      <a class="content-back" href={backHref} data-astro-prefetch="hover">{backLabel}</a>
       <div class="knowledge-article-header__meta">
         <ContentMeta entry={summary} />
       </div>

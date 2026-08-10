@@ -20,6 +20,9 @@ frontend architecture. Browser behavior belongs in a small script or an explicit
 - A future interactive feature may call an API client under `/api/v1`, but it must render a useful failure state and never
   gate the Markdown page.
 - Keep scripts narrowly scoped, typed, and colocated with the component or under `src/scripts/` when shared.
+- Knowledge document behavior may use Astro `ClientRouter` as progressive enhancement. Any document script that binds
+  search, keyboard shortcuts, or table-of-contents state must listen for `astro:page-load`, clean up listeners and
+  observers from the previous document, and leave real links usable when the router or script is unavailable.
 
 ## Data fetching
 

@@ -72,14 +72,14 @@ const { entry } = Astro.props satisfies Props;
 
 ## Root-page exhibition heroes
 
-`EditorialHero.astro` is the root-page-only visual shell for `/knowledge`, `/projects`, `/journey`, and `/about`.
+`EditorialHero.astro` is the root-page-only visual shell for `/projects`, `/journey`, and `/about`.
 It receives `eyebrow`, `title`, `description`, and a typed art `variant`; the associated local image source and dimensions
 live in `src/config/editorial-heroes.ts`. It must preserve one real H1 and expose imagery only as `alt=""` decoration.
 
 - Keep `PageHero.astro` for quiet single-page introductions outside the knowledge namespace. Every
-  `knowledge/[key].astro` section and article uses the shared `KnowledgeDocsLayout.astro` document shell with typed
-  sidebar and table-of-contents view models; those presentational components do not query content or infer section
-  membership.
+  `knowledge/index.astro` overview, `knowledge/[key].astro` section, and article uses the shared
+  `KnowledgeDocsLayout.astro` document shell with typed sidebar and table-of-contents view models; those presentational
+  components do not query content or infer section membership.
 - The wide knowledge shell caps at `108rem` and uses an `18rem` product-navigation rail, flexible reading column, and
   page TOC. The rail adapts CC Switch's verified 44px search and 40px row geometry with library icons, 12px scoped
   navigation radii, a light brand-tint current state, and 4px row rhythm while retaining Praxis tokens and typography.

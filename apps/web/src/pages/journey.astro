@@ -3,6 +3,11 @@ import EmptyState from '../components/EmptyState.astro';
 import EditorialHero from '../components/EditorialHero.astro';
 import { uiCopy } from '../config/copy';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import {
+  defaultKnowledgeSection,
+  getKnowledgeContextUrl,
+  getKnowledgeUrl,
+} from '../lib/content/domain';
 ---
 
 <BaseLayout title={uiCopy.journeyPage.title} description={uiCopy.journeyPage.description}>
@@ -18,7 +23,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         title={uiCopy.journeyPage.emptyTitle}
         description={uiCopy.journeyPage.emptyDescription}
         actions={[
-          { label: uiCopy.actions.browseKnowledge, href: '/knowledge' },
+          {
+            label: uiCopy.actions.browseKnowledge,
+            href: getKnowledgeContextUrl(
+              getKnowledgeUrl(defaultKnowledgeSection.slug),
+              defaultKnowledgeSection.key,
+            ),
+          },
           { label: uiCopy.actions.viewProjects, href: '/projects' },
         ]}
       />

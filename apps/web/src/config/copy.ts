@@ -144,6 +144,15 @@ export const uiCopy = {
     filterResultPrefix: '已显示',
     filterResultSuffix: '个知识入口',
     filterEmptyResult: '没有匹配的知识入口',
+    workspaceEyebrow: 'Knowledge workspace',
+    workspaceTitle: '从这里进入 Praxis 的知识体系',
+    workspaceDescription:
+      '按问题领域进入章节，在真实文章、实践复盘与仍待验证的认知之间保持清晰边界。',
+    startReadingTitle: '开始阅读',
+    startReadingDescription: '从 Agent 应用开发开始，沿着五个固定章节逐步建立完整上下文。',
+    startReadingAction: '进入第一章',
+    browseChaptersTitle: '选择知识章节',
+    browseChaptersDescription: '每个入口都有稳定地址、明确范围和真实内容计数。',
   },
   projects: {
     eyebrow: 'Projects',

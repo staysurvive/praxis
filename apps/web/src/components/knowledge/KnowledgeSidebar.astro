@@ -13,16 +13,19 @@ import {
 } from 'lucide-astro';
 
 import { uiCopy } from '../../config/copy';
-import { getKnowledgeUrl } from '../../lib/content/domain';
+import { getKnowledgeContextUrl, getKnowledgeUrl } from '../../lib/content/domain';
 import type { KnowledgeSidebarEntry, KnowledgeSidebarSection } from './types';
 
 interface Props {
   sections: readonly KnowledgeSidebarSection[];
   recentEntries: readonly KnowledgeSidebarEntry[];
+  overviewIsCurrent?: boolean;
 }
 
-const { sections, recentEntries } = Astro.props satisfies Props;
+const { sections, recentEntries, overviewIsCurrent = false } = Astro.props satisfies Props;
 const itemCount = sections.length + recentEntries.length;
+const currentSection = sections.find((section) => section.isCurrent);
+const overviewHref = getKnowledgeContextUrl(getKnowledgeUrl(), currentSection?.key);
 const sectionIcons = {
   'agent-app-development': Rocket,
   'llm-principles': BrainCircuit,
@@ -85,8 +88,10 @@ const sectionLinks = sections.map((section) => ({
       <nav aria-label={uiCopy.accessibility.knowledgeDocsNavigation}>
         <a
           class="knowledge-sidebar__nav-link knowledge-sidebar__nav-link--overview"
-          href={getKnowledgeUrl()}
+          href={overviewHref}
+          aria-current={overviewIsCurrent ? 'page' : undefined}
           data-knowledge-overview-link
+          data-astro-prefetch="hover"
         >
           <BookOpenText
             class="knowledge-sidebar__icon knowledge-sidebar__nav-icon"
@@ -117,6 +122,7 @@ const sectionLinks = sections.map((section) => ({
               sectionLinks.map(({ section, Icon }) => (
                 <li
                   data-knowledge-filter-item
+                  data-knowledge-filter-key={`section:${section.key}`}
                   data-knowledge-filter-text={`${section.label} ${section.description} ${section.topics.join(' ')}`}
                 >
                   <a
@@ -125,7 +131,9 @@ const sectionLinks = sections.map((section) => ({
                     title={section.label}
                     aria-current={section.isCurrent ? 'page' : undefined}
                     data-knowledge-section-link
+                    data-knowledge-section-key={section.key}
                     data-knowledge-section-number={section.number}
+                    data-astro-prefetch="hover"
                   >
                     <Icon
                       class="knowledge-sidebar__icon knowledge-sidebar__nav-icon knowledge-sidebar__nav-icon--section"
@@ -163,6 +171,7 @@ const sectionLinks = sections.map((section) => ({
               recentEntries.map((entry) => (
                 <li
                   data-knowledge-filter-item
+                  data-knowledge-filter-key={`entry:${entry.key}`}
                   data-knowledge-filter-text={`${entry.title} ${entry.summary} ${entry.tags.join(' ')} ${entry.typeLabel}`}
                 >
                   <a
@@ -171,6 +180,7 @@ const sectionLinks = sections.map((section) => ({
                     title={entry.title}
                     aria-current={entry.isCurrent ? 'page' : undefined}
                     data-knowledge-recent-link
+                    data-astro-prefetch="hover"
                   >
                     <FileText
                       class="knowledge-sidebar__icon knowledge-sidebar__nav-icon"

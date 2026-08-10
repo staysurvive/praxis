@@ -6,6 +6,8 @@ import {
   getContentPath,
   getContentTypeFromPath,
   getContentUrl,
+  getKnowledgeContextUrl,
+  getKnowledgeUrl,
   getPublicContentUrl,
   knowledgeSections,
   legacyCompatibilityMappings,
@@ -76,6 +78,16 @@ describe('type-first URL contract', () => {
 });
 
 describe('public URL contract', () => {
+  it('adds navigation-only section context without changing the canonical path', () => {
+    expect(
+      getKnowledgeContextUrl(getKnowledgeUrl('agent-app-development'), 'agent-app-development'),
+    ).toBe('/knowledge/agent-app-development?section=agent-app-development');
+    expect(
+      getKnowledgeContextUrl('/knowledge?view=compact#workspace-start', 'practice-cases'),
+    ).toBe('/knowledge?view=compact&section=practice-cases#workspace-start');
+    expect(getKnowledgeContextUrl('/knowledge/article')).toBe('/knowledge/article');
+  });
+
   it('uses one knowledge canonical for every non-project content type', () => {
     for (const type of ['blog', 'note', 'journal'] as const) {
       expect(getPublicContentUrl({ contentId: `fixture-${type}`, type, slug: 'shared-slug' })).toBe(
