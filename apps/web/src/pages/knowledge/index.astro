@@ -1,12 +1,18 @@
 ---
-import ContentCard from '../../components/ContentCard.astro';
-import KnowledgeSectionCard from '../../components/KnowledgeSectionCard.astro';
-import EditorialHero from '../../components/EditorialHero.astro';
-import SectionHeading from '../../components/SectionHeading.astro';
+import KnowledgeWorkspaceOverview from '../../components/knowledge/KnowledgeWorkspaceOverview.astro';
+import type {
+  KnowledgeSidebarEntry,
+  KnowledgeSidebarSection,
+  KnowledgeTocItem,
+} from '../../components/knowledge/types';
 import { uiCopy } from '../../config/copy';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import KnowledgeDocsLayout from '../../layouts/KnowledgeDocsLayout.astro';
 import { listKnowledgeSectionEntries, listRecentKnowledge } from '../../lib/content';
-import { knowledgeSections } from '../../lib/content/domain';
+import {
+  getKnowledgeNavigationUrl,
+  getKnowledgeUrl,
+  knowledgeSections,
+} from '../../lib/content/domain';
 
 const sectionCounts = new Map(
   await Promise.all(
@@ -17,62 +23,45 @@ const sectionCounts = new Map(
   ),
 );
 const recentEntries = await listRecentKnowledge();
+const sidebarSections = knowledgeSections.map((section): KnowledgeSidebarSection => ({
+  key: section.key,
+  href: getKnowledgeNavigationUrl({ section: section.key }),
+  number: section.number,
+  label: section.label,
+  description: section.description,
+  topics: section.topics,
+  count: sectionCounts.get(section.key) ?? 0,
+  isCurrent: false,
+}));
+const sidebarEntries = recentEntries.map((entry): KnowledgeSidebarEntry => ({
+  key: entry.contentId,
+  href: getKnowledgeNavigationUrl({
+    section: entry.knowledgeSections?.[0],
+    item: entry.slug,
+  }),
+  title: entry.title,
+  summary: entry.summary,
+  tags: entry.tags,
+  typeLabel: entry.typeLabel,
+  updatedAt: entry.updatedAt,
+  isCurrent: false,
+}));
+const tocItems = [
+  { id: 'workspace-start', text: uiCopy.knowledge.startReadingTitle, depth: 2 },
+  { id: 'workspace-chapters', text: uiCopy.knowledge.browseChaptersTitle, depth: 2 },
+  { id: 'workspace-recent', text: uiCopy.knowledge.recentTitle, depth: 2 },
+] satisfies readonly KnowledgeTocItem[];
 ---
 
-<BaseLayout title={uiCopy.knowledge.title} description={uiCopy.knowledge.description}>
-  <EditorialHero
-    eyebrow={uiCopy.knowledge.eyebrow}
-    title={uiCopy.knowledge.title}
-    description={uiCopy.knowledge.description}
-    variant="knowledge"
-  />
-
-  <section class="knowledge-sections" aria-label={uiCopy.knowledge.title}>
-    <div class="page-shell section-grid">
-      {
-        knowledgeSections.map((section) => (
-          <KnowledgeSectionCard section={section} count={sectionCounts.get(section.key) ?? 0} />
-        ))
-      }
-    </div>
-  </section>
-
-  <section class="recent-knowledge rule-scotch" aria-labelledby="recent-knowledge-title">
-    <div class="page-shell">
-      <SectionHeading
-        eyebrow={uiCopy.knowledge.recentEyebrow}
-        title={uiCopy.knowledge.recentTitle}
-        description={uiCopy.knowledge.recentDescription}
-        titleId="recent-knowledge-title"
-      />
-      <div class="recent-list">
-        {recentEntries.map((entry) => <ContentCard entry={entry} />)}
-      </div>
-    </div>
-  </section>
-</BaseLayout>
-
-<style>
-  .knowledge-sections,
-  .recent-knowledge {
-    padding-block: clamp(3.5rem, 8vw, 7rem);
-  }
-
-  .section-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: clamp(2rem, 6vw, 5rem);
-    border-bottom: 1px solid var(--color-line);
-  }
-
-  .recent-list {
-    margin-top: clamp(3rem, 7vw, 6rem);
-    border-bottom: 1px solid var(--color-line);
-  }
-
-  @media (max-width: 42rem) {
-    .section-grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-</style>
+<KnowledgeDocsLayout
+  title={uiCopy.knowledge.title}
+  description={uiCopy.knowledge.description}
+  canonicalPath={getKnowledgeUrl()}
+  navigationPath={getKnowledgeNavigationUrl()}
+  sidebarSections={sidebarSections}
+  recentEntries={sidebarEntries}
+  tocItems={tocItems}
+  overviewIsCurrent
+>
+  <KnowledgeWorkspaceOverview sections={sidebarSections} recentEntries={sidebarEntries} />
+</KnowledgeDocsLayout>

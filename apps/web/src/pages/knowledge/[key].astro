@@ -17,6 +17,7 @@ import {
 } from '../../lib/content';
 import {
   assertKnowledgeSlugAvailability,
+  getKnowledgeNavigationUrl,
   getKnowledgeSectionByKey,
   getKnowledgeUrl,
   isPublicStatus,
@@ -79,6 +80,9 @@ if (kind === 'section' && !section) {
 }
 
 const summary = entry ? toContentSummary(entry) : undefined;
+const articleSectionKey = summary?.knowledgeSections?.[0];
+const articleSection = articleSectionKey ? getKnowledgeSectionByKey(articleSectionKey) : undefined;
+const activeSectionKey = section?.key ?? articleSection?.key;
 const renderedEntry = entry ? await renderContentEntry(entry) : undefined;
 const Content = renderedEntry?.Content;
 const practiceEvents = entry ? normalizePracticeEvents([toPracticeSourceEntry(entry.data)]) : [];
@@ -103,20 +107,25 @@ const nextSection =
 
 const sidebarSections = knowledgeSections.map((candidate): KnowledgeSidebarSection => ({
   key: candidate.key,
-  href: getKnowledgeUrl(candidate.slug),
+  href: getKnowledgeNavigationUrl({ section: candidate.key }),
   number: candidate.number,
   label: candidate.label,
   description: candidate.description,
   topics: candidate.topics,
   count: selectKnowledgeSectionEntries(recentEntries, candidate.key).length,
-  isCurrent: section?.key === candidate.key,
+  isCurrent: activeSectionKey === candidate.key,
 }));
 const sidebarEntries = recentEntries.map((candidate): KnowledgeSidebarEntry => ({
-  href: candidate.url,
+  key: candidate.contentId,
+  href: getKnowledgeNavigationUrl({
+    section: candidate.knowledgeSections?.[0],
+    item: candidate.slug,
+  }),
   title: candidate.title,
   summary: candidate.summary,
   tags: candidate.tags,
   typeLabel: candidate.typeLabel,
+  updatedAt: candidate.updatedAt,
   isCurrent: candidate.contentId === contentId,
 }));
 
@@ -147,12 +156,19 @@ const pageMetadata = section
 if (!pageMetadata) {
   throw new Error('知识文档页面缺少可渲染的数据。');
 }
+
+const navigationPath = section
+  ? getKnowledgeNavigationUrl({ section: section.key })
+  : summary
+    ? getKnowledgeNavigationUrl({ section: articleSectionKey, item: summary.slug })
+    : getKnowledgeNavigationUrl();
 ---
 
 <KnowledgeDocsLayout
   title={pageMetadata.title}
   description={pageMetadata.description}
   canonicalPath={pageMetadata.canonicalPath}
+  navigationPath={navigationPath}
   seoType={pageMetadata.seoType}
   publishedAt={pageMetadata.publishedAt}
   updatedAt={pageMetadata.updatedAt}
@@ -170,7 +186,11 @@ if (!pageMetadata) {
         nextSection={nextSection}
       />
     ) : summary && Content ? (
-      <KnowledgeArticleView summary={summary} practiceEvents={practiceEvents}>
+      <KnowledgeArticleView
+        summary={summary}
+        practiceEvents={practiceEvents}
+        section={articleSection}
+      >
         <Content />
       </KnowledgeArticleView>
     ) : null

@@ -36,6 +36,13 @@ web server or proxy.
 Merge the relevant directives from [`Caddyfile.example`](./Caddyfile.example) into the existing site block and replace
 the example domain. Do not copy it over a live Caddyfile without reviewing the server's current routes and volumes.
 
+Knowledge navigation uses `/knowledge?section=<alias>&item=<slug>` while the exported content remains at the canonical
+`/knowledge/:key` files. The example Caddy route rewrites valid Knowledge queries internally before static-file lookup,
+so the browser keeps the short query URL and direct requests still work without JavaScript. Unknown section aliases,
+unsafe item values, repeated selectors, extra parameters, and unsupported Knowledge query shapes enter the normal
+branded 404 path instead of falling back to the overview. Keep the alias mapping synchronized with
+`apps/web/src/lib/content/domain.ts`.
+
 The route fallback resolves Astro's generated `index.html` files without changing canonical URLs. Requests with a
 trailing slash or a direct `index.html` path are redirected to the canonical no-trailing-slash URL; non-empty query
 parameters are preserved without adding an empty `?` to query-free requests. Unknown paths serve the branded

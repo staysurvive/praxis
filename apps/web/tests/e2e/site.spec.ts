@@ -7,16 +7,24 @@ import { expect, test } from '@playwright/test';
 import { resolveSiteUrl } from '../../config/site-url';
 import { uiCopy } from '../../src/config/copy';
 import { editorialHeroArt } from '../../src/config/editorial-heroes';
-import { getKnowledgeUrl, knowledgeSections } from '../../src/lib/content/domain';
+import {
+  getKnowledgeNavigationUrl,
+  getKnowledgeUrl,
+  knowledgeSections,
+} from '../../src/lib/content/domain';
 
 const siteOrigin = resolveSiteUrl(process.env.SITE_URL);
 const absoluteUrl = (pathname: string) => new URL(pathname, siteOrigin).toString();
 const sitemapUrl = (pathname: string) => (pathname ? absoluteUrl(pathname) : siteOrigin);
 const firstKnowledgeSection = knowledgeSections[0];
 const firstKnowledgeSectionUrl = getKnowledgeUrl(firstKnowledgeSection.slug);
-const knowledgeMenuItems = knowledgeSections.map(({ label, slug }) => ({
+const knowledgeOverviewContextUrl = getKnowledgeNavigationUrl();
+const firstKnowledgeSectionContextUrl = getKnowledgeNavigationUrl({
+  section: firstKnowledgeSection.key,
+});
+const knowledgeMenuItems = knowledgeSections.map(({ key, label }) => ({
   label,
-  href: getKnowledgeUrl(slug),
+  href: getKnowledgeNavigationUrl({ section: key }),
 }));
 
 test('editorial homepage exposes the real Praxis project and local practice data', async ({
@@ -69,11 +77,11 @@ test('editorial homepage exposes the real Praxis project and local practice data
   await expect(page.locator('a[href="/projects/praxis-foundation"]').first()).toBeVisible();
   await expect(page.getByRole('link', { name: /先审后信/ }).first()).toHaveAttribute(
     'href',
-    '/knowledge/ai-code-security-review',
+    '/knowledge?item=ai-code-security-review',
   );
   await expect(page.getByRole('link', { name: /门禁全绿之后/ }).first()).toHaveAttribute(
     'href',
-    '/knowledge/what-green-gates-miss',
+    '/knowledge?item=what-green-gates-miss',
   );
   await expect(page.getByText('GitHub Contributions')).toHaveCount(0);
   await expect(page.locator('.latest-list .content-card')).toHaveCount(3);
@@ -128,7 +136,7 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   const knowledgeTrigger = knowledgeMenu.locator('summary[data-knowledge-menu-trigger]');
   const knowledgeOverviewLink = primaryItems.nth(0).locator('a[data-knowledge-overview-link]');
   await expect(knowledgeOverviewLink).toHaveText('知识');
-  await expect(knowledgeOverviewLink).toHaveAttribute('href', '/knowledge');
+  await expect(knowledgeOverviewLink).toHaveAttribute('href', knowledgeOverviewContextUrl);
   await expect(
     primaryItems
       .nth(0)
@@ -147,7 +155,7 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   const directPrimaryLinks = navigation.locator(':scope > ul.nav-list > li.nav-item > a.nav-link');
   await expect(directPrimaryLinks).toHaveCount(4);
   await expect(directPrimaryLinks).toHaveText(['知识', '项目', '旅程', '关于']);
-  await expect(directPrimaryLinks.nth(0)).toHaveAttribute('href', '/knowledge');
+  await expect(directPrimaryLinks.nth(0)).toHaveAttribute('href', knowledgeOverviewContextUrl);
   await expect(directPrimaryLinks.nth(1)).toHaveAttribute('href', '/projects');
   await expect(directPrimaryLinks.nth(2)).toHaveAttribute('href', '/journey');
   await expect(directPrimaryLinks.nth(3)).toHaveAttribute('href', '/about');
@@ -227,7 +235,7 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   await expect(knowledgeOverviewLink).toHaveClass(/nav-link--active/);
   expect(await knowledgeTrigger.getAttribute('aria-current')).toBeNull();
   await expect(
-    knowledgeMenu.locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`),
+    knowledgeMenu.locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionContextUrl}"]`),
   ).toHaveAttribute('aria-current', 'page');
 
   for (const [pathname, label] of [
@@ -254,19 +262,21 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   );
 });
 
-test('the visible Knowledge link navigates directly to its overview independently of the disclosure', async ({
+test('the visible Knowledge link navigates to the workspace overview independently of the disclosure', async ({
   page,
 }) => {
   await page.goto('/journey');
 
   const knowledgeOverviewLink = page.locator('[data-knowledge-overview-link]');
   const knowledgeMenu = page.locator('details[data-knowledge-menu]');
-  await expect(knowledgeOverviewLink).toHaveAttribute('href', '/knowledge');
+  await expect(knowledgeOverviewLink).toHaveAttribute('href', knowledgeOverviewContextUrl);
   await expect(knowledgeMenu).toHaveJSProperty('open', false);
 
   await knowledgeOverviewLink.click();
   await expect(page).toHaveURL(/\/knowledge$/);
-  await expect(page.getByRole('heading', { level: 1, name: '知识' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: uiCopy.knowledge.workspaceTitle }),
+  ).toBeVisible();
 });
 
 test('knowledge menu opens on desktop hover and dismisses without moving focus', async ({
@@ -287,7 +297,7 @@ test('knowledge menu opens on desktop hover and dismisses without moving focus',
   await expect(panel).toBeVisible();
 
   const firstSectionLink = menu.locator(
-    `[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`,
+    `[data-knowledge-menu-link][href="${firstKnowledgeSectionContextUrl}"]`,
   );
   await expect(firstSectionLink).toHaveCount(1);
   await firstSectionLink.hover();
@@ -329,10 +339,12 @@ test('an expanded knowledge menu child link navigates with JavaScript enabled', 
   await menu.locator('summary[data-knowledge-menu-trigger]').click();
   await expect(menu).toHaveJSProperty('open', true);
 
-  const childLink = menu.locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`);
+  const childLink = menu.locator(
+    `[data-knowledge-menu-link][href="${firstKnowledgeSectionContextUrl}"]`,
+  );
   await expect(childLink).toBeVisible();
   await childLink.click();
-  await expect(page).toHaveURL(new RegExp(`${firstKnowledgeSectionUrl}$`));
+  await expect(page).toHaveURL(/\/knowledge\?section=agents$/);
   await expect(
     page.getByRole('heading', { level: 1, name: firstKnowledgeSection.label }),
   ).toBeVisible();
@@ -358,8 +370,8 @@ test('knowledge menu opens by touch and closes on an outside tap', async ({ page
   await expect(panel).toBeHidden();
 
   await trigger.tap();
-  await menu.locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`).tap();
-  await expect(page).toHaveURL(new RegExp(`${firstKnowledgeSectionUrl}$`));
+  await menu.locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionContextUrl}"]`).tap();
+  await expect(page).toHaveURL(/\/knowledge\?section=agents$/);
 });
 
 test('Escape closes the knowledge menu and restores focus to its trigger', async ({ page }) => {
@@ -421,34 +433,47 @@ test('Space toggles the native knowledge disclosure from the keyboard', async ({
 test('knowledge exposes five truthful sections and all recent knowledge', async ({ page }) => {
   await page.goto('/knowledge');
 
-  await expect(page.getByRole('heading', { level: 1, name: '知识' })).toBeVisible();
-  const sectionCards = page.locator('.knowledge-section-card');
+  await expect(
+    page.getByRole('heading', { level: 1, name: uiCopy.knowledge.workspaceTitle }),
+  ).toBeVisible();
+  await expect(page.locator('[data-page-hero]')).toHaveCount(0);
+  await expect(page.locator('[data-knowledge-docs]')).toHaveCount(1);
+  const sectionCards = page.locator('.knowledge-workspace__chapters > li');
   await expect(sectionCards).toHaveCount(knowledgeSections.length);
   await expect(sectionCards.getByRole('link')).toHaveCount(knowledgeSections.length);
-  await expect(sectionCards.getByRole('heading', { level: 2 })).toHaveText(
+  await expect(sectionCards.locator('.knowledge-workspace__chapter-copy strong')).toHaveText(
     knowledgeSections.map(({ label }) => label),
   );
   await expect(sectionCards.getByText('暂无作者内容', { exact: true })).toHaveCount(
     knowledgeSections.length,
   );
+  expect(
+    await sectionCards
+      .getByRole('link')
+      .evaluateAll((links) =>
+        links.every((link) => link.getAttribute('data-astro-prefetch') === 'hover'),
+      ),
+  ).toBe(true);
 
-  const recent = page.locator('.recent-list');
-  await expect(recent.locator('.content-card')).toHaveCount(2);
+  const recent = page.locator('.knowledge-workspace__recent-list');
+  await expect(recent.locator('article')).toHaveCount(2);
   await expect(recent.getByRole('link', { name: /先审后信/ }).first()).toHaveAttribute(
     'href',
-    '/knowledge/ai-code-security-review',
+    '/knowledge?item=ai-code-security-review',
   );
   await expect(recent.getByRole('link', { name: /门禁全绿之后/ }).first()).toHaveAttribute(
     'href',
-    '/knowledge/what-green-gates-miss',
+    '/knowledge?item=what-green-gates-miss',
   );
+  await expect(page.locator('a[href^="/knowledge/"]')).toHaveCount(0);
 });
 
 test('knowledge interiors share the documentation shell and keep truthful return paths', async ({
   page,
 }) => {
   for (const section of knowledgeSections) {
-    await page.goto(getKnowledgeUrl(section.slug));
+    const sectionContextUrl = getKnowledgeNavigationUrl({ section: section.key });
+    await page.goto(sectionContextUrl);
     await expect(page.locator('[data-knowledge-docs]')).toHaveCount(1);
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.getByRole('heading', { level: 1, name: section.label })).toBeVisible();
@@ -457,7 +482,7 @@ test('knowledge interiors share the documentation shell and keep truthful return
     await expect(page.getByRole('heading', { level: 2, name: '主题范围' })).toBeVisible();
     await expect(page.locator('[data-knowledge-sidebar] [aria-current="page"]')).toHaveAttribute(
       'href',
-      getKnowledgeUrl(section.slug),
+      sectionContextUrl,
     );
     await expect(page.getByRole('heading', { name: '此入口尚无作者内容' })).toBeVisible();
     await expect(page.getByRole('link', { name: '返回知识总览' })).toHaveAttribute(
@@ -470,10 +495,10 @@ test('knowledge interiors share the documentation shell and keep truthful return
   await expect(page).toHaveURL(/\/knowledge$/);
 
   await page
-    .locator('.recent-list h3')
+    .locator('.knowledge-workspace__recent-list h3')
     .getByRole('link', { name: /先审后信/ })
     .click();
-  await expect(page).toHaveURL(/\/knowledge\/ai-code-security-review$/);
+  await expect(page).toHaveURL(/\/knowledge\?item=ai-code-security-review$/);
   await expect(page.locator('[data-knowledge-docs]')).toHaveCount(1);
   await expect(page.locator('h1')).toHaveCount(1);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('先审后信');
@@ -492,7 +517,7 @@ test('knowledge interiors share the documentation shell and keep truthful return
   ).toHaveAttribute('href', '#方法不是看一遍而是相互否证');
   await expect(page.locator('[data-knowledge-sidebar] [aria-current="page"]')).toHaveAttribute(
     'href',
-    '/knowledge/ai-code-security-review',
+    '/knowledge?item=ai-code-security-review',
   );
 
   await page.goto('/knowledge/what-green-gates-miss');
@@ -503,7 +528,7 @@ test('knowledge interiors share the documentation shell and keep truthful return
   );
   await expect(page.locator('[data-knowledge-sidebar] [aria-current="page"]')).toHaveAttribute(
     'href',
-    '/knowledge/what-green-gates-miss',
+    '/knowledge?item=what-green-gates-miss',
   );
   await expect(page.locator('[data-knowledge-toc-link]')).toHaveCount(0);
   const emptyTocMessage = page.getByText('本页暂无可跳转的小节。');
@@ -545,6 +570,123 @@ test('knowledge filter and shortcut progressively enhance the rendered navigatio
   await expect(page.locator('[data-knowledge-filter-item]:not([hidden])')).toHaveCount(
     knowledgeSections.length + 2,
   );
+});
+
+test('knowledge ClientRouter preserves URL history and rebinds document behavior', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile-chromium', 'Desktop soft-navigation lifecycle.');
+
+  await page.goto('/knowledge');
+  const startLink = page.locator('.knowledge-workspace__start');
+  await expect(startLink).toHaveAttribute('href', firstKnowledgeSectionContextUrl);
+  await expect(startLink).toHaveAttribute('data-astro-prefetch', 'hover');
+
+  await page.evaluate(() => {
+    (window as Window & { __praxisClientRouterProbe?: string }).__praxisClientRouterProbe =
+      'preserved';
+  });
+  await startLink.click();
+
+  await expect(page).toHaveURL(/\/knowledge\?section=agents$/);
+  expect(
+    await page.evaluate(
+      () => (window as Window & { __praxisClientRouterProbe?: string }).__praxisClientRouterProbe,
+    ),
+  ).toBe('preserved');
+  await expect(page.locator('[data-knowledge-docs]')).toHaveAttribute(
+    'data-knowledge-docs-ready',
+    'true',
+  );
+
+  const filterInput = page.locator('[data-knowledge-sidebar] [data-knowledge-filter-input]');
+  await page.keyboard.press('Control+k');
+  await expect(filterInput).toBeFocused();
+  await filterInput.fill('Agent');
+  await expect(page.locator('[data-knowledge-filter-status]')).toHaveText('已显示 1 个知识入口');
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/knowledge$/);
+  expect(
+    await page.evaluate(
+      () => (window as Window & { __praxisClientRouterProbe?: string }).__praxisClientRouterProbe,
+    ),
+  ).toBe('preserved');
+  await expect(page.locator('[data-knowledge-workspace]')).toHaveCount(1);
+  await expect(page.locator('[data-knowledge-docs]')).toHaveAttribute(
+    'data-knowledge-docs-ready',
+    'true',
+  );
+});
+
+test('theme toggle stays bound when Knowledge ClientRouter swaps the header', async ({ page }) => {
+  await page.goto(firstKnowledgeSectionContextUrl);
+
+  const themeToggle = page.locator('[data-theme-toggle]');
+  await expect(themeToggle).toBeVisible();
+  await expect(themeToggle).toHaveAttribute('data-theme-toggle-ready', 'true');
+
+  await page.evaluate(() => {
+    const state = window as Window & { __praxisThemePageLoaded?: boolean };
+    state.__praxisThemePageLoaded = false;
+    document.addEventListener(
+      'astro:page-load',
+      () => {
+        state.__praxisThemePageLoaded = true;
+      },
+      { once: true },
+    );
+  });
+  await page.locator('.site-header [data-knowledge-overview-link]').click();
+  await expect(page).toHaveURL(/\/knowledge$/);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as Window & { __praxisThemePageLoaded?: boolean }).__praxisThemePageLoaded,
+      ),
+    )
+    .toBe(true);
+  await expect(themeToggle).toBeVisible();
+  await expect(themeToggle).toHaveAttribute('data-theme-toggle-ready', 'true');
+
+  const themeBeforeToggle = await page.locator('html').getAttribute('data-theme');
+  await themeToggle.click();
+  await expect
+    .poll(() => page.locator('html').getAttribute('data-theme'))
+    .not.toBe(themeBeforeToggle);
+  await expect(themeToggle).not.toHaveAttribute('data-theme-transition', /.+/);
+  const selectedTheme = await page.locator('html').getAttribute('data-theme');
+  expect(selectedTheme === 'light' || selectedTheme === 'dark').toBe(true);
+
+  await page.evaluate(() => {
+    const state = window as Window & { __praxisThemePageLoaded?: boolean };
+    state.__praxisThemePageLoaded = false;
+    document.addEventListener(
+      'astro:page-load',
+      () => {
+        state.__praxisThemePageLoaded = true;
+      },
+      { once: true },
+    );
+  });
+  await page.goBack();
+  await expect(page).toHaveURL(/\/knowledge\?section=agents$/);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as Window & { __praxisThemePageLoaded?: boolean }).__praxisThemePageLoaded,
+      ),
+    )
+    .toBe(true);
+  await expect(themeToggle).toBeVisible();
+  await expect(themeToggle).toHaveAttribute('data-theme-toggle-ready', 'true');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', selectedTheme ?? '');
+
+  const themeBeforeBackToggle = await page.locator('html').getAttribute('data-theme');
+  await themeToggle.click();
+  await expect
+    .poll(() => page.locator('html').getAttribute('data-theme'))
+    .not.toBe(themeBeforeBackToggle);
 });
 
 test('wide knowledge pages expose three non-overlapping document columns', async ({
@@ -716,7 +858,10 @@ test('journey stays empty and about uses only confirmed site identity', async ({
   await page.goto('/journey');
   await expect(page.getByRole('heading', { level: 1, name: '旅程' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '旅程尚未开始记录' })).toBeVisible();
-  await expect(page.getByRole('link', { name: '浏览知识' })).toHaveAttribute('href', '/knowledge');
+  await expect(page.getByRole('link', { name: '浏览知识' })).toHaveAttribute(
+    'href',
+    knowledgeOverviewContextUrl,
+  );
   await expect(page.getByRole('link', { name: '查看项目' })).toHaveAttribute('href', '/projects');
   await expect(page.locator('.practice-timeline')).toHaveCount(0);
 
@@ -725,7 +870,7 @@ test('journey stays empty and about uses only confirmed site identity', async ({
   await expect(page.getByText('一个关于长期思考、真实行动与持续复盘的个人实践站。')).toHaveCount(2);
 });
 
-test('primary pages use their own editorial art while knowledge interiors keep the docs shell', async ({
+test('editorial primary pages keep their art while the knowledge namespace shares one docs shell', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1536, height: 791 });
@@ -736,7 +881,6 @@ test('primary pages use their own editorial art while knowledge interiors keep t
     .evaluate((element) => getComputedStyle(element).backgroundImage);
 
   for (const [pathname, variant, heading] of [
-    ['/knowledge', 'knowledge', '知识'],
     ['/projects', 'projects', '项目'],
     ['/journey', 'journey', '旅程'],
     ['/about', 'about', '关于 Praxis'],
@@ -779,20 +923,68 @@ test('primary pages use their own editorial art while knowledge interiors keep t
     expect(desktopVeil, pathname).toBe(homepageDesktopOverlay);
   }
 
-  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/knowledge');
-  const knowledgeMobileVeil = await page
-    .locator('[data-page-hero="knowledge"] .editorial-hero__veil')
-    .evaluate((element) => getComputedStyle(element).backgroundImage);
-  expect(knowledgeMobileVeil).toContain('linear-gradient(0deg');
-  expect(knowledgeMobileVeil).not.toContain('90deg');
-  expect(knowledgeMobileVeil).not.toBe(homepageDesktopOverlay);
+  await expect(page.locator('[data-page-hero]')).toHaveCount(0);
+  await expect(page.locator('[data-knowledge-docs]')).toHaveCount(1);
+  await expect(page.locator('[data-knowledge-workspace]')).toHaveCount(1);
 
-  await page.goto(firstKnowledgeSectionUrl);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(firstKnowledgeSectionContextUrl);
   await expect(page.locator('[data-page-hero]')).toHaveCount(0);
   await expect(page.locator('.page-hero')).toHaveCount(0);
   await expect(page.locator('[data-knowledge-docs]')).toHaveCount(1);
   await expect(page.locator('[data-knowledge-section-view]')).toHaveCount(1);
+});
+
+test('preview dispatches query-first Knowledge routes to static content and rejects invalid input', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === 'mobile-chromium',
+    'Preview routing is viewport-independent.',
+  );
+
+  for (const section of knowledgeSections) {
+    const response = await page.goto(getKnowledgeNavigationUrl({ section: section.key }));
+    expect(response?.status(), section.alias).toBe(200);
+    await expect(page.getByRole('heading', { level: 1, name: section.label })).toBeVisible();
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      absoluteUrl(getKnowledgeUrl(section.slug)),
+    );
+  }
+
+  const articleNavigationUrl = getKnowledgeNavigationUrl({ item: 'ai-code-security-review' });
+  const articleResponse = await page.goto(articleNavigationUrl);
+  expect(articleResponse?.status()).toBe(200);
+  await expect(page).toHaveURL(/\/knowledge\?item=ai-code-security-review$/);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('先审后信');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    absoluteUrl('/knowledge/ai-code-security-review'),
+  );
+
+  const reloadResponse = await page.reload();
+  expect(reloadResponse?.status()).toBe(200);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('先审后信');
+
+  await page.goto('/knowledge?section=agents&item=ai-code-security-review');
+  await expect(page).toHaveURL(/\/knowledge\?item=ai-code-security-review$/);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('先审后信');
+
+  for (const invalidUrl of [
+    '/knowledge?section=unknown',
+    '/knowledge?item=not-a-real-article',
+    '/knowledge?item=..%2Funsafe',
+    '/knowledge?section=agents&section=llm',
+    '/knowledge?item=ai-code-security-review&item=what-green-gates-miss',
+    '/knowledge?section=unknown&item=ai-code-security-review',
+    '/knowledge?view=compact',
+  ]) {
+    const response = await page.goto(invalidUrl);
+    expect(response?.status(), invalidUrl).toBe(404);
+    await expect(page.getByRole('heading', { name: '这一页尚未抵达' })).toBeVisible();
+  }
 });
 
 test('missing routes use the branded 404', async ({ page }) => {
@@ -1013,7 +1205,7 @@ test('theme control mirrors the CC Switch control geometry and desktop icon hand
     'CC Switch swaps the icon directly on touch devices.',
   );
 
-  await page.emulateMedia({ colorScheme: 'light' });
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference' });
   await page.goto('/');
 
   const toggle = page.locator('[data-theme-toggle]');
@@ -1050,9 +1242,9 @@ test('theme control mirrors the CC Switch control geometry and desktop icon hand
     ],
   });
 
-  await toggle.click();
-  await expect(toggle).toHaveAttribute('data-theme-transition', 'to-dark');
   const handoff = await toggle.evaluate((element) => {
+    (element as HTMLButtonElement).click();
+
     const animation = (iconName: string) => {
       const icon = element.querySelector(`[data-theme-icon="${iconName}"]`);
       if (!icon) throw new Error(`Missing ${iconName} theme icon`);
@@ -1066,12 +1258,14 @@ test('theme control mirrors the CC Switch control geometry and desktop icon hand
     };
 
     return {
+      transition: element.getAttribute('data-theme-transition'),
       exiting: animation('moon'),
       entering: animation('sun'),
     };
   });
 
   expect(handoff).toEqual({
+    transition: 'to-dark',
     exiting: { name: 'theme-toggle-icon-exit', duration: '0.15s', delay: '0s' },
     entering: { name: 'theme-toggle-icon-enter', duration: '0.15s', delay: '0.15s' },
   });
@@ -1464,21 +1658,25 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
   expect(transitionDuration).toBeLessThanOrEqual(0.00001);
 
   await page.goto('/knowledge');
-  const editorialArtAnimation = await page
-    .locator('[data-page-hero="knowledge"] img')
-    .evaluate((image) => getComputedStyle(image).animationName);
-  expect(editorialArtAnimation).toBe('none');
+  const workspaceTransition = await page
+    .locator('.knowledge-workspace__start')
+    .evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration));
+  expect(workspaceTransition).toBeLessThanOrEqual(0.00001);
 });
 
-test('editorial hero artwork is excluded in forced-colors mode', async ({ page }) => {
+test('the knowledge workspace remains readable in forced-colors mode', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   await page.goto('/knowledge');
 
-  await expect(page.locator('[data-page-hero="knowledge"] img')).toBeHidden();
-  await expect(page.getByRole('heading', { level: 1, name: '知识' })).toBeVisible();
+  await expect(page.locator('[data-page-hero]')).toHaveCount(0);
+  await expect(
+    page.getByRole('heading', { level: 1, name: uiCopy.knowledge.workspaceTitle }),
+  ).toBeVisible();
 });
 
-test('keyboard order remains brand-first across the explicit navigation', async ({ page }) => {
+test('keyboard order remains brand-first across the explicit navigation', async ({
+  page,
+}, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/knowledge');
 
@@ -1567,7 +1765,13 @@ test('keyboard order remains brand-first across the explicit navigation', async 
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: /切换到/ })).toBeFocused();
   await page.keyboard.press('Tab');
-  await expect(page.locator('.knowledge-section-card').first().getByRole('link')).toBeFocused();
+  if (testInfo.project.name === 'mobile-chromium') {
+    await expect(page.locator('[data-knowledge-sidebar] summary')).toBeFocused();
+  } else {
+    await expect(
+      page.locator('[data-knowledge-sidebar] [data-knowledge-filter-input]'),
+    ).toBeFocused();
+  }
 });
 
 test('new primary, empty, and detail pages pass a basic automated accessibility scan', async ({
@@ -1614,28 +1818,30 @@ test('core content remains readable without JavaScript', async ({ browser }) => 
   await expect(page.locator('[data-theme-color-override]')).toHaveAttribute('media', 'not all');
   await expect(page.locator('[data-theme-toggle]')).toBeHidden();
   const knowledgeOverviewLink = page.locator('[data-knowledge-overview-link]');
-  await expect(knowledgeOverviewLink).toHaveAttribute('href', '/knowledge');
-  await knowledgeOverviewLink.click();
-  await expect(page).toHaveURL(/\/knowledge$/);
+  await expect(knowledgeOverviewLink).toHaveAttribute('href', knowledgeOverviewContextUrl);
 
   const knowledgeMenu = page.locator('details[data-knowledge-menu]');
   await knowledgeMenu.locator('summary[data-knowledge-menu-trigger]').click();
   await expect(knowledgeMenu).toHaveJSProperty('open', true);
   await knowledgeMenu
-    .locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionUrl}"]`)
+    .locator(`[data-knowledge-menu-link][href="${firstKnowledgeSectionContextUrl}"]`)
     .click();
-  await expect(page).toHaveURL(new RegExp(`${firstKnowledgeSectionUrl}$`));
+  await expect(page).toHaveURL(/\/knowledge\?section=agents$/);
   await expect(page.locator('[data-knowledge-sidebar] [data-knowledge-filter-item]')).toHaveCount(
     knowledgeSections.length + 2,
   );
   await expect(page.getByRole('heading', { name: '此入口尚无作者内容' })).toBeVisible();
   await page.getByRole('link', { name: '返回知识总览' }).click();
   await expect(page).toHaveURL(/\/knowledge$/);
+  await expect(
+    page.getByRole('heading', { level: 1, name: uiCopy.knowledge.workspaceTitle }),
+  ).toBeVisible();
 
   await page
-    .locator('.recent-list h3')
+    .locator('.knowledge-workspace__recent-list h3')
     .getByRole('link', { name: /先审后信/ })
     .click();
+  await expect(page).toHaveURL(/\/knowledge\?item=ai-code-security-review$/);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('先审后信');
   const firstTocLink = page.locator('[data-knowledge-toc-link]').first();
   const firstTocHref = await firstTocLink.getAttribute('href');

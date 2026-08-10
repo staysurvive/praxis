@@ -1,0 +1,3 @@
+{"file":".trellis/spec/frontend/routing.md","reason":"实现 section 上下文 helper 和导航链接时参考"}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"实现工作台组件和 KnowledgeDocsLayout 时参考"}
+{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"重构 knowledge-docs.js 与 astro:page-load 生命周期时参考"}

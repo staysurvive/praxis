@@ -1,4 +1,5 @@
 import { uiCopy } from './copy';
+import { getKnowledgeUrl } from '../lib/content/domain';
 
 export const siteConfig = {
   name: 'Praxis',
@@ -17,7 +18,11 @@ export const siteConfig = {
     bio: '一个关于长期思考、真实行动与持续复盘的个人实践站。',
   },
   navigation: [
-    { key: 'knowledge', label: uiCopy.navigation.knowledge, href: '/knowledge' },
+    {
+      key: 'knowledge',
+      label: uiCopy.navigation.knowledge,
+      href: getKnowledgeUrl(),
+    },
     { key: 'projects', label: uiCopy.navigation.projects, href: '/projects' },
     { key: 'journey', label: uiCopy.navigation.journey, href: '/journey' },
     { key: 'about', label: uiCopy.navigation.about, href: '/about' },

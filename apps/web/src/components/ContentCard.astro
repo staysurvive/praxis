@@ -6,9 +6,11 @@ import ContentMeta from './ContentMeta.astro';
 interface Props {
   entry: ContentSummary;
   featured?: boolean;
+  href?: string;
+  prefetch?: 'hover';
 }
 
-const { entry, featured = false } = Astro.props;
+const { entry, featured = false, href = entry.url, prefetch } = Astro.props satisfies Props;
 ---
 
 <article class:list={['content-card', 'editorial-surface', featured && 'content-card--featured']}>
@@ -16,11 +18,13 @@ const { entry, featured = false } = Astro.props;
   <div class="content-card-body mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
     <div>
       <h3 class="content-title">
-        <a href={entry.url}>{entry.title}</a>
+        <a href={href} data-astro-prefetch={prefetch}>{entry.title}</a>
       </h3>
       <p class="content-summary">{entry.summary}</p>
     </div>
-    <a class="text-link whitespace-nowrap" href={entry.url}>{uiCopy.actions.readMore}</a>
+    <a class="text-link whitespace-nowrap" href={href} data-astro-prefetch={prefetch}
+      >{uiCopy.actions.readMore}</a
+    >
   </div>
 </article>
 

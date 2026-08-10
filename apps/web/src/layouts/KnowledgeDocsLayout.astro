@@ -1,4 +1,6 @@
 ---
+import { ClientRouter } from 'astro:transitions';
+
 import KnowledgeSidebar from '../components/knowledge/KnowledgeSidebar.astro';
 import KnowledgeTableOfContents from '../components/knowledge/KnowledgeTableOfContents.astro';
 import type {
@@ -13,6 +15,7 @@ interface Props {
   title: string;
   description: string;
   canonicalPath: string;
+  navigationPath: string;
   seoType?: 'website' | 'article';
   publishedAt?: string;
   updatedAt?: string;
@@ -20,12 +23,14 @@ interface Props {
   sidebarSections: readonly KnowledgeSidebarSection[];
   recentEntries: readonly KnowledgeSidebarEntry[];
   tocItems: readonly KnowledgeTocItem[];
+  overviewIsCurrent?: boolean;
 }
 
 const {
   title,
   description,
   canonicalPath,
+  navigationPath,
   seoType = 'website',
   publishedAt,
   updatedAt,
@@ -33,6 +38,7 @@ const {
   sidebarSections,
   recentEntries,
   tocItems,
+  overviewIsCurrent = false,
 } = Astro.props satisfies Props;
 ---
 
@@ -45,20 +51,26 @@ const {
   updatedAt={updatedAt}
   tags={tags}
 >
+  <ClientRouter slot="head" />
   <div
     class="knowledge-docs"
     data-knowledge-docs
     data-filter-result-prefix={uiCopy.knowledge.filterResultPrefix}
     data-filter-result-suffix={uiCopy.knowledge.filterResultSuffix}
     data-filter-empty-result={uiCopy.knowledge.filterEmptyResult}
+    data-knowledge-navigation-path={navigationPath}
   >
-    <KnowledgeSidebar sections={sidebarSections} recentEntries={recentEntries} />
+    <KnowledgeSidebar
+      sections={sidebarSections}
+      recentEntries={recentEntries}
+      overviewIsCurrent={overviewIsCurrent}
+    />
     <KnowledgeTableOfContents items={tocItems} />
     <div class="knowledge-docs__content">
       <slot />
     </div>
   </div>
-  <script is:inline src="/scripts/knowledge-docs.js"></script>
+  <script is:inline src="/scripts/knowledge-docs.js" defer></script>
 </BaseLayout>
 
 <style>

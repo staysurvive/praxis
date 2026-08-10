@@ -25,3 +25,24 @@
 ### Status
 
 [OK] **Completed**
+
+
+## Session 2: Knowledge query-first routing and ClientRouter
+
+**Date**: 2026-08-10
+**Task**: Knowledge query-first routing and ClientRouter
+**Branch**: `codex/knowledge-docs-workspace-routing`
+
+### Summary
+
+Implemented CCSwitch-style query-first Knowledge navigation with short section aliases, static query dispatch for Astro dev and the project preview server, strict Caddy rewrites, and ClientRouter/no-JS coverage. Verified lint, typecheck, 87 unit tests, static build, 78 E2E tests with 8 expected skips, and Caddy validation/smoke.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `b957dc7` | (see git log) |
+
+### Status
+
+[OK] **Completed**

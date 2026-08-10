@@ -13,7 +13,7 @@
     "build": "astro build",
     "build:production": "npm run validate:production-site-url && npm run build",
     "validate:production-site-url": "tsx scripts/validate-production-site-url.ts",
-    "preview": "astro preview",
+    "preview": "tsx scripts/preview-query-server.ts",
     "lint": "eslint .",
     "pretypecheck": "npm run generate:practice",
     "typecheck": "astro check",

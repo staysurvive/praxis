@@ -1,6 +1,6 @@
 ---
 import { uiCopy } from '../config/copy';
-import { getKnowledgeUrl } from '../lib/content/domain';
+import { getKnowledgeNavigationUrl } from '../lib/content/domain';
 import type { KnowledgeSection } from '../lib/content/domain';
 
 interface Props {
@@ -12,7 +12,7 @@ const { section, count } = Astro.props;
 ---
 
 <article class="knowledge-section-card">
-  <a href={getKnowledgeUrl(section.slug)}>
+  <a href={getKnowledgeNavigationUrl({ section: section.key })}>
     <div>
       <h2>{section.label}</h2>
       <p>{section.description}</p>

@@ -1,0 +1,5 @@
+{"file":".trellis/spec/frontend/routing.md","reason":"知识 canonical 路由、查询上下文、真实链接与 metadata 契约"}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Astro typed props、文档布局和无障碍导航约定"}
+{"file":".trellis/spec/frontend/state-management.md","reason":"静态 HTML 与渐进增强边界"}
+{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"客户端脚本生命周期和清理约定"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"浏览器、No-JS、主题和响应式验收"}

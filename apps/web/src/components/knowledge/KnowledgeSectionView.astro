@@ -1,7 +1,7 @@
 ---
 import { uiCopy } from '../../config/copy';
 import type { ContentSummary } from '../../lib/content';
-import { getKnowledgeUrl } from '../../lib/content/domain';
+import { getKnowledgeNavigationUrl, getKnowledgeUrl } from '../../lib/content/domain';
 import type { KnowledgeSection } from '../../lib/content/domain';
 import ContentCard from '../ContentCard.astro';
 import EmptyState from '../EmptyState.astro';
@@ -41,14 +41,26 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
       entries.length > 0 ? (
         <div class="knowledge-entry-list">
           {entries.map((entry) => (
-            <ContentCard entry={entry} />
+            <ContentCard
+              entry={entry}
+              href={getKnowledgeNavigationUrl({
+                section: entry.knowledgeSections?.[0],
+                item: entry.slug,
+              })}
+              prefetch="hover"
+            />
           ))}
         </div>
       ) : (
         <EmptyState
           title={uiCopy.knowledge.emptySectionTitle}
           description={uiCopy.knowledge.emptySectionDescription}
-          actions={[{ label: uiCopy.actions.backToKnowledge, href: getKnowledgeUrl() }]}
+          actions={[
+            {
+              label: uiCopy.actions.backToKnowledge,
+              href: getKnowledgeUrl(),
+            },
+          ]}
         />
       )
     }
@@ -63,19 +75,31 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
     <div class="knowledge-section-navigation__links">
       {
         previousSection && (
-          <a href={getKnowledgeUrl(previousSection.slug)} rel="prev">
+          <a
+            href={getKnowledgeNavigationUrl({ section: previousSection.key })}
+            rel="prev"
+            data-astro-prefetch="hover"
+          >
             <span>{uiCopy.knowledge.previousChapter}</span>
             <strong>{previousSection.label}</strong>
           </a>
         )
       }
-      <a class="knowledge-section-navigation__overview" href={getKnowledgeUrl()}>
+      <a
+        class="knowledge-section-navigation__overview"
+        href={getKnowledgeUrl()}
+        data-astro-prefetch="hover"
+      >
         <span>{uiCopy.knowledge.eyebrow}</span>
         <strong>{uiCopy.knowledge.overviewLabel}</strong>
       </a>
       {
         nextSection && (
-          <a href={getKnowledgeUrl(nextSection.slug)} rel="next">
+          <a
+            href={getKnowledgeNavigationUrl({ section: nextSection.key })}
+            rel="next"
+            data-astro-prefetch="hover"
+          >
             <span>{uiCopy.knowledge.nextChapter}</span>
             <strong>{nextSection.label}</strong>
           </a>

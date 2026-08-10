@@ -1,84 +1,60 @@
-# Knowledge sidebar CC Switch source-based design QA
+# Knowledge documentation workspace design QA
 
-Date: 2026-08-09
-Scope: shared left navigation on every `/knowledge/*` child page.
+Date: 2026-08-10
+Scope: `/knowledge`, all `/knowledge/*` chapter/article pages, shared Knowledge navigation, route context, and progressive enhancement.
 
-## Comparison Target
+## Source visual truth
 
-- Source URL: `https://ccswitch.io/zh/docs?section=getting-started`.
-- Source implementation analysis: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/ccswitch-source-analysis.md`.
-- User reference crop: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/ccswitch-sidebar-reference.png`.
-- Current Praxis crop supplied by the user: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/praxis-sidebar-current.png`.
-- Browser source capture: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/ccswitch-docs-light-1280x720.png`.
-- Pre-fix Praxis capture: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/praxis-docs-sidebar-before-light-1280x720.png`.
-- Final Light Praxis capture: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/praxis-docs-sidebar-after-light-1280x720.png`.
-- Final Dark Praxis capture: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/praxis-docs-sidebar-after-dark-1280x720.png`.
-- Final mobile Praxis capture: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/praxis-docs-sidebar-after-mobile-light-390x844.png`.
-- Full same-view comparison: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/comparison-sidebar-light-1280x720.png`.
-- Focused same-region comparison: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/comparison-sidebar-focus-light.png`.
+- Live reference: `https://ccswitch.io/zh/docs?section=getting-started`.
+- Source implementation notes: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/ccswitch-source-analysis.md`.
+- User reference: `.trellis/tasks/08-10-knowledge-docs-workspace-routing/research/user-reference-knowledge-section.png`.
+- Source capture: `.trellis/tasks/08-09-knowledge-sidebar-ui-polish/research/ccswitch-docs-light-1280x720.png`.
 
-The source and final desktop implementation were both captured by the Codex in-app Browser at a `1280 x 720` CSS
-viewport and saved as `1280 x 720` PNGs at the same scroll position (`scrollY = 0`). No density normalization was
-required. The source is Light theme with `getting-started` active; the implementation is Light theme with
-`agent-app-development` active. The focused comparison crops the left `320 x 560` region from both equal-size captures.
+The CC Switch source was inspected for information architecture and visual relationships rather than copied as a brand asset. The key verified relationships are a compact search-first rail, icon-led chapter rows, rounded active state, a stable reading column, and a shareable `section` query state.
+
+## Implementation evidence
+
+- Overview, Light, 1920 × 1080: `.trellis/tasks/08-10-knowledge-docs-workspace-routing/research/knowledge-overview-light-1920x1080.png`.
+- Overview, Light, mobile 390 × 844: `.trellis/tasks/08-10-knowledge-docs-workspace-routing/research/knowledge-overview-light-390x844.png`.
+- Chapter, Light, 1920 × 1080: `.trellis/tasks/08-10-knowledge-docs-workspace-routing/research/knowledge-section-light-1920x1080.png`.
+- Chapter, Dark, 1920 × 1080: `.trellis/tasks/08-10-knowledge-docs-workspace-routing/research/knowledge-section-dark-1920x1080.png`.
+- Full-view comparison: `.trellis/tasks/08-10-knowledge-docs-workspace-routing/research/comparison-knowledge-section-light-page.png`.
+- Focused sidebar comparison: `.trellis/tasks/08-10-knowledge-docs-workspace-routing/research/comparison-knowledge-sidebar-light.png`.
+
+Source and implementation browser captures were taken at the stated CSS viewport sizes with the browser chrome excluded from the comparison. The focused comparison uses the same left navigation region and scroll position; the full-view comparison keeps the complete first viewport so hierarchy and whitespace can be judged together.
 
 ## Findings
 
-No actionable P0, P1, or P2 mismatch remains.
+- **Typography:** Praxis retains the existing system sans UI stack and editorial serif reading treatment. Navigation copy stays compact and readable; no remote font or CC Switch type asset was introduced.
+- **Spacing and layout:** The documentation shell uses a stable three-column desktop rhythm: approximately 288px navigation, a flexible reading column, and a narrow page TOC. Search and nav rows use the source-derived 44px/40px geometry with 12px radii and 4px row rhythm. Mobile collapses the rail into native disclosure behavior without introducing horizontal overflow at 320px.
+- **Colors and tokens:** Light mode keeps Praxis paper and copper tokens; Dark mode maps the same semantic roles instead of using a raw inversion. Active rows use a restrained copper tint, with text and icon state changes as a second signal.
+- **Icons and imagery:** Navigation icons use the existing `lucide-astro` package. No hand-drawn SVG, emoji, CC Switch logo, remote image, or placeholder artwork was added to the Knowledge shell.
+- **Copy and content:** Chapter labels, descriptions, counts, article titles, and recent updates come from the content registry. Empty chapters remain truthful empty states. The rail hides repetitive visible zero counts while retaining accessible count text.
+- **Interaction and accessibility:** Real links preserve shareable URLs and work without JavaScript. `aria-current`, visible focus, keyboard disclosure, `Ctrl/Meta + K`, Escape reset, live filter status, TOC highlighting, browser history, and ClientRouter page-load rebinding were exercised. The shared Header theme control uses one delegated listener, clears outgoing state before swaps, and only marks the current control ready after page-load initialization. Reduced-motion and forced-colors behavior remain supported.
+- **Routing:** The top-level “知识” entry opens the workspace overview at `/knowledge`; chapter navigation uses short aliases such as `/knowledge?section=agents`, and article navigation uses `item`. Canonical URLs remain path based and query-free.
 
-- **Information architecture:** CC Switch uses one search control followed by a flat icon-led product-navigation rail.
-  Praxis now uses the same hierarchy for Knowledge overview, five stable chapters, and two real recent entries. Praxis
-  deliberately keeps direct route links instead of copying CC Switch's JavaScript buttons and nested content tree.
-- **Fonts and typography:** the source uses Inter at 14-16px; Praxis keeps its system sans stack and uses 14px nav copy
-  at `1.45` line height. The result matches the source density without replacing the site's editorial serif reading
-  system or downloading a remote font. Letter spacing remains `0` in all new controls.
-- **Spacing and layout rhythm:** source measurement established an `18rem / 288px` rail, approximately 44px search,
-  40px primary rows, 12px radii, 12px inner gaps, and 4px row rhythm. The final implementation computes to `288px`,
-  `44px`, `40px`, `12px`, and `4px` respectively. The wide three-column shell and first-viewport content alignment
-  remain intact.
-- **Colors and visual tokens:** CC Switch uses `rgb(238 234 226)` paper and a warm primary at 10% opacity. Praxis keeps
-  its `rgb(244 241 234)` paper and maps the current state to the existing copper brand tint. Dark uses the same semantic
-  roles and remains designed rather than inverted.
-- **Icons and image quality:** every visible rail icon comes from `lucide-astro`, matching the source's Lucide family at
-  16px with 1.8px strokes. No CC Switch Logo, inline SVG, custom SVG, CSS drawing, emoji, placeholder, or generated image
-  was introduced. The interface has no content imagery to reproduce.
-- **Copy and content:** all Praxis labels and chapter descriptions remain registry/copy driven. Chapter numbers remain in
-  the reading header; repetitive visible zero counts were removed from the visual rail while truthful count phrases
-  remain in screen-reader-only text.
-- **States and interactions:** current chapter and article use a rounded tinted surface plus changed text/icon color.
-  Hover, visible focus, `Ctrl/Meta + K`, live-result filtering, Escape reset, native mobile disclosure and TOC behavior
-  work. Recent article labels truncate visually but retain full text and a `title` fallback.
-- **Responsiveness and accessibility:** the `390 x 844` open state shows all chapter descriptions and a native summary;
-  320px and project-mobile browser regressions report no page overflow. One H1, real links, `aria-current`, no-JavaScript
-  navigation and Light/Dark Axe scans remain valid.
+## Comparison history
 
-## Comparison History
+1. The prior Knowledge entry page duplicated the editorial hero and made users take an unnecessary overview-to-chapter step.
+2. The sidebar polish pass adopted the verified source geometry, icon hierarchy, rounded current state, and lighter content density while preserving Praxis identity.
+3. The current pass replaces the old overview composition with the Knowledge workspace, adds section-aware links, and scopes Astro ClientRouter plus hover prefetch to documentation pages.
+4. A parallel E2E theme-animation assertion was made deterministic by capturing the transition in the same browser task; this does not alter runtime behavior.
+5. A ClientRouter regression exposed that the shared Header DOM is replaced or restored from history snapshots. The theme control now re-queries current metadata on page load, uses a single delegated click listener, clears outgoing ready/animation state, and has a chapter-to-overview-to-Back regression test.
+6. Knowledge navigation now uses short query aliases at the public UI boundary. Astro dev, the project preview server, and production Caddy dispatch those URLs to the existing static chapter/article artifacts without changing canonical metadata.
 
-1. The user-provided pre-fix state had four P2 issues: no navigation icons, a table-like row system, visible repeated
-   numbers/zero counts, and square selected/search surfaces that did not match the supplied source.
-2. Source inspection confirmed CC Switch's actual React/Tailwind/Lucide contract and measured the active control geometry.
-3. The first implementation pass added Lucide icons and new markup, but an old long-running dev server served stale CSS;
-   the browser showed icons with legacy square styles. Restarting the server applied the intended scoped styles; this
-   was preview state, not a production-code fix.
-4. The post-restart focused comparison confirms equal rail width, search geometry, row height, icon rhythm, rounded
-   current surface and compact hierarchy. Dark, article-current and mobile-expanded states found no remaining P0/P1/P2.
+## Automated verification
 
-## Interaction And Automated Checks
+- Changed-file Prettier check — passed. The repository-wide `npm run format:check` still reports 60 pre-existing baseline files outside this change set, so they were not bulk-rewritten.
+- `npm run lint` — passed.
+- `npm run typecheck` — passed: 71 files, zero diagnostics.
+- `npm run test:unit` — passed: 87 tests across 6 files.
+- `npm run build` — passed: 14 static pages.
+- Focused Knowledge E2E — passed on Chromium and mobile Chromium.
+- Focused ClientRouter theme lifecycle E2E — passed 10/10 concurrent repetitions.
+- Full E2E — passed with four workers: 78 tests passed, 8 expected project/device skips.
+- Caddy v2.11.4 validation and local query-routing smoke — passed; valid overview/section/item requests return 200, while unknown, repeated, unsafe, and extra selectors return 404.
+- No-JavaScript navigation, Light/Dark, mobile, reduced-motion, forced-colors, Axe, history/back, prefetch attributes, and 320px overflow checks are covered by the suite.
 
-- `Ctrl+K` focused `#knowledge-filter-input`.
-- Filtering `安全` left one visible item and announced `已显示 1 个知识入口`; Escape restored all seven entries.
-- Browser console contained no warnings or errors on the local implementation.
-- Focused Prettier: passed after formatting the dependency manifest.
-- Lint: passed.
-- Astro TypeCheck: 68 files, zero diagnostics.
-- Unit: 77/77 passed.
-- Build: 14 pages.
-- Full E2E: 74 passed with 6 expected device-specific skips.
-- `git diff --check`: passed with line-ending notices only.
-
-## Follow-up Polish
-
-No P3 is required for this pass. A future full-text search modal should be a separate feature only after the content
-volume justifies it; this iteration intentionally preserves the lighter in-page filter.
+No actionable P0, P1, or P2 visual or interaction mismatch remains for this scope.
 
 final result: passed
