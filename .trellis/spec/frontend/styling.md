@@ -60,8 +60,9 @@ per page:
   threshold. `.page-section` also increments the `section-folio` counter that `.eyebrow--folio::before` renders as
   `01 —`, `02 —` …; adding a homepage section renumbers automatically.
 - `.display-title` / `.section-title` — serif display type from system stacks only (Georgia + Source Han Serif SC
-  fallbacks in `--font-serif`). Webfonts are forbidden: the CSP allows no third-party origins and pages must not pay
-  a font download.
+  fallbacks in `--font-serif`). General-purpose webfonts remain forbidden. The only approved exception is the
+  self-hosted, OFL-licensed four-glyph subset at `public/fonts/praxis-brand-serif.woff2`, used exclusively by the
+  `SiteHeader` motto. Do not expand that subset or issue third-party font requests.
 - `.article-prose` — long-form Chinese body sets `text-align: justify`, `text-justify: inter-character`,
   `line-break: strict`, and `hanging-punctuation: allow-end` at `--measure-cjk` (36em); headings and blockquotes
   reset to `text-align: left`.

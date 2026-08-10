@@ -121,6 +121,7 @@ test('header preserves the brand structure with an animated motto signature', as
   page,
 }, testInfo) => {
   await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
 
   const motto = page.locator('.brand-motto');
   await expect(motto).toHaveText('知行合一');
@@ -132,16 +133,34 @@ test('header preserves the brand structure with an animated motto signature', as
 
   await expect(motto.locator('.brand-motto-orbit')).toBeVisible();
   await expect(motto.locator('.brand-motto-glint')).toBeVisible();
+  await expect
+    .poll(() =>
+      motto.locator('.brand-motto-orbit').evaluate((element) => getComputedStyle(element).opacity),
+    )
+    .toBe('0.32');
 
   const signature = await motto.evaluate((element) => {
     const text = element.querySelector('.brand-motto-text');
     const orbit = element.querySelector('.brand-motto-orbit');
-    if (!(text instanceof HTMLElement) || !(orbit instanceof HTMLElement)) {
+    const brandName = element.closest('.brand')?.querySelector('.brand-name');
+    if (
+      !(text instanceof HTMLElement) ||
+      !(orbit instanceof HTMLElement) ||
+      !(brandName instanceof HTMLElement)
+    ) {
       throw new Error('Missing brand motto signature layers');
     }
 
     return {
+      brandGap: element.getBoundingClientRect().left - brandName.getBoundingClientRect().right,
+      brandNameSize: getComputedStyle(brandName).fontSize,
+      dividerToTextGap: text.getBoundingClientRect().left - element.getBoundingClientRect().left,
+      fontLoaded: document.fonts.check('400 16px "Praxis Brand Serif"', '知行合一'),
       textAnimation: getComputedStyle(text).animationName,
+      textFeatures: getComputedStyle(text).fontFeatureSettings,
+      textFamily: getComputedStyle(text).fontFamily,
+      textSize: getComputedStyle(text).fontSize,
+      textStroke: getComputedStyle(text).webkitTextStrokeWidth,
       textWeight: getComputedStyle(text).fontWeight,
       orbitAnimation: getComputedStyle(orbit).animationName,
       orbitMask: getComputedStyle(orbit).maskImage,
@@ -149,11 +168,25 @@ test('header preserves the brand structure with an animated motto signature', as
     };
   });
 
+  expect(signature.fontLoaded).toBe(true);
   expect(signature.textAnimation).toBe('brand-motto-emerge');
+  expect(signature.textFeatures).toContain('"palt"');
+  expect(signature.textFamily).toBe('"Praxis Brand Serif"');
+  expect(signature.textSize).toBe('16px');
+  expect(signature.textStroke).toBe('0.12px');
+  expect(Number.parseFloat(signature.textSize)).toBeGreaterThanOrEqual(
+    Number.parseFloat(signature.brandNameSize) * 1.15,
+  );
+  expect(Number.parseFloat(signature.textSize)).toBeLessThanOrEqual(
+    Number.parseFloat(signature.brandNameSize) * 1.25,
+  );
+  expect(signature.brandGap).toBeLessThanOrEqual(10);
+  expect(signature.dividerToTextGap).toBeLessThanOrEqual(14);
   expect(signature.textWeight).toBe('400');
   expect(signature.orbitAnimation).toBe('brand-orbit-reveal');
   expect(signature.orbitMask).toContain('praxis-motto-orbit.png');
-  expect(signature.width).toBeGreaterThan(200);
+  expect(signature.width).toBeGreaterThan(100);
+  expect(signature.width).toBeLessThan(120);
 });
 
 test('primary navigation is explicit and section-aware', async ({ page }) => {
@@ -1620,7 +1653,7 @@ test('new primary, empty, and detail pages pass a basic automated accessibility 
   page,
 }) => {
   for (const colorScheme of ['light', 'dark'] as const) {
-    await page.emulateMedia({ colorScheme });
+    await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
 
     for (const path of [
       '/',
