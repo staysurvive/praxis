@@ -117,6 +117,45 @@ test('editorial homepage exposes the real Praxis project and local practice data
   expect(tooltipGeometry.tooltipBottom).toBeLessThanOrEqual(tooltipGeometry.scrollBottom);
 });
 
+test('header preserves the brand structure with an animated motto signature', async ({
+  page,
+}, testInfo) => {
+  await page.goto('/');
+
+  const motto = page.locator('.brand-motto');
+  await expect(motto).toHaveText('知行合一');
+
+  if (testInfo.project.name === 'mobile-chromium') {
+    await expect(motto).toBeHidden();
+    return;
+  }
+
+  await expect(motto.locator('.brand-motto-orbit')).toBeVisible();
+  await expect(motto.locator('.brand-motto-glint')).toBeVisible();
+
+  const signature = await motto.evaluate((element) => {
+    const text = element.querySelector('.brand-motto-text');
+    const orbit = element.querySelector('.brand-motto-orbit');
+    if (!(text instanceof HTMLElement) || !(orbit instanceof HTMLElement)) {
+      throw new Error('Missing brand motto signature layers');
+    }
+
+    return {
+      textAnimation: getComputedStyle(text).animationName,
+      textWeight: getComputedStyle(text).fontWeight,
+      orbitAnimation: getComputedStyle(orbit).animationName,
+      orbitMask: getComputedStyle(orbit).maskImage,
+      width: element.getBoundingClientRect().width,
+    };
+  });
+
+  expect(signature.textAnimation).toBe('brand-motto-emerge');
+  expect(signature.textWeight).toBe('400');
+  expect(signature.orbitAnimation).toBe('brand-orbit-reveal');
+  expect(signature.orbitMask).toContain('praxis-motto-orbit.png');
+  expect(signature.width).toBeGreaterThan(200);
+});
+
 test('primary navigation is explicit and section-aware', async ({ page }) => {
   await page.goto('/');
 
@@ -1468,6 +1507,13 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
     .locator('[data-page-hero="knowledge"] img')
     .evaluate((image) => getComputedStyle(image).animationName);
   expect(editorialArtAnimation).toBe('none');
+
+  const mottoAnimations = await page.locator('.brand-motto').evaluate((element) => ({
+    text: getComputedStyle(element.querySelector('.brand-motto-text') as Element).animationName,
+    orbit: getComputedStyle(element.querySelector('.brand-motto-orbit') as Element).animationName,
+    glint: getComputedStyle(element.querySelector('.brand-motto-glint') as Element).animationName,
+  }));
+  expect(mottoAnimations).toEqual({ text: 'none', orbit: 'none', glint: 'none' });
 });
 
 test('editorial hero artwork is excluded in forced-colors mode', async ({ page }) => {

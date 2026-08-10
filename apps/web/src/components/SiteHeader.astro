@@ -1,4 +1,6 @@
 ---
+import { Sparkle } from 'lucide-astro';
+
 import { uiCopy } from '../config/copy';
 import { siteConfig } from '../config/site';
 import { getKnowledgeUrl, knowledgeSections } from '../lib/content/domain';
@@ -31,7 +33,13 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
         aria-hidden="true"
       />
       <span class="brand-name">{siteConfig.name}</span>
-      <span class="brand-motto">{siteConfig.theme}</span>
+      <span class="brand-motto" aria-hidden="true">
+        <span class="brand-motto-orbit"></span>
+        <span class="brand-motto-glint">
+          <Sparkle size={7} strokeWidth={1.25} />
+        </span>
+        <span class="brand-motto-text">{siteConfig.theme}</span>
+      </span>
     </a>
 
     <div class="header-actions flex items-center justify-end gap-3 sm:gap-5">
@@ -144,7 +152,6 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
     align-items: center;
     gap: 0.75rem;
     text-decoration: none;
-    transition: opacity var(--duration-fast) var(--ease-out);
   }
 
   .brand-mark {
@@ -160,16 +167,99 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
     font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
+    transition: opacity var(--duration-fast) var(--ease-out);
   }
 
   .brand-motto {
-    padding-left: 0.75rem;
-    border-left: 1px solid var(--color-line);
-    color: var(--color-fg-muted);
-    font-family: var(--font-serif);
-    font-size: 0.8125rem;
-    letter-spacing: 0.06em;
-    line-height: 1.2;
+    position: relative;
+    display: flex;
+    width: 13.5rem;
+    height: 3.5rem;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.45rem;
+    padding-left: 1.55rem;
+    isolation: isolate;
+  }
+
+  .brand-motto::before {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    width: 1px;
+    height: 2rem;
+    background: color-mix(in srgb, var(--color-line-strong) 18%, transparent);
+    content: '';
+    transform: translateY(-50%);
+  }
+
+  .brand-motto-orbit {
+    position: absolute;
+    z-index: 0;
+    inset-block: 0;
+    inset-inline: 1.35rem 0;
+    background: var(--color-brand-secondary);
+    -webkit-mask: url('/brand/praxis-motto-orbit.png') center / 100% 100% no-repeat;
+    mask: url('/brand/praxis-motto-orbit.png') center / 100% 100% no-repeat;
+    opacity: 0.92;
+    transform-origin: left center;
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  .brand-motto-text {
+    position: relative;
+    z-index: 2;
+    color: var(--color-fg);
+    font-family:
+      'Songti SC', STSong, 'Source Han Serif SC', 'Noto Serif CJK SC', 'Noto Serif SC',
+      var(--font-serif);
+    font-size: 1.625rem;
+    font-weight: 400;
+    letter-spacing: 0.17em;
+    line-height: 1;
+    text-indent: 0.17em;
+    text-wrap: nowrap;
+    white-space: nowrap;
+    transition:
+      color var(--duration-base) var(--ease-out),
+      text-shadow var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  .brand-motto-glint {
+    position: absolute;
+    z-index: 3;
+    top: 0.45rem;
+    right: 0.7rem;
+    display: grid;
+    width: 0.45rem;
+    height: 0.45rem;
+    place-items: center;
+    color: var(--color-brand-secondary);
+    filter: drop-shadow(
+      0 0 0.24rem color-mix(in srgb, var(--color-brand-secondary) 52%, transparent)
+    );
+    opacity: 0.72;
+    pointer-events: none;
+  }
+
+  @supports (offset-path: path('M 0 0 L 1 1')) {
+    .brand-motto-glint {
+      top: 0;
+      right: auto;
+      left: 0;
+      offset-distance: 82%;
+      offset-path: path('M 38 45 C 80 57 155 53 198 29 C 211 22 212 13 201 10');
+      offset-rotate: 0deg;
+    }
+  }
+
+  .brand-motto-glint :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   .nav-list {
@@ -400,8 +490,24 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .brand:hover {
-      opacity: 0.72;
+    .brand:hover .brand-mark,
+    .brand:hover .brand-name {
+      opacity: 0.78;
+    }
+
+    .brand:hover .brand-motto-orbit {
+      opacity: 1;
+      transform: translateX(0.12rem) scaleX(1.012);
+    }
+
+    .brand:hover .brand-motto-text {
+      color: color-mix(in srgb, var(--color-fg) 88%, var(--color-brand-secondary));
+      text-shadow: 0.42em 0 0.85em color-mix(in srgb, var(--color-brand-secondary) 18%, transparent);
+      transform: translateY(-0.02rem);
+    }
+
+    .brand:hover .brand-motto-glint {
+      animation-duration: 4.8s;
     }
 
     .nav-link:hover {
@@ -430,6 +536,64 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
 
   .knowledge-menu-link:focus-visible .knowledge-menu-label {
     font-weight: 600;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .brand-motto-orbit {
+      animation: brand-orbit-reveal 1.35s var(--ease-out) 0.12s both;
+    }
+
+    .brand-motto-text {
+      animation: brand-motto-emerge 0.9s var(--ease-out) 0.62s both;
+    }
+
+    .brand-motto-glint {
+      animation: brand-glint-travel 7.2s ease-in-out 1.35s infinite alternate;
+    }
+  }
+
+  @keyframes brand-orbit-reveal {
+    from {
+      clip-path: inset(0 100% 0 0);
+      opacity: 0;
+    }
+
+    to {
+      clip-path: inset(0);
+      opacity: 0.92;
+    }
+  }
+
+  @keyframes brand-motto-emerge {
+    from {
+      opacity: 0;
+      transform: translateY(0.22rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes brand-glint-travel {
+    0% {
+      offset-distance: 2%;
+      opacity: 0.18;
+      transform: scale(0.72);
+    }
+
+    38%,
+    68% {
+      opacity: 0.86;
+      transform: scale(1);
+    }
+
+    100% {
+      offset-distance: 98%;
+      opacity: 0.34;
+      transform: scale(0.82);
+    }
   }
 
   @media (max-width: 43rem) {
@@ -465,6 +629,18 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
     .site-header {
       background: var(--color-bg-surface);
       backdrop-filter: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .brand-motto-orbit,
+    .brand-motto-glint {
+      display: none;
+    }
+
+    .brand-motto-text {
+      color: CanvasText;
+      text-shadow: none;
     }
   }
 
