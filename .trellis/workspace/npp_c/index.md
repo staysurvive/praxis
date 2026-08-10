@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 1
-- **Last Active**: 2026-08-09
+- **Total Sessions**: 2
+- **Last Active**: 2026-08-10
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~27 | Active |
+| `journal-1.md` | ~48 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 2 | 2026-08-10 | Knowledge query-first routing and ClientRouter | `b957dc7` | `codex/knowledge-docs-workspace-routing` |
 | 1 | 2026-08-09 | 知识文档架构重构与 CC Switch 细化 | `08ae431` | `-` |
 <!-- @@@/auto:session-history -->
 
