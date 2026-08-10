@@ -16,6 +16,10 @@ the offline-capable `check` command.
 - Browser smoke: Knowledge disclosure hover/touch/keyboard/no-JavaScript paths, Knowledge empty-section and
   recent-detail round trips, Projects → the one real detail exception,
   Journey/About, all five compatibility pages, plus a missing route/404.
+- ClientRouter lifecycle: navigate from a Knowledge chapter to the overview without a document reload, then assert the
+  replacement Header theme control is visible, has its ready attribute, changes `html[data-theme]` when clicked, and is
+  rebound after browser Back. Assert the selected explicit theme survives the swap before clicking again. Keep the
+  separate no-JavaScript and aborted-script assertions that the unbound control remains hidden.
 - Accessibility: keyboard navigation, visible focus, landmarks/headings, reduced motion, color-independent heatmap
   summary, and basic automated checks in both themes.
 - Responsive: run the normal mobile project and a 320px regression; the document must not scroll horizontally. A wide

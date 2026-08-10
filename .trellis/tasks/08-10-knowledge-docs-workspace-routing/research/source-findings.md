@@ -19,6 +19,6 @@ Date: 2026-08-10
 
 ## Praxis-specific decisions
 
-- `/knowledge` remains a useful workspace overview and index, but the top-level “知识” link enters the first chapter directly with `?section=agent-app-development`.
+- `/knowledge` is the primary workspace overview. The top-level “知识” link opens `/knowledge?section=agent-app-development`, while the chapter disclosure and start-reading action still enter the first chapter directly.
 - `section` is intentionally excluded from canonical metadata, RSS, sitemap entries, content IDs, and static route generation.
 - Empty chapters keep their truthful empty state; the overview does not invent article counts or placeholder content.

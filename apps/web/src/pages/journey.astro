@@ -25,10 +25,7 @@ import {
         actions={[
           {
             label: uiCopy.actions.browseKnowledge,
-            href: getKnowledgeContextUrl(
-              getKnowledgeUrl(defaultKnowledgeSection.slug),
-              defaultKnowledgeSection.key,
-            ),
+            href: getKnowledgeContextUrl(getKnowledgeUrl(), defaultKnowledgeSection.key),
           },
           { label: uiCopy.actions.viewProjects, href: '/projects' },
         ]}

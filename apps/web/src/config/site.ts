@@ -25,10 +25,7 @@ export const siteConfig = {
     {
       key: 'knowledge',
       label: uiCopy.navigation.knowledge,
-      href: getKnowledgeContextUrl(
-        getKnowledgeUrl(defaultKnowledgeSection.slug),
-        defaultKnowledgeSection.key,
-      ),
+      href: getKnowledgeContextUrl(getKnowledgeUrl(), defaultKnowledgeSection.key),
     },
     { key: 'projects', label: uiCopy.navigation.projects, href: '/projects' },
     { key: 'journey', label: uiCopy.navigation.journey, href: '/journey' },

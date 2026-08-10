@@ -36,17 +36,17 @@ online single-hop verification remain an external deployment gate; do not add wi
 ## Navigation and filters
 
 Primary navigation is the explicit ordered list Knowledge, Projects, Journey, About; it is never derived from
-`contentTypes`. The visible Knowledge label directly enters the default knowledge section with a shareable
-`?section=<section-key>` context query, and its adjacent native disclosure arrow contains exactly the five
+`contentTypes`. The visible Knowledge label enters the document-workspace overview at
+`/knowledge?section=<default-section-key>`, and its adjacent native disclosure arrow contains exactly the five
 registry-backed section links; do not repeat a Knowledge-overview menu item or nest the link inside `summary`.
-`/knowledge` remains a document-workspace index reached from the docs rail and contextual return links. Projects,
-Journey, and About remain direct links. The Knowledge label uses `aria-current="page"` on the default section and
-`aria-current="location"` on any other knowledge descendant; the matching section link uses `page` within the nested
-link set. The icon-only disclosure has its own accessible name but no competing current-page state. Direct primary links
-use `page` on an exact route and `location` on a descendant. All navigation, section entries, empty-state exits, and
-detail return paths are real links and work without JavaScript; the menu enhancement may only add fine-pointer hover,
-outside-close, and Escape behavior. The `section` query is navigation context only and never changes canonical metadata,
-content selection, RSS, or Sitemap output.
+The overview is the primary Knowledge entry, while the disclosure, chapter cards, and start-reading action may link
+directly to a section. Projects, Journey, and About remain direct links. The Knowledge label uses
+`aria-current="page"` on `/knowledge` and `aria-current="location"` on section/article descendants; the matching
+section link uses `page` within the nested link set. The icon-only disclosure has its own accessible name but no
+competing current-page state. Direct primary links use `page` on an exact route and `location` on a descendant. All
+navigation, section entries, empty-state exits, and detail return paths are real links and work without JavaScript; the
+menu enhancement may only add fine-pointer hover, outside-close, and Escape behavior. The `section` query is navigation
+context only and never changes canonical metadata, content selection, RSS, or Sitemap output.
 
 ## Metadata and errors
 

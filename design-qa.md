@@ -30,8 +30,8 @@ Source and implementation browser captures were taken at the stated CSS viewport
 - **Colors and tokens:** Light mode keeps Praxis paper and copper tokens; Dark mode maps the same semantic roles instead of using a raw inversion. Active rows use a restrained copper tint, with text and icon state changes as a second signal.
 - **Icons and imagery:** Navigation icons use the existing `lucide-astro` package. No hand-drawn SVG, emoji, CC Switch logo, remote image, or placeholder artwork was added to the Knowledge shell.
 - **Copy and content:** Chapter labels, descriptions, counts, article titles, and recent updates come from the content registry. Empty chapters remain truthful empty states. The rail hides repetitive visible zero counts while retaining accessible count text.
-- **Interaction and accessibility:** Real links preserve shareable URLs and work without JavaScript. `aria-current`, visible focus, keyboard disclosure, `Ctrl/Meta + K`, Escape reset, live filter status, TOC highlighting, browser history, and ClientRouter page-load rebinding were exercised. Reduced-motion and forced-colors behavior remain supported.
-- **Routing:** The top-level “知识” entry now opens the default chapter at `/knowledge/agent-app-development?section=agent-app-development`; canonical URLs remain query-free. `/knowledge` remains a workspace/index page rather than a mandatory intermediate route.
+- **Interaction and accessibility:** Real links preserve shareable URLs and work without JavaScript. `aria-current`, visible focus, keyboard disclosure, `Ctrl/Meta + K`, Escape reset, live filter status, TOC highlighting, browser history, and ClientRouter page-load rebinding were exercised. The shared Header theme control uses one delegated listener, clears outgoing state before swaps, and only marks the current control ready after page-load initialization. Reduced-motion and forced-colors behavior remain supported.
+- **Routing:** The top-level “知识” entry opens the workspace overview at `/knowledge?section=agent-app-development`; the disclosure and start-reading action still enter the default chapter. Canonical URLs remain query-free.
 
 ## Comparison history
 
@@ -39,6 +39,7 @@ Source and implementation browser captures were taken at the stated CSS viewport
 2. The sidebar polish pass adopted the verified source geometry, icon hierarchy, rounded current state, and lighter content density while preserving Praxis identity.
 3. The current pass replaces the old overview composition with the Knowledge workspace, adds section-aware links, and scopes Astro ClientRouter plus hover prefetch to documentation pages.
 4. A parallel E2E theme-animation assertion was made deterministic by capturing the transition in the same browser task; this does not alter runtime behavior.
+5. A ClientRouter regression exposed that the shared Header DOM is replaced or restored from history snapshots. The theme control now re-queries current metadata on page load, uses a single delegated click listener, clears outgoing ready/animation state, and has a chapter-to-overview-to-Back regression test.
 
 ## Automated verification
 
@@ -48,7 +49,8 @@ Source and implementation browser captures were taken at the stated CSS viewport
 - `npm run test:unit` — passed: 78 tests across 6 files.
 - `npm run build` — passed: 14 static pages.
 - Focused Knowledge E2E — passed on Chromium and mobile Chromium.
-- Full E2E — passed: 75 tests passed, 7 expected project/device skips.
+- Focused ClientRouter theme lifecycle E2E — passed 10/10 concurrent repetitions.
+- Full E2E — passed: 77 tests passed, 7 expected project/device skips.
 - No-JavaScript navigation, Light/Dark, mobile, reduced-motion, forced-colors, Axe, history/back, prefetch attributes, and 320px overflow checks are covered by the suite.
 
 No actionable P0, P1, or P2 visual or interaction mismatch remains for this scope.

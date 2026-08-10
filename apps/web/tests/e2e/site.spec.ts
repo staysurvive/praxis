@@ -18,6 +18,10 @@ const absoluteUrl = (pathname: string) => new URL(pathname, siteOrigin).toString
 const sitemapUrl = (pathname: string) => (pathname ? absoluteUrl(pathname) : siteOrigin);
 const firstKnowledgeSection = knowledgeSections[0];
 const firstKnowledgeSectionUrl = getKnowledgeUrl(firstKnowledgeSection.slug);
+const knowledgeOverviewContextUrl = getKnowledgeContextUrl(
+  getKnowledgeUrl(),
+  firstKnowledgeSection.key,
+);
 const firstKnowledgeSectionContextUrl = getKnowledgeContextUrl(
   firstKnowledgeSectionUrl,
   firstKnowledgeSection.key,
@@ -136,7 +140,7 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   const knowledgeTrigger = knowledgeMenu.locator('summary[data-knowledge-menu-trigger]');
   const knowledgeOverviewLink = primaryItems.nth(0).locator('a[data-knowledge-overview-link]');
   await expect(knowledgeOverviewLink).toHaveText('知识');
-  await expect(knowledgeOverviewLink).toHaveAttribute('href', firstKnowledgeSectionContextUrl);
+  await expect(knowledgeOverviewLink).toHaveAttribute('href', knowledgeOverviewContextUrl);
   await expect(
     primaryItems
       .nth(0)
@@ -155,7 +159,7 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   const directPrimaryLinks = navigation.locator(':scope > ul.nav-list > li.nav-item > a.nav-link');
   await expect(directPrimaryLinks).toHaveCount(4);
   await expect(directPrimaryLinks).toHaveText(['知识', '项目', '旅程', '关于']);
-  await expect(directPrimaryLinks.nth(0)).toHaveAttribute('href', firstKnowledgeSectionContextUrl);
+  await expect(directPrimaryLinks.nth(0)).toHaveAttribute('href', knowledgeOverviewContextUrl);
   await expect(directPrimaryLinks.nth(1)).toHaveAttribute('href', '/projects');
   await expect(directPrimaryLinks.nth(2)).toHaveAttribute('href', '/journey');
   await expect(directPrimaryLinks.nth(3)).toHaveAttribute('href', '/about');
@@ -226,12 +230,12 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
 
   await page.goto('/knowledge');
   await expect(knowledgeOverviewLink).toHaveClass(/nav-link--active/);
-  await expect(knowledgeOverviewLink).toHaveAttribute('aria-current', 'location');
+  await expect(knowledgeOverviewLink).toHaveAttribute('aria-current', 'page');
   expect(await knowledgeTrigger.getAttribute('aria-current')).toBeNull();
   await expect(knowledgeLinks.locator('[aria-current]')).toHaveCount(0);
 
   await page.goto(firstKnowledgeSectionUrl);
-  await expect(knowledgeOverviewLink).toHaveAttribute('aria-current', 'page');
+  await expect(knowledgeOverviewLink).toHaveAttribute('aria-current', 'location');
   await expect(knowledgeOverviewLink).toHaveClass(/nav-link--active/);
   expect(await knowledgeTrigger.getAttribute('aria-current')).toBeNull();
   await expect(
@@ -262,22 +266,20 @@ test('primary navigation is explicit and section-aware', async ({ page }) => {
   );
 });
 
-test('the visible Knowledge link navigates directly to the default chapter independently of the disclosure', async ({
+test('the visible Knowledge link navigates to the workspace overview independently of the disclosure', async ({
   page,
 }) => {
   await page.goto('/journey');
 
   const knowledgeOverviewLink = page.locator('[data-knowledge-overview-link]');
   const knowledgeMenu = page.locator('details[data-knowledge-menu]');
-  await expect(knowledgeOverviewLink).toHaveAttribute('href', firstKnowledgeSectionContextUrl);
+  await expect(knowledgeOverviewLink).toHaveAttribute('href', knowledgeOverviewContextUrl);
   await expect(knowledgeMenu).toHaveJSProperty('open', false);
 
   await knowledgeOverviewLink.click();
-  await expect(page).toHaveURL(
-    new RegExp(`${firstKnowledgeSectionUrl}\\?section=${firstKnowledgeSection.key}$`),
-  );
+  await expect(page).toHaveURL(/\/knowledge\?section=agent-app-development$/);
   await expect(
-    page.getByRole('heading', { level: 1, name: firstKnowledgeSection.label }),
+    page.getByRole('heading', { level: 1, name: uiCopy.knowledge.workspaceTitle }),
   ).toBeVisible();
 });
 
@@ -626,6 +628,78 @@ test('knowledge ClientRouter preserves URL history and rebinds document behavior
   );
 });
 
+test('theme toggle stays bound when Knowledge ClientRouter swaps the header', async ({ page }) => {
+  await page.goto(firstKnowledgeSectionContextUrl);
+
+  const themeToggle = page.locator('[data-theme-toggle]');
+  await expect(themeToggle).toBeVisible();
+  await expect(themeToggle).toHaveAttribute('data-theme-toggle-ready', 'true');
+
+  await page.evaluate(() => {
+    const state = window as Window & { __praxisThemePageLoaded?: boolean };
+    state.__praxisThemePageLoaded = false;
+    document.addEventListener(
+      'astro:page-load',
+      () => {
+        state.__praxisThemePageLoaded = true;
+      },
+      { once: true },
+    );
+  });
+  await page.locator('.site-header [data-knowledge-overview-link]').click();
+  await expect(page).toHaveURL(/\/knowledge\?section=agent-app-development$/);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as Window & { __praxisThemePageLoaded?: boolean }).__praxisThemePageLoaded,
+      ),
+    )
+    .toBe(true);
+  await expect(themeToggle).toBeVisible();
+  await expect(themeToggle).toHaveAttribute('data-theme-toggle-ready', 'true');
+
+  const themeBeforeToggle = await page.locator('html').getAttribute('data-theme');
+  await themeToggle.click();
+  await expect
+    .poll(() => page.locator('html').getAttribute('data-theme'))
+    .not.toBe(themeBeforeToggle);
+  await expect(themeToggle).not.toHaveAttribute('data-theme-transition', /.+/);
+  const selectedTheme = await page.locator('html').getAttribute('data-theme');
+  expect(selectedTheme === 'light' || selectedTheme === 'dark').toBe(true);
+
+  await page.evaluate(() => {
+    const state = window as Window & { __praxisThemePageLoaded?: boolean };
+    state.__praxisThemePageLoaded = false;
+    document.addEventListener(
+      'astro:page-load',
+      () => {
+        state.__praxisThemePageLoaded = true;
+      },
+      { once: true },
+    );
+  });
+  await page.goBack();
+  await expect(page).toHaveURL(
+    new RegExp(`${firstKnowledgeSectionUrl}\\?section=${firstKnowledgeSection.key}$`),
+  );
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as Window & { __praxisThemePageLoaded?: boolean }).__praxisThemePageLoaded,
+      ),
+    )
+    .toBe(true);
+  await expect(themeToggle).toBeVisible();
+  await expect(themeToggle).toHaveAttribute('data-theme-toggle-ready', 'true');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', selectedTheme ?? '');
+
+  const themeBeforeBackToggle = await page.locator('html').getAttribute('data-theme');
+  await themeToggle.click();
+  await expect
+    .poll(() => page.locator('html').getAttribute('data-theme'))
+    .not.toBe(themeBeforeBackToggle);
+});
+
 test('wide knowledge pages expose three non-overlapping document columns', async ({
   page,
 }, testInfo) => {
@@ -797,7 +871,7 @@ test('journey stays empty and about uses only confirmed site identity', async ({
   await expect(page.getByRole('heading', { name: '旅程尚未开始记录' })).toBeVisible();
   await expect(page.getByRole('link', { name: '浏览知识' })).toHaveAttribute(
     'href',
-    firstKnowledgeSectionContextUrl,
+    knowledgeOverviewContextUrl,
   );
   await expect(page.getByRole('link', { name: '查看项目' })).toHaveAttribute('href', '/projects');
   await expect(page.locator('.practice-timeline')).toHaveCount(0);
@@ -1704,7 +1778,7 @@ test('core content remains readable without JavaScript', async ({ browser }) => 
   await expect(page.locator('[data-theme-color-override]')).toHaveAttribute('media', 'not all');
   await expect(page.locator('[data-theme-toggle]')).toBeHidden();
   const knowledgeOverviewLink = page.locator('[data-knowledge-overview-link]');
-  await expect(knowledgeOverviewLink).toHaveAttribute('href', firstKnowledgeSectionContextUrl);
+  await expect(knowledgeOverviewLink).toHaveAttribute('href', knowledgeOverviewContextUrl);
 
   const knowledgeMenu = page.locator('details[data-knowledge-menu]');
   await knowledgeMenu.locator('summary[data-knowledge-menu-trigger]').click();

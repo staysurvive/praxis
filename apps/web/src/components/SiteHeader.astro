@@ -2,7 +2,6 @@
 import { uiCopy } from '../config/copy';
 import { siteConfig } from '../config/site';
 import {
-  defaultKnowledgeSection,
   getKnowledgeContextUrl,
   getKnowledgeUrl,
   knowledgePath,
@@ -25,13 +24,11 @@ function getCurrentState(href: string): 'page' | 'location' | undefined {
 }
 
 function getKnowledgeCurrentState(): 'page' | 'location' | undefined {
-  if (currentPath === getKnowledgeUrl(defaultKnowledgeSection.slug)) {
+  if (currentPath === knowledgePath) {
     return 'page';
   }
 
-  return currentPath === knowledgePath || currentPath.startsWith(`${knowledgePath}/`)
-    ? 'location'
-    : undefined;
+  return currentPath.startsWith(`${knowledgePath}/`) ? 'location' : undefined;
 }
 ---
 

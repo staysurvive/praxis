@@ -24,6 +24,37 @@ frontend architecture. Browser behavior belongs in a small script or an explicit
   search, keyboard shortcuts, or table-of-contents state must listen for `astro:page-load`, clean up listeners and
   observers from the previous document, and leave real links usable when the router or script is unavailable.
 
+### ClientRouter DOM replacement contract
+
+Shared controls rendered inside the page body, including the site Header theme toggle, are replaced or restored from
+history snapshots when `ClientRouter` swaps documents. Their external scripts must therefore be page-lifecycle aware
+even when the control is not specific to Knowledge:
+
+- keep one namespaced global state object with an idempotent `init` function;
+- run `init` on the initial script evaluation and on every `astro:page-load`;
+- on `astro:before-swap`, remove the outgoing control's ready/transition attributes and listeners so a cached DOM node
+  cannot advertise stale readiness when browser history restores it;
+- prefer one globally registered delegated listener for a shared control that exists on every page; otherwise remove
+  listeners from the previous DOM node before rebinding;
+- re-query the current control and any replaced head metadata inside `init`, rather than retaining first-page nodes;
+- reapply the saved explicit theme during `init`, because ClientRouter may replace the root `data-theme` attribute;
+- set the control's ready attribute only after its current DOM node has a working event handler;
+- if ClientRouter evaluates the external script again, call the existing global `init` and return without registering a
+  second document-level lifecycle listener.
+
+```javascript
+// Wrong: ClientRouter replaces this node, leaving the new control hidden and unbound.
+const button = document.querySelector('[data-theme-toggle]');
+button?.addEventListener('click', toggleTheme);
+
+// Correct: one delegated handler survives swaps; each page load marks the current node ready.
+window.__praxisThemeToggle ??= { init };
+document.addEventListener('click', handleThemeClick);
+document.addEventListener('astro:before-swap', teardown);
+document.addEventListener('astro:page-load', window.__praxisThemeToggle.init);
+window.__praxisThemeToggle.init();
+```
+
 ## Data fetching
 
 - Build-time content and Practice Heatmap data are loaded from the local content boundary, not from browser fetches.
