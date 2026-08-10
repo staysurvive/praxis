@@ -135,17 +135,28 @@ test('header preserves the brand structure with an animated motto signature', as
   await expect(motto.locator('.brand-motto-glint')).toBeVisible();
   await expect
     .poll(() =>
-      motto.locator('.brand-motto-orbit').evaluate((element) => getComputedStyle(element).opacity),
+      motto
+        .locator('.brand-motto-orbit')
+        .evaluate((element) => Number.parseFloat(getComputedStyle(element).opacity)),
     )
-    .toBe('0.32');
+    .toBeGreaterThanOrEqual(0.38);
+  await expect
+    .poll(() =>
+      motto
+        .locator('.brand-motto-orbit')
+        .evaluate((element) => Number.parseFloat(getComputedStyle(element).opacity)),
+    )
+    .toBeLessThanOrEqual(0.56);
 
   const signature = await motto.evaluate((element) => {
     const text = element.querySelector('.brand-motto-text');
     const orbit = element.querySelector('.brand-motto-orbit');
+    const orbitPath = element.querySelector('.brand-motto-orbit-path');
     const brandName = element.closest('.brand')?.querySelector('.brand-name');
     if (
       !(text instanceof HTMLElement) ||
       !(orbit instanceof HTMLElement) ||
+      !(orbitPath instanceof SVGPathElement) ||
       !(brandName instanceof HTMLElement)
     ) {
       throw new Error('Missing brand motto signature layers');
@@ -157,19 +168,25 @@ test('header preserves the brand structure with an animated motto signature', as
       dividerToTextGap: text.getBoundingClientRect().left - element.getBoundingClientRect().left,
       fontLoaded: document.fonts.check('400 16px "Praxis Brand Serif"', '知行合一'),
       textAnimation: getComputedStyle(text).animationName,
+      atmosphereAnimation: getComputedStyle(element, '::after').animationName,
+      atmosphereDuration: getComputedStyle(element, '::after').animationDuration,
       textFeatures: getComputedStyle(text).fontFeatureSettings,
       textFamily: getComputedStyle(text).fontFamily,
       textSize: getComputedStyle(text).fontSize,
       textStroke: getComputedStyle(text).webkitTextStrokeWidth,
       textWeight: getComputedStyle(text).fontWeight,
       orbitAnimation: getComputedStyle(orbit).animationName,
-      orbitMask: getComputedStyle(orbit).maskImage,
+      orbitMask: getComputedStyle(orbit, '::before').maskImage,
+      orbitPathAnimation: getComputedStyle(orbitPath).animationName,
+      orbitPathDasharray: getComputedStyle(orbitPath).strokeDasharray,
       width: element.getBoundingClientRect().width,
     };
   });
 
   expect(signature.fontLoaded).toBe(true);
   expect(signature.textAnimation).toBe('brand-motto-emerge');
+  expect(signature.atmosphereAnimation).toBe('brand-atmosphere-drift');
+  expect(signature.atmosphereDuration).toBe('9.6s');
   expect(signature.textFeatures).toContain('"palt"');
   expect(signature.textFamily).toBe('"Praxis Brand Serif"');
   expect(signature.textSize).toBe('16px');
@@ -183,8 +200,10 @@ test('header preserves the brand structure with an animated motto signature', as
   expect(signature.brandGap).toBeLessThanOrEqual(10);
   expect(signature.dividerToTextGap).toBeLessThanOrEqual(14);
   expect(signature.textWeight).toBe('400');
-  expect(signature.orbitAnimation).toBe('brand-orbit-reveal');
+  expect(signature.orbitAnimation).toContain('brand-orbit');
   expect(signature.orbitMask).toContain('praxis-motto-orbit.png');
+  expect(signature.orbitPathAnimation).toBe('brand-orbit-draw');
+  expect(signature.orbitPathDasharray).not.toBe('none');
   expect(signature.width).toBeGreaterThan(100);
   expect(signature.width).toBeLessThan(120);
 });
@@ -1544,9 +1563,16 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
   const mottoAnimations = await page.locator('.brand-motto').evaluate((element) => ({
     text: getComputedStyle(element.querySelector('.brand-motto-text') as Element).animationName,
     orbit: getComputedStyle(element.querySelector('.brand-motto-orbit') as Element).animationName,
+    orbitPath: getComputedStyle(element.querySelector('.brand-motto-orbit-path') as Element)
+      .animationName,
     glint: getComputedStyle(element.querySelector('.brand-motto-glint') as Element).animationName,
   }));
-  expect(mottoAnimations).toEqual({ text: 'none', orbit: 'none', glint: 'none' });
+  expect(mottoAnimations).toEqual({
+    text: 'none',
+    orbit: 'none',
+    orbitPath: 'none',
+    glint: 'none',
+  });
 });
 
 test('editorial hero artwork is excluded in forced-colors mode', async ({ page }) => {
