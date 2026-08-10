@@ -9,9 +9,10 @@ data flow.
 ## State categories
 
 - **Build-time state:** content entries, journey, practiceLog, normalized activity, navigation metadata, and UI copy.
-- **URL state:** canonical namespace, content/section slug, navigation-only knowledge `section` context, or project hash,
-  and future filter/search parameters; URL state must be serializable and shareable. Legacy `type` appears only in the
-  five exact compatibility addresses. Navigation context must not fork the canonical content identity.
+- **URL state:** canonical namespace, content/section slug, the short-alias Knowledge `section` context, public article
+  `item`, or project hash, and future filter/search parameters; URL state must be serializable and shareable. An
+  unassigned article uses `item` without a fabricated `section`. Legacy `type` appears only in the five exact
+  compatibility addresses. Navigation context must not fork the canonical content identity.
 - **Ephemeral browser state:** theme preference or an explicitly interactive control, kept local to that control.
 - **Future server state:** comments, identity, views, and assistant data behind `/api/v1`; isolate it in an API client and
   never make article rendering depend on it.

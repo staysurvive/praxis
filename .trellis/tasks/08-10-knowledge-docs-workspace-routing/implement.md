@@ -37,3 +37,19 @@
 - [x] 增加章节到总览、切换主题、浏览器返回后的 E2E 回归覆盖。
 - [x] 运行变更文件 Prettier、lint、typecheck、unit、build 与完整 E2E。
 - [x] 更新 hook/quality 规范与 `design-qa.md` 验证记录。
+
+## 7. Query-first Knowledge navigation
+
+- [x] 在知识章节注册表中增加短别名，并集中实现 query 导航 URL 与 query-to-canonical 解析 helper；未归类文章必须省略 section。
+- [x] 将顶栏、侧栏、总览章节卡片、最近文章、章节前后导航、文章返回入口和 Journey CTA 全部切换到 `/knowledge?section=...&item=...`。
+- [x] 保留 `/knowledge/:key` 静态构建与 canonical 语义，并让渲染状态由真实 section/article 数据驱动。
+- [x] 为 Astro dev 与项目静态 preview server 增加 query 请求内部映射，为生产 `Caddyfile.example` 增加等价静态 rewrite 与安全的未知参数处理。
+- [x] 覆盖总览、五个章节、文章、刷新、直达、无效参数、ClientRouter history、No-JS 和主题按钮生命周期。
+- [x] 更新 routing/state/hook/quality specs 与部署说明。
+
+## 8. Validation and rollback gates
+
+- [x] 运行变更文件 Prettier、`npm run lint`、`npm run typecheck`、`npm run test:unit`、`npm run build` 与完整 Playwright E2E。
+- [x] 验证 Caddy 配置和 query 路由 smoke；确认 canonical、RSS、Sitemap、legacy compatibility 与 404 未漂移。
+- [x] 检查构建 HTML 不再生成重复的长章节导航 URL，并在 Light/Dark、桌面、移动端和 320px 完成视觉回归。
+- [x] 确认 query rewrite 在 dev、项目 preview server 和 production 三个边界保持一致，无需触发 canonical path 回滚方案。

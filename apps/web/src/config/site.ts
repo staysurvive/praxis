@@ -1,9 +1,5 @@
 import { uiCopy } from './copy';
-import {
-  defaultKnowledgeSection,
-  getKnowledgeContextUrl,
-  getKnowledgeUrl,
-} from '../lib/content/domain';
+import { getKnowledgeUrl } from '../lib/content/domain';
 
 export const siteConfig = {
   name: 'Praxis',
@@ -25,7 +21,7 @@ export const siteConfig = {
     {
       key: 'knowledge',
       label: uiCopy.navigation.knowledge,
-      href: getKnowledgeContextUrl(getKnowledgeUrl(), defaultKnowledgeSection.key),
+      href: getKnowledgeUrl(),
     },
     { key: 'projects', label: uiCopy.navigation.projects, href: '/projects' },
     { key: 'journey', label: uiCopy.navigation.journey, href: '/journey' },

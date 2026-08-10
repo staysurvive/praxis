@@ -7,6 +7,7 @@ import { uiCopy } from '../config/copy';
 import { siteConfig } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getLatestEntries, listEntries } from '../lib/content';
+import { getKnowledgeNavigationUrl } from '../lib/content/domain';
 import { practiceDataset } from '../lib/practice-data';
 
 const latestEntries = await getLatestEntries(3);
@@ -87,7 +88,22 @@ const [currentProject] = await listEntries({ type: 'project' });
         description={homeContent.latest.description}
       />
       <div class="latest-list mt-14">
-        {latestEntries.map((entry) => <ContentCard entry={entry} />)}
+        {
+          latestEntries.map((entry) => (
+            <ContentCard
+              entry={entry}
+              href={
+                entry.type === 'project'
+                  ? entry.url
+                  : getKnowledgeNavigationUrl({
+                      section: entry.knowledgeSections?.[0],
+                      item: entry.slug,
+                    })
+              }
+              prefetch={entry.type === 'project' ? undefined : 'hover'}
+            />
+          ))
+        }
       </div>
     </div>
   </section>

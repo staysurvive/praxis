@@ -31,7 +31,7 @@ Source and implementation browser captures were taken at the stated CSS viewport
 - **Icons and imagery:** Navigation icons use the existing `lucide-astro` package. No hand-drawn SVG, emoji, CC Switch logo, remote image, or placeholder artwork was added to the Knowledge shell.
 - **Copy and content:** Chapter labels, descriptions, counts, article titles, and recent updates come from the content registry. Empty chapters remain truthful empty states. The rail hides repetitive visible zero counts while retaining accessible count text.
 - **Interaction and accessibility:** Real links preserve shareable URLs and work without JavaScript. `aria-current`, visible focus, keyboard disclosure, `Ctrl/Meta + K`, Escape reset, live filter status, TOC highlighting, browser history, and ClientRouter page-load rebinding were exercised. The shared Header theme control uses one delegated listener, clears outgoing state before swaps, and only marks the current control ready after page-load initialization. Reduced-motion and forced-colors behavior remain supported.
-- **Routing:** The top-level “知识” entry opens the workspace overview at `/knowledge?section=agent-app-development`; the disclosure and start-reading action still enter the default chapter. Canonical URLs remain query-free.
+- **Routing:** The top-level “知识” entry opens the workspace overview at `/knowledge`; chapter navigation uses short aliases such as `/knowledge?section=agents`, and article navigation uses `item`. Canonical URLs remain path based and query-free.
 
 ## Comparison history
 
@@ -40,17 +40,19 @@ Source and implementation browser captures were taken at the stated CSS viewport
 3. The current pass replaces the old overview composition with the Knowledge workspace, adds section-aware links, and scopes Astro ClientRouter plus hover prefetch to documentation pages.
 4. A parallel E2E theme-animation assertion was made deterministic by capturing the transition in the same browser task; this does not alter runtime behavior.
 5. A ClientRouter regression exposed that the shared Header DOM is replaced or restored from history snapshots. The theme control now re-queries current metadata on page load, uses a single delegated click listener, clears outgoing ready/animation state, and has a chapter-to-overview-to-Back regression test.
+6. Knowledge navigation now uses short query aliases at the public UI boundary. Astro dev, the project preview server, and production Caddy dispatch those URLs to the existing static chapter/article artifacts without changing canonical metadata.
 
 ## Automated verification
 
-- Changed-file Prettier check — passed. The repository-wide `npm run format:check` still reports 66 pre-existing baseline files outside this change set, so they were not bulk-rewritten.
+- Changed-file Prettier check — passed. The repository-wide `npm run format:check` still reports 60 pre-existing baseline files outside this change set, so they were not bulk-rewritten.
 - `npm run lint` — passed.
-- `npm run typecheck` — passed: 69 files, zero diagnostics.
-- `npm run test:unit` — passed: 78 tests across 6 files.
+- `npm run typecheck` — passed: 71 files, zero diagnostics.
+- `npm run test:unit` — passed: 87 tests across 6 files.
 - `npm run build` — passed: 14 static pages.
 - Focused Knowledge E2E — passed on Chromium and mobile Chromium.
 - Focused ClientRouter theme lifecycle E2E — passed 10/10 concurrent repetitions.
-- Full E2E — passed: 77 tests passed, 7 expected project/device skips.
+- Full E2E — passed with four workers: 78 tests passed, 8 expected project/device skips.
+- Caddy v2.11.4 validation and local query-routing smoke — passed; valid overview/section/item requests return 200, while unknown, repeated, unsafe, and extra selectors return 404.
 - No-JavaScript navigation, Light/Dark, mobile, reduced-motion, forced-colors, Axe, history/back, prefetch attributes, and 320px overflow checks are covered by the suite.
 
 No actionable P0, P1, or P2 visual or interaction mismatch remains for this scope.

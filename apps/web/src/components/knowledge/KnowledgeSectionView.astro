@@ -1,7 +1,7 @@
 ---
 import { uiCopy } from '../../config/copy';
 import type { ContentSummary } from '../../lib/content';
-import { getKnowledgeContextUrl, getKnowledgeUrl } from '../../lib/content/domain';
+import { getKnowledgeNavigationUrl, getKnowledgeUrl } from '../../lib/content/domain';
 import type { KnowledgeSection } from '../../lib/content/domain';
 import ContentCard from '../ContentCard.astro';
 import EmptyState from '../EmptyState.astro';
@@ -43,7 +43,10 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
           {entries.map((entry) => (
             <ContentCard
               entry={entry}
-              href={getKnowledgeContextUrl(entry.url, section.key)}
+              href={getKnowledgeNavigationUrl({
+                section: entry.knowledgeSections?.[0],
+                item: entry.slug,
+              })}
               prefetch="hover"
             />
           ))}
@@ -55,7 +58,7 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
           actions={[
             {
               label: uiCopy.actions.backToKnowledge,
-              href: getKnowledgeContextUrl(getKnowledgeUrl(), section.key),
+              href: getKnowledgeUrl(),
             },
           ]}
         />
@@ -73,10 +76,7 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
       {
         previousSection && (
           <a
-            href={getKnowledgeContextUrl(
-              getKnowledgeUrl(previousSection.slug),
-              previousSection.key,
-            )}
+            href={getKnowledgeNavigationUrl({ section: previousSection.key })}
             rel="prev"
             data-astro-prefetch="hover"
           >
@@ -87,7 +87,7 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
       }
       <a
         class="knowledge-section-navigation__overview"
-        href={getKnowledgeContextUrl(getKnowledgeUrl(), section.key)}
+        href={getKnowledgeUrl()}
         data-astro-prefetch="hover"
       >
         <span>{uiCopy.knowledge.eyebrow}</span>
@@ -96,7 +96,7 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
       {
         nextSection && (
           <a
-            href={getKnowledgeContextUrl(getKnowledgeUrl(nextSection.slug), nextSection.key)}
+            href={getKnowledgeNavigationUrl({ section: nextSection.key })}
             rel="next"
             data-astro-prefetch="hover"
           >

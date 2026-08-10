@@ -17,7 +17,7 @@ import {
 } from '../../lib/content';
 import {
   assertKnowledgeSlugAvailability,
-  getKnowledgeContextUrl,
+  getKnowledgeNavigationUrl,
   getKnowledgeSectionByKey,
   getKnowledgeUrl,
   isPublicStatus,
@@ -107,7 +107,7 @@ const nextSection =
 
 const sidebarSections = knowledgeSections.map((candidate): KnowledgeSidebarSection => ({
   key: candidate.key,
-  href: getKnowledgeContextUrl(getKnowledgeUrl(candidate.slug), candidate.key),
+  href: getKnowledgeNavigationUrl({ section: candidate.key }),
   number: candidate.number,
   label: candidate.label,
   description: candidate.description,
@@ -117,7 +117,10 @@ const sidebarSections = knowledgeSections.map((candidate): KnowledgeSidebarSecti
 }));
 const sidebarEntries = recentEntries.map((candidate): KnowledgeSidebarEntry => ({
   key: candidate.contentId,
-  href: getKnowledgeContextUrl(candidate.url, candidate.knowledgeSections?.[0]),
+  href: getKnowledgeNavigationUrl({
+    section: candidate.knowledgeSections?.[0],
+    item: candidate.slug,
+  }),
   title: candidate.title,
   summary: candidate.summary,
   tags: candidate.tags,
@@ -153,12 +156,19 @@ const pageMetadata = section
 if (!pageMetadata) {
   throw new Error('知识文档页面缺少可渲染的数据。');
 }
+
+const navigationPath = section
+  ? getKnowledgeNavigationUrl({ section: section.key })
+  : summary
+    ? getKnowledgeNavigationUrl({ section: articleSectionKey, item: summary.slug })
+    : getKnowledgeNavigationUrl();
 ---
 
 <KnowledgeDocsLayout
   title={pageMetadata.title}
   description={pageMetadata.description}
   canonicalPath={pageMetadata.canonicalPath}
+  navigationPath={navigationPath}
   seoType={pageMetadata.seoType}
   publishedAt={pageMetadata.publishedAt}
   updatedAt={pageMetadata.updatedAt}

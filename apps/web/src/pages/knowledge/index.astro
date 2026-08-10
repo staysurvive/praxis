@@ -9,7 +9,7 @@ import { uiCopy } from '../../config/copy';
 import KnowledgeDocsLayout from '../../layouts/KnowledgeDocsLayout.astro';
 import { listKnowledgeSectionEntries, listRecentKnowledge } from '../../lib/content';
 import {
-  getKnowledgeContextUrl,
+  getKnowledgeNavigationUrl,
   getKnowledgeUrl,
   knowledgeSections,
 } from '../../lib/content/domain';
@@ -25,7 +25,7 @@ const sectionCounts = new Map(
 const recentEntries = await listRecentKnowledge();
 const sidebarSections = knowledgeSections.map((section): KnowledgeSidebarSection => ({
   key: section.key,
-  href: getKnowledgeContextUrl(getKnowledgeUrl(section.slug), section.key),
+  href: getKnowledgeNavigationUrl({ section: section.key }),
   number: section.number,
   label: section.label,
   description: section.description,
@@ -35,7 +35,10 @@ const sidebarSections = knowledgeSections.map((section): KnowledgeSidebarSection
 }));
 const sidebarEntries = recentEntries.map((entry): KnowledgeSidebarEntry => ({
   key: entry.contentId,
-  href: getKnowledgeContextUrl(entry.url, entry.knowledgeSections?.[0]),
+  href: getKnowledgeNavigationUrl({
+    section: entry.knowledgeSections?.[0],
+    item: entry.slug,
+  }),
   title: entry.title,
   summary: entry.summary,
   tags: entry.tags,
@@ -54,6 +57,7 @@ const tocItems = [
   title={uiCopy.knowledge.title}
   description={uiCopy.knowledge.description}
   canonicalPath={getKnowledgeUrl()}
+  navigationPath={getKnowledgeNavigationUrl()}
   sidebarSections={sidebarSections}
   recentEntries={sidebarEntries}
   tocItems={tocItems}

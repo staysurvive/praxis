@@ -20,6 +20,9 @@ the offline-capable `check` command.
   replacement Header theme control is visible, has its ready attribute, changes `html[data-theme]` when clicked, and is
   rebound after browser Back. Assert the selected explicit theme survives the swap before clicking again. Keep the
   separate no-JavaScript and aborted-script assertions that the unbound control remains hidden.
+- Query routing: run browser coverage against the project `npm run preview` server; direct-paste and refresh all five section aliases and an
+  unassigned `item`, verify canonical metadata remains path based, and assert unknown/unsafe selectors return a real
+  branded 404. The no-JavaScript suite must follow the same query links to static content.
 - Accessibility: keyboard navigation, visible focus, landmarks/headings, reduced motion, color-independent heatmap
   summary, and basic automated checks in both themes.
 - Responsive: run the normal mobile project and a 320px regression; the document must not scroll horizontally. A wide

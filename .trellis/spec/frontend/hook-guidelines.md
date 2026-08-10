@@ -23,6 +23,9 @@ frontend architecture. Browser behavior belongs in a small script or an explicit
 - Knowledge document behavior may use Astro `ClientRouter` as progressive enhancement. Any document script that binds
   search, keyboard shortcuts, or table-of-contents state must listen for `astro:page-load`, clean up listeners and
   observers from the previous document, and leave real links usable when the router or script is unavailable.
+- When query navigation contains an `item`, the statically rendered article and its authored `knowledgeSections` own
+  the active state. On `astro:page-load`, normalize a stale valid `section` query with `history.replaceState`; never
+  rewrite direct canonical `/knowledge/:key` visits or invent a section for unassigned content.
 
 ### ClientRouter DOM replacement contract
 

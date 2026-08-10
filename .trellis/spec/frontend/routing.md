@@ -36,17 +36,26 @@ online single-hop verification remain an external deployment gate; do not add wi
 ## Navigation and filters
 
 Primary navigation is the explicit ordered list Knowledge, Projects, Journey, About; it is never derived from
-`contentTypes`. The visible Knowledge label enters the document-workspace overview at
-`/knowledge?section=<default-section-key>`, and its adjacent native disclosure arrow contains exactly the five
-registry-backed section links; do not repeat a Knowledge-overview menu item or nest the link inside `summary`.
+`contentTypes`. The visible Knowledge label enters the document-workspace overview at `/knowledge`, and its adjacent
+native disclosure arrow contains exactly the five registry-backed section links; do not repeat a Knowledge-overview
+menu item or nest the link inside `summary`.
 The overview is the primary Knowledge entry, while the disclosure, chapter cards, and start-reading action may link
-directly to a section. Projects, Journey, and About remain direct links. The Knowledge label uses
+directly to `/knowledge?section=<short-alias>`. Knowledge article navigation uses the public article slug as `item`;
+assigned articles include their first authored section alias, while unassigned articles truthfully use
+`/knowledge?item=<slug>` without inventing a chapter. Projects, Journey, and About remain direct links. The Knowledge label uses
 `aria-current="page"` on `/knowledge` and `aria-current="location"` on section/article descendants; the matching
 section link uses `page` within the nested link set. The icon-only disclosure has its own accessible name but no
 competing current-page state. Direct primary links use `page` on an exact route and `location` on a descendant. All
 navigation, section entries, empty-state exits, and detail return paths are real links and work without JavaScript; the
 menu enhancement may only add fine-pointer hover, outside-close, and Escape behavior. The `section` query is navigation
 context only and never changes canonical metadata, content selection, RSS, or Sitemap output.
+
+Astro dev, the project `npm run preview` static server, and production Caddy internally dispatch valid query navigation
+to the existing static `/knowledge/:key` artifact without changing the browser URL. `item` selects content and its
+authored metadata selects the active chapter; a stale valid section context is normalized by the Knowledge page
+lifecycle. Unknown aliases, unknown items, unsafe item slugs, duplicate selectors, and unsupported query keys must
+return the branded 404 rather than a successful overview. Canonical metadata, RSS, Sitemap, and direct compatibility
+paths remain path based.
 
 ## Metadata and errors
 

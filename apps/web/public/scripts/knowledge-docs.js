@@ -20,6 +20,17 @@
       return;
     }
 
+    const navigationPath = root.dataset.knowledgeNavigationPath;
+    const locationUrl = new URL(window.location.href);
+    if (
+      navigationPath &&
+      locationUrl.pathname === '/knowledge' &&
+      (locationUrl.searchParams.has('section') || locationUrl.searchParams.has('item')) &&
+      `${locationUrl.pathname}${locationUrl.search}` !== navigationPath
+    ) {
+      window.history.replaceState(window.history.state, '', `${navigationPath}${locationUrl.hash}`);
+    }
+
     const inputs = Array.from(root.querySelectorAll('[data-knowledge-filter-input]')).filter(
       (input) => input instanceof HTMLInputElement,
     );

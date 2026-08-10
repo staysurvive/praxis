@@ -1,7 +1,7 @@
 ---
 import { uiCopy } from '../../config/copy';
 import type { ContentSummary } from '../../lib/content';
-import { getKnowledgeContextUrl, getKnowledgeUrl } from '../../lib/content/domain';
+import { getKnowledgeNavigationUrl, getKnowledgeUrl } from '../../lib/content/domain';
 import type { KnowledgeSection } from '../../lib/content/domain';
 import { formatDateKey } from '../../lib/date';
 import type { NormalizedPracticeEvent } from '../../lib/practice';
@@ -16,9 +16,7 @@ interface Props {
 }
 
 const { summary, practiceEvents, section } = Astro.props satisfies Props;
-const backHref = section
-  ? getKnowledgeContextUrl(getKnowledgeUrl(section.slug), section.key)
-  : getKnowledgeUrl();
+const backHref = section ? getKnowledgeNavigationUrl({ section: section.key }) : getKnowledgeUrl();
 const backLabel = section?.label ?? uiCopy.knowledge.detailBackLabel;
 ---
 

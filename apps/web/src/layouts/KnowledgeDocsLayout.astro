@@ -15,6 +15,7 @@ interface Props {
   title: string;
   description: string;
   canonicalPath: string;
+  navigationPath: string;
   seoType?: 'website' | 'article';
   publishedAt?: string;
   updatedAt?: string;
@@ -29,6 +30,7 @@ const {
   title,
   description,
   canonicalPath,
+  navigationPath,
   seoType = 'website',
   publishedAt,
   updatedAt,
@@ -56,6 +58,7 @@ const {
     data-filter-result-prefix={uiCopy.knowledge.filterResultPrefix}
     data-filter-result-suffix={uiCopy.knowledge.filterResultSuffix}
     data-filter-empty-result={uiCopy.knowledge.filterEmptyResult}
+    data-knowledge-navigation-path={navigationPath}
   >
     <KnowledgeSidebar
       sections={sidebarSections}

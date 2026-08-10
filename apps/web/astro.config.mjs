@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
 import { resolveSiteUrl } from './config/site-url';
+import { knowledgeQueryRouting } from './config/knowledge-query-routing';
 import { legacyCompatibilityMappings } from './src/lib/content/domain';
 import { contentMarkdownProcessor } from './src/lib/content/markdown';
 
@@ -35,6 +36,6 @@ export default defineConfig({
   },
   integrations: [sitemap({ filter: isIndexablePage })],
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [knowledgeQueryRouting(), tailwindcss()],
   },
 });

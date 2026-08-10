@@ -2,7 +2,7 @@
 import { uiCopy } from '../config/copy';
 import { siteConfig } from '../config/site';
 import {
-  getKnowledgeContextUrl,
+  getKnowledgeNavigationUrl,
   getKnowledgeUrl,
   knowledgePath,
   knowledgeSections,
@@ -95,7 +95,7 @@ function getKnowledgeCurrentState(): 'page' | 'location' | undefined {
                           >
                             {knowledgeSections.map((section) => {
                               const canonicalHref = getKnowledgeUrl(section.slug);
-                              const href = getKnowledgeContextUrl(canonicalHref, section.key);
+                              const href = getKnowledgeNavigationUrl({ section: section.key });
                               return (
                                 <li>
                                   <a

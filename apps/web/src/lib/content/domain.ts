@@ -5,6 +5,7 @@ export const knowledgeSections = [
   {
     key: 'agent-app-development',
     slug: 'agent-app-development',
+    alias: 'agents',
     number: '01',
     label: 'Agent 应用开发',
     description: 'Agent 应用层知识',
@@ -15,6 +16,7 @@ export const knowledgeSections = [
   {
     key: 'llm-principles',
     slug: 'llm-principles',
+    alias: 'llm',
     number: '02',
     label: '大模型原理与实现',
     description: '模型原理和实现知识',
@@ -25,6 +27,7 @@ export const knowledgeSections = [
   {
     key: 'fine-tuning-inference-deployment',
     slug: 'fine-tuning-inference-deployment',
+    alias: 'model-engineering',
     number: '03',
     label: '微调、推理与部署',
     description: '模型工程与交付知识',
@@ -34,6 +37,7 @@ export const knowledgeSections = [
   {
     key: 'practice-cases',
     slug: 'practice-cases',
+    alias: 'practice',
     number: '04',
     label: '实践与案例',
     description: '从真实项目和实验中提炼的可迁移知识',
@@ -44,6 +48,7 @@ export const knowledgeSections = [
   {
     key: 'knowledge-frontier',
     slug: 'knowledge-frontier',
+    alias: 'frontier',
     number: '05',
     label: '知识前沿',
     description: '正在研究的问题、假设和认知边界',
@@ -54,6 +59,7 @@ export const knowledgeSections = [
 ] as const;
 export type KnowledgeSection = (typeof knowledgeSections)[number];
 export type KnowledgeSectionKey = KnowledgeSection['key'];
+export type KnowledgeSectionAlias = KnowledgeSection['alias'];
 export const defaultKnowledgeSection = knowledgeSections[0];
 
 export const stages = ['know-think', 'think-act', 'act-achieve'] as const;
@@ -83,6 +89,10 @@ export const contentTypePaths = {
 } as const satisfies Record<ContentType, string>;
 
 export const knowledgePath = '/knowledge';
+export const invalidKnowledgeQueryPath = '/_knowledge-query-not-found';
+
+const knowledgeItemPattern = /^[a-z0-9][a-z0-9-]{0,119}$/;
+const knowledgeQueryKeys = new Set(['section', 'item']);
 
 export const legacyProjectDetail = {
   contentId: 'praxis-project-0001',
@@ -131,6 +141,10 @@ export function getKnowledgeSectionBySlug(slug: string): KnowledgeSection | unde
   return knowledgeSections.find((section) => section.slug === slug);
 }
 
+export function getKnowledgeSectionByAlias(alias: string): KnowledgeSection | undefined {
+  return knowledgeSections.find((section) => section.alias === alias);
+}
+
 export function isPublicStatus(status: Status): boolean {
   return status !== 'draft';
 }
@@ -152,14 +166,64 @@ export function getKnowledgeUrl(slug?: string): string {
   return slug ? `${knowledgePath}/${slug}` : knowledgePath;
 }
 
-export function getKnowledgeContextUrl(path: string, section?: KnowledgeSectionKey): string {
-  if (!section) {
-    return path;
+export interface KnowledgeNavigationTarget {
+  section?: KnowledgeSectionKey;
+  item?: string;
+}
+
+export function getKnowledgeNavigationUrl({
+  section,
+  item,
+}: KnowledgeNavigationTarget = {}): string {
+  const searchParams = new URLSearchParams();
+
+  if (section) {
+    const sectionDefinition = getKnowledgeSectionByKey(section);
+    if (!sectionDefinition) {
+      throw new Error(`无法为未知知识章节生成导航地址：${section}`);
+    }
+    searchParams.set('section', sectionDefinition.alias);
   }
 
-  const url = new URL(path, 'https://praxis.local');
-  url.searchParams.set('section', section);
-  return `${url.pathname}${url.search}${url.hash}`;
+  if (item) {
+    if (!knowledgeItemPattern.test(item)) {
+      throw new Error(`无法为无效知识条目生成导航地址：${item}`);
+    }
+    searchParams.set('item', item);
+  }
+
+  const search = searchParams.toString();
+  return search ? `${knowledgePath}?${search}` : knowledgePath;
+}
+
+export function resolveKnowledgeQueryPath(searchParams: URLSearchParams): string | undefined {
+  const keys = [...searchParams.keys()];
+  if (keys.some((key) => !knowledgeQueryKeys.has(key))) {
+    return undefined;
+  }
+
+  for (const key of knowledgeQueryKeys) {
+    if (searchParams.getAll(key).length > 1) {
+      return undefined;
+    }
+  }
+
+  const sectionAlias = searchParams.get('section');
+  const item = searchParams.get('item');
+  if ((searchParams.has('section') && !sectionAlias) || (searchParams.has('item') && !item)) {
+    return undefined;
+  }
+
+  const section = sectionAlias ? getKnowledgeSectionByAlias(sectionAlias) : undefined;
+  if (sectionAlias && !section) {
+    return undefined;
+  }
+
+  if (item) {
+    return knowledgeItemPattern.test(item) ? getKnowledgeUrl(item) : undefined;
+  }
+
+  return section ? getKnowledgeUrl(section.slug) : getKnowledgeUrl();
 }
 
 export function getPublicContentUrl(entry: PublicContentIdentity): string {
