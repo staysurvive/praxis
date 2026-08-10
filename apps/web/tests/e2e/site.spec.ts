@@ -125,6 +125,97 @@ test('editorial homepage exposes the real Praxis project and local practice data
   expect(tooltipGeometry.tooltipBottom).toBeLessThanOrEqual(tooltipGeometry.scrollBottom);
 });
 
+test('header preserves the brand structure with an animated motto signature', async ({
+  page,
+}, testInfo) => {
+  await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
+
+  const motto = page.locator('.brand-motto');
+  await expect(motto).toHaveText('知行合一');
+
+  if (testInfo.project.name === 'mobile-chromium') {
+    await expect(motto).toBeHidden();
+    return;
+  }
+
+  await expect(motto.locator('.brand-motto-orbit')).toBeVisible();
+  await expect(motto.locator('.brand-motto-glint')).toBeVisible();
+  await expect
+    .poll(() =>
+      motto
+        .locator('.brand-motto-orbit')
+        .evaluate((element) => Number.parseFloat(getComputedStyle(element).opacity)),
+    )
+    .toBeGreaterThanOrEqual(0.38);
+  await expect
+    .poll(() =>
+      motto
+        .locator('.brand-motto-orbit')
+        .evaluate((element) => Number.parseFloat(getComputedStyle(element).opacity)),
+    )
+    .toBeLessThanOrEqual(0.56);
+
+  const signature = await motto.evaluate((element) => {
+    const text = element.querySelector('.brand-motto-text');
+    const orbit = element.querySelector('.brand-motto-orbit');
+    const orbitPath = element.querySelector('.brand-motto-orbit-path');
+    const brandName = element.closest('.brand')?.querySelector('.brand-name');
+    if (
+      !(text instanceof HTMLElement) ||
+      !(orbit instanceof HTMLElement) ||
+      !(orbitPath instanceof SVGPathElement) ||
+      !(brandName instanceof HTMLElement)
+    ) {
+      throw new Error('Missing brand motto signature layers');
+    }
+
+    return {
+      brandGap: element.getBoundingClientRect().left - brandName.getBoundingClientRect().right,
+      brandNameSize: getComputedStyle(brandName).fontSize,
+      dividerToTextGap: text.getBoundingClientRect().left - element.getBoundingClientRect().left,
+      fontLoaded: document.fonts.check('400 16px "Praxis Brand Serif"', '知行合一'),
+      textAnimation: getComputedStyle(text).animationName,
+      atmosphereAnimation: getComputedStyle(element, '::after').animationName,
+      atmosphereDuration: getComputedStyle(element, '::after').animationDuration,
+      textFeatures: getComputedStyle(text).fontFeatureSettings,
+      textFamily: getComputedStyle(text).fontFamily,
+      textSize: getComputedStyle(text).fontSize,
+      textStroke: getComputedStyle(text).webkitTextStrokeWidth,
+      textWeight: getComputedStyle(text).fontWeight,
+      orbitAnimation: getComputedStyle(orbit).animationName,
+      orbitMask: getComputedStyle(orbit, '::before').maskImage,
+      orbitPathAnimation: getComputedStyle(orbitPath).animationName,
+      orbitPathDasharray: getComputedStyle(orbitPath).strokeDasharray,
+      width: element.getBoundingClientRect().width,
+    };
+  });
+
+  expect(signature.fontLoaded).toBe(true);
+  expect(signature.textAnimation).toBe('brand-motto-emerge');
+  expect(signature.atmosphereAnimation).toBe('brand-atmosphere-drift');
+  expect(signature.atmosphereDuration).toBe('9.6s');
+  expect(signature.textFeatures).toContain('"palt"');
+  expect(signature.textFamily).toBe('"Praxis Brand Serif"');
+  expect(signature.textSize).toBe('16px');
+  expect(signature.textStroke).toBe('0.12px');
+  expect(Number.parseFloat(signature.textSize)).toBeGreaterThanOrEqual(
+    Number.parseFloat(signature.brandNameSize) * 1.15,
+  );
+  expect(Number.parseFloat(signature.textSize)).toBeLessThanOrEqual(
+    Number.parseFloat(signature.brandNameSize) * 1.25,
+  );
+  expect(signature.brandGap).toBeLessThanOrEqual(10);
+  expect(signature.dividerToTextGap).toBeLessThanOrEqual(14);
+  expect(signature.textWeight).toBe('400');
+  expect(signature.orbitAnimation).toContain('brand-orbit');
+  expect(signature.orbitMask).toContain('praxis-motto-orbit.png');
+  expect(signature.orbitPathAnimation).toBe('brand-orbit-draw');
+  expect(signature.orbitPathDasharray).not.toBe('none');
+  expect(signature.width).toBeGreaterThan(100);
+  expect(signature.width).toBeLessThan(120);
+});
+
 test('primary navigation is explicit and section-aware', async ({ page }) => {
   await page.goto('/');
 
@@ -1662,6 +1753,20 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
     .locator('.knowledge-workspace__start')
     .evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration));
   expect(workspaceTransition).toBeLessThanOrEqual(0.00001);
+
+  const mottoAnimations = await page.locator('.brand-motto').evaluate((element) => ({
+    text: getComputedStyle(element.querySelector('.brand-motto-text') as Element).animationName,
+    orbit: getComputedStyle(element.querySelector('.brand-motto-orbit') as Element).animationName,
+    orbitPath: getComputedStyle(element.querySelector('.brand-motto-orbit-path') as Element)
+      .animationName,
+    glint: getComputedStyle(element.querySelector('.brand-motto-glint') as Element).animationName,
+  }));
+  expect(mottoAnimations).toEqual({
+    text: 'none',
+    orbit: 'none',
+    orbitPath: 'none',
+    glint: 'none',
+  });
 });
 
 test('the knowledge workspace remains readable in forced-colors mode', async ({ page }) => {
@@ -1778,7 +1883,7 @@ test('new primary, empty, and detail pages pass a basic automated accessibility 
   page,
 }) => {
   for (const colorScheme of ['light', 'dark'] as const) {
-    await page.emulateMedia({ colorScheme });
+    await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
 
     for (const path of [
       '/',
