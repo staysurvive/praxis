@@ -1,15 +1,42 @@
 import { readFile } from 'node:fs/promises';
 
 import { glob } from 'astro/loaders';
-import type { Loader } from 'astro/loaders';
+import type { DataStore, Loader } from 'astro/loaders';
 
-import { isContentType } from './domain';
 import { contentFilePattern } from './file-policy';
+import { normalizeContentIdentity } from './identity-normalizer';
 import { assertSafeMarkdownSource } from './markdown';
 import { assertUniqueSourceIdentities, discoverAuthoredSourceFiles } from './source-reader';
 import type { SourceIdentity } from './source-reader';
 
 const contentBase = '../../content';
+
+interface IdentityValidationState {
+  initialLoad: boolean;
+  initialIdentities: SourceIdentity[];
+  root: URL;
+  store: DataStore;
+}
+
+function getSourceURL(entry: string, base: URL): URL {
+  return new URL(encodeURI(entry), base);
+}
+
+function getStoredIdentities(state: IdentityValidationState, candidateURL: URL): SourceIdentity[] {
+  return state.store.values().flatMap((entry) => {
+    if (!entry.filePath) {
+      return [];
+    }
+
+    const sourceURL = new URL(entry.filePath, state.root);
+    if (sourceURL.href === candidateURL.href) {
+      return [];
+    }
+
+    const identity = normalizeContentIdentity(entry.data, sourceURL.href);
+    return identity ? [identity] : [];
+  });
+}
 
 async function assertSafeContentSources(root: URL): Promise<void> {
   const contentDirectory = new URL(`${contentBase}/`, root);
@@ -22,29 +49,28 @@ async function assertSafeContentSources(root: URL): Promise<void> {
 }
 
 export function markdownContentLoader(): Loader {
-  let activeIdentities: SourceIdentity[] | undefined;
+  let validationState: IdentityValidationState | undefined;
   const sourceLoader = glob({
     base: contentBase,
     pattern: contentFilePattern,
-    generateId: ({ data, entry }) => {
-      if (
-        activeIdentities &&
-        typeof data.contentId === 'string' &&
-        typeof data.type === 'string' &&
-        isContentType(data.type) &&
-        typeof data.slug === 'string'
-      ) {
-        activeIdentities.push({
-          contentId: data.contentId,
-          type: data.type,
-          slug: data.slug,
-          sourcePath: entry,
-        });
+    generateId: ({ base, data, entry }) => {
+      const identity = normalizeContentIdentity(data, entry);
+
+      if (validationState && identity) {
+        if (validationState.initialLoad) {
+          validationState.initialIdentities.push(identity);
+        } else {
+          assertUniqueSourceIdentities([
+            ...getStoredIdentities(validationState, getSourceURL(entry, base)),
+            identity,
+          ]);
+        }
       }
 
-      return typeof data.contentId === 'string' && data.contentId.length > 0
-        ? data.contentId
-        : entry;
+      return (
+        identity?.contentId ??
+        (typeof data.contentId === 'string' && data.contentId.length > 0 ? data.contentId : entry)
+      );
     },
   });
 
@@ -52,14 +78,21 @@ export function markdownContentLoader(): Loader {
     name: 'praxis-markdown-content-loader',
     async load(context) {
       await assertSafeContentSources(context.config.root);
-      const identities: SourceIdentity[] = [];
-      activeIdentities = identities;
+      const state: IdentityValidationState = {
+        initialLoad: true,
+        initialIdentities: [],
+        root: context.config.root,
+        store: context.store,
+      };
+      validationState = state;
 
       try {
         await sourceLoader.load(context);
-        assertUniqueSourceIdentities(identities);
-      } finally {
-        activeIdentities = undefined;
+        assertUniqueSourceIdentities(state.initialIdentities);
+        state.initialLoad = false;
+      } catch (error) {
+        validationState = undefined;
+        throw error;
       }
     },
   };

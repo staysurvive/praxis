@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import matter from 'gray-matter';
 
 import { contentSchema } from '../src/lib/content/schema';
+import { normalizeContentIdentity } from '../src/lib/content/identity-normalizer';
 import {
   assertUniqueSourceIdentities,
   discoverAuthoredSourceFiles,
@@ -59,12 +60,11 @@ async function main(): Promise<void> {
     }
 
     parsedEntries.push(parsed.data);
-    identities.push({
-      contentId: parsed.data.contentId,
-      type: parsed.data.type,
-      slug: parsed.data.slug,
-      sourcePath: relativePath,
-    });
+    const identity = normalizeContentIdentity(parsed.data, relativePath);
+    if (!identity) {
+      throw new Error(`Content identity normalization failed: ${relativePath}`);
+    }
+    identities.push(identity);
   }
 
   assertUniqueSourceIdentities(identities);
