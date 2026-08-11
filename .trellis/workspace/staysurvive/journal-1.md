@@ -382,3 +382,24 @@ Unified authored source and identity rules, extracted Knowledge and Practice Hea
 ### Status
 
 [OK] **Completed**
+
+
+## Session 9: Trellis archive reference validation
+
+**Date**: 2026-08-11
+**Task**: Trellis archive reference validation
+**Branch**: `main`
+
+### Summary
+
+Updated the frontend spec and archived task context manifests to their final archive paths, then revalidated all context references after task archival.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `404c36d` | (see git log) |
+
+### Status
+
+[OK] **Completed**
