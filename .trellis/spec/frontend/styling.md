@@ -27,6 +27,8 @@ Components may add short scoped CSS for meaningful visual patterns. Do not intro
 - Avoid recurring arbitrary-value utilities; add or adjust a token when a value is a design decision.
 - Keep article measure and typography separate from marketing/display layout so long Chinese prose remains comfortable.
 - Check focus, hover, disabled, empty, and high-contrast-adjacent states in both themes.
+- Do not let a running keyframe and an interaction state own the same `transform` or `opacity` property on one element.
+  Put ambient motion on an outer layer and hover/focus feedback on an inner layer so both remain observable.
 
 ## Implemented token examples
 

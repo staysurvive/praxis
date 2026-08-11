@@ -48,17 +48,26 @@ function getKnowledgeCurrentState(): 'page' | 'location' | undefined {
       <span class="brand-name">{siteConfig.name}</span>
       <span class="brand-motto" aria-hidden="true">
         <span class="brand-motto-orbit">
-          <svg viewBox="0 0 108 36" preserveAspectRatio="none" focusable="false" aria-hidden="true">
-            <path
-              class="brand-motto-orbit-path"
-              pathLength="1"
-              d="M 7 28 C 31 34 73 32 98 18 C 105 14 106 9 99 6"></path>
-          </svg>
+          <span class="brand-motto-orbit-visual">
+            <svg
+              viewBox="0 0 108 36"
+              preserveAspectRatio="none"
+              focusable="false"
+              aria-hidden="true"
+            >
+              <path
+                class="brand-motto-orbit-path"
+                pathLength="1"
+                d="M 7 28 C 31 34 73 32 98 18 C 105 14 106 9 99 6"></path>
+            </svg>
+          </span>
         </span>
         <span class="brand-motto-glint">
           <Sparkle size={8} strokeWidth={1.25} />
         </span>
-        <span class="brand-motto-text">{siteConfig.theme}</span>
+        <span class="brand-motto-text">
+          <span class="brand-motto-glyphs">{siteConfig.theme}</span>
+        </span>
       </span>
     </a>
 
@@ -278,17 +287,22 @@ function getKnowledgeCurrentState(): 'page' | 'location' | undefined {
     inset-block: 0.25rem;
     inset-inline: 0.35rem 0.3rem;
     opacity: 0.42;
+    transform-origin: left center;
+  }
+
+  .brand-motto-orbit-visual {
+    position: absolute;
+    inset: 0;
     filter: drop-shadow(
       0 0 0.18rem color-mix(in srgb, var(--color-brand-secondary) 24%, transparent)
     );
     transform-origin: left center;
     transition:
-      opacity var(--duration-base) var(--ease-out),
       transform 1.2s cubic-bezier(0.22, 0.72, 0.24, 1),
       filter var(--duration-base) var(--ease-out);
   }
 
-  .brand-motto-orbit::before {
+  .brand-motto-orbit-visual::before {
     position: absolute;
     inset: 0;
     background: var(--color-brand-secondary);
@@ -298,7 +312,7 @@ function getKnowledgeCurrentState(): 'page' | 'location' | undefined {
     opacity: 0.56;
   }
 
-  .brand-motto-orbit :global(svg) {
+  .brand-motto-orbit-visual :global(svg) {
     position: absolute;
     inset: 0;
     display: block;
@@ -337,8 +351,12 @@ function getKnowledgeCurrentState(): 'page' | 'location' | undefined {
     text-indent: 0.18em;
     text-wrap: nowrap;
     white-space: nowrap;
+    transition: color var(--duration-base) var(--ease-out);
+  }
+
+  .brand-motto-glyphs {
+    display: inline-block;
     transition:
-      color var(--duration-base) var(--ease-out),
       text-shadow var(--duration-base) var(--ease-out),
       transform var(--duration-base) var(--ease-out);
   }
@@ -610,8 +628,7 @@ function getKnowledgeCurrentState(): 'page' | 'location' | undefined {
       opacity: 0.78;
     }
 
-    .brand:hover .brand-motto-orbit {
-      opacity: 0.58;
+    .brand:hover .brand-motto-orbit-visual {
       filter: drop-shadow(
         0 0 0.22rem color-mix(in srgb, var(--color-brand-secondary) 30%, transparent)
       );
@@ -620,6 +637,9 @@ function getKnowledgeCurrentState(): 'page' | 'location' | undefined {
 
     .brand:hover .brand-motto-text {
       color: color-mix(in srgb, var(--color-fg) 88%, var(--color-brand-secondary));
+    }
+
+    .brand:hover .brand-motto-glyphs {
       text-shadow: 0.42em 0 0.85em color-mix(in srgb, var(--color-brand-secondary) 18%, transparent);
       transform: translateY(-0.02rem);
     }
@@ -857,7 +877,12 @@ function getKnowledgeCurrentState(): 'page' | 'location' | undefined {
 
     .brand-motto-text {
       color: CanvasText;
+    }
+
+    .brand-motto-glyphs,
+    .brand:hover .brand-motto-glyphs {
       text-shadow: none;
+      transform: none;
     }
   }
 

@@ -53,9 +53,9 @@ context only and never changes canonical metadata, content selection, RSS, or Si
 Astro dev, the project `npm run preview` static server, and production Caddy internally dispatch valid query navigation
 to the existing static `/knowledge/:key` artifact without changing the browser URL. `item` selects content and its
 authored metadata selects the active chapter; a stale valid section context is normalized by the Knowledge page
-lifecycle. Unknown aliases, unknown items, unsafe item slugs, duplicate selectors, and unsupported query keys must
-return the branded 404 rather than a successful overview. Canonical metadata, RSS, Sitemap, and direct compatibility
-paths remain path based.
+lifecycle. Unknown aliases, unknown items, unsafe item slugs, item values that collide with the five reserved section
+slugs, duplicate selectors, and unsupported query keys must return the branded 404 rather than a successful overview.
+Canonical metadata, RSS, Sitemap, and direct compatibility paths remain path based.
 
 ## Metadata and errors
 

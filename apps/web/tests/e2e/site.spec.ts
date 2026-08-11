@@ -158,12 +158,16 @@ test('header preserves the brand structure with an animated motto signature', as
 
   const signature = await motto.evaluate((element) => {
     const text = element.querySelector('.brand-motto-text');
+    const textGlyphs = element.querySelector('.brand-motto-glyphs');
     const orbit = element.querySelector('.brand-motto-orbit');
+    const orbitVisual = element.querySelector('.brand-motto-orbit-visual');
     const orbitPath = element.querySelector('.brand-motto-orbit-path');
     const brandName = element.closest('.brand')?.querySelector('.brand-name');
     if (
       !(text instanceof HTMLElement) ||
+      !(textGlyphs instanceof HTMLElement) ||
       !(orbit instanceof HTMLElement) ||
+      !(orbitVisual instanceof HTMLElement) ||
       !(orbitPath instanceof SVGPathElement) ||
       !(brandName instanceof HTMLElement)
     ) {
@@ -183,8 +187,9 @@ test('header preserves the brand structure with an animated motto signature', as
       textSize: getComputedStyle(text).fontSize,
       textStroke: getComputedStyle(text).webkitTextStrokeWidth,
       textWeight: getComputedStyle(text).fontWeight,
+      textGlyphShadow: getComputedStyle(textGlyphs).textShadow,
       orbitAnimation: getComputedStyle(orbit).animationName,
-      orbitMask: getComputedStyle(orbit, '::before').maskImage,
+      orbitMask: getComputedStyle(orbitVisual, '::before').maskImage,
       orbitPathAnimation: getComputedStyle(orbitPath).animationName,
       orbitPathDasharray: getComputedStyle(orbitPath).strokeDasharray,
       width: element.getBoundingClientRect().width,
@@ -214,6 +219,29 @@ test('header preserves the brand structure with an animated motto signature', as
   expect(signature.orbitPathDasharray).not.toBe('none');
   expect(signature.width).toBeGreaterThan(100);
   expect(signature.width).toBeLessThan(120);
+
+  await page.locator('.brand').hover();
+  await expect
+    .poll(() =>
+      motto
+        .locator('.brand-motto-orbit-visual')
+        .evaluate((element) => getComputedStyle(element).transform),
+    )
+    .not.toBe('none');
+  await expect
+    .poll(() =>
+      motto
+        .locator('.brand-motto-glyphs')
+        .evaluate((element) => getComputedStyle(element).transform),
+    )
+    .not.toBe('none');
+  await expect
+    .poll(() =>
+      motto
+        .locator('.brand-motto-glyphs')
+        .evaluate((element) => getComputedStyle(element).textShadow),
+    )
+    .not.toBe(signature.textGlyphShadow);
 });
 
 test('primary navigation is explicit and section-aware', async ({ page }) => {
@@ -1067,6 +1095,7 @@ test('preview dispatches query-first Knowledge routes to static content and reje
     '/knowledge?section=unknown',
     '/knowledge?item=not-a-real-article',
     '/knowledge?item=..%2Funsafe',
+    '/knowledge?item=agent-app-development',
     '/knowledge?section=agents&section=llm',
     '/knowledge?item=ai-code-security-review&item=what-green-gates-miss',
     '/knowledge?section=unknown&item=ai-code-security-review',

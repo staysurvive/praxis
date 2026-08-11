@@ -94,6 +94,10 @@ export const invalidKnowledgeQueryPath = '/_knowledge-query-not-found';
 const knowledgeItemPattern = /^[a-z0-9][a-z0-9-]{0,119}$/;
 const knowledgeQueryKeys = new Set(['section', 'item']);
 
+function isKnowledgeItemSlug(value: string): boolean {
+  return knowledgeItemPattern.test(value) && !getKnowledgeSectionBySlug(value);
+}
+
 export const legacyProjectDetail = {
   contentId: 'praxis-project-0001',
   slug: 'praxis-foundation',
@@ -186,7 +190,7 @@ export function getKnowledgeNavigationUrl({
   }
 
   if (item) {
-    if (!knowledgeItemPattern.test(item)) {
+    if (!isKnowledgeItemSlug(item)) {
       throw new Error(`无法为无效知识条目生成导航地址：${item}`);
     }
     searchParams.set('item', item);
@@ -220,7 +224,7 @@ export function resolveKnowledgeQueryPath(searchParams: URLSearchParams): string
   }
 
   if (item) {
-    return knowledgeItemPattern.test(item) ? getKnowledgeUrl(item) : undefined;
+    return isKnowledgeItemSlug(item) ? getKnowledgeUrl(item) : undefined;
   }
 
   return section ? getKnowledgeUrl(section.slug) : getKnowledgeUrl();

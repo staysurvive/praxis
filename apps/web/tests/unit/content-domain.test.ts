@@ -112,6 +112,9 @@ describe('public URL contract', () => {
     expect(getKnowledgeNavigationUrl({ item: 'unassigned-article' })).toBe(
       '/knowledge?item=unassigned-article',
     );
+    expect(() => getKnowledgeNavigationUrl({ item: knowledgeSections[0].slug })).toThrow(
+      /无效知识条目/,
+    );
     expect(getKnowledgeUrl('unassigned-article')).toBe('/knowledge/unassigned-article');
   });
 
@@ -134,6 +137,7 @@ describe('public URL contract', () => {
     'item=',
     'item=../unsafe',
     'item=UPPERCASE',
+    'item=agent-app-development',
     'section=agents&section=llm',
     'item=first&item=second',
     'view=compact',
