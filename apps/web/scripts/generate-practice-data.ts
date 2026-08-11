@@ -1,14 +1,18 @@
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import matter from 'gray-matter';
 
-import { assertMarkdownContentFile, getContentFileKind } from '../src/lib/content/file-policy';
 import { contentSchema } from '../src/lib/content/schema';
+import {
+  assertUniqueSourceIdentities,
+  discoverAuthoredSourceFiles,
+} from '../src/lib/content/source-reader';
 import { buildPublicPracticeDataset } from '../src/lib/practice';
 import { getTodayDateKey } from '../src/lib/date';
 import type { ContentFrontmatter } from '../src/lib/content/schema';
+import type { SourceIdentity } from '../src/lib/content/source-reader';
 
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repositoryRoot = path.resolve(webRoot, '../..');
@@ -33,33 +37,16 @@ function parseFrontmatter(source: string): Record<string, unknown> {
   }).data;
 }
 
-async function findContentFiles(directory: string): Promise<string[]> {
-  const entries = await readdir(directory, { withFileTypes: true });
-  const files = await Promise.all(
-    entries.map(async (entry) => {
-      const absolutePath = path.join(directory, entry.name);
-      if (entry.isDirectory()) {
-        return findContentFiles(absolutePath);
-      }
-
-      return getContentFileKind(entry.name) ? [absolutePath] : [];
-    }),
-  );
-
-  return files.flat().sort((left, right) => left.localeCompare(right));
-}
-
 async function main(): Promise<void> {
-  const files = await findContentFiles(contentRoot);
+  const files = await discoverAuthoredSourceFiles(pathToFileURL(contentRoot));
   const parsedEntries: ContentFrontmatter[] = [];
-  const contentIds = new Set<string>();
-  const urls = new Set<string>();
+  const identities: SourceIdentity[] = [];
 
-  for (const file of files) {
+  for (const { fileURL } of files) {
+    const file = fileURLToPath(fileURL);
     const relativePath = path.relative(repositoryRoot, file).replaceAll('\\', '/');
-    assertMarkdownContentFile(relativePath);
 
-    const source = await readFile(file, 'utf8');
+    const source = await readFile(fileURL, 'utf8');
     const frontmatter = parseFrontmatter(source);
     const parsed = contentSchema.safeParse(frontmatter);
 
@@ -71,19 +58,16 @@ async function main(): Promise<void> {
       );
     }
 
-    if (contentIds.has(parsed.data.contentId)) {
-      throw new Error(`contentId 重复：${parsed.data.contentId}（${relativePath}）`);
-    }
-    contentIds.add(parsed.data.contentId);
-
-    const urlKey = `${parsed.data.type}:${parsed.data.slug}`;
-    if (urls.has(urlKey)) {
-      throw new Error(`内容 URL 重复：${urlKey}（${relativePath}）`);
-    }
-    urls.add(urlKey);
-
     parsedEntries.push(parsed.data);
+    identities.push({
+      contentId: parsed.data.contentId,
+      type: parsed.data.type,
+      slug: parsed.data.slug,
+      sourcePath: relativePath,
+    });
   }
+
+  assertUniqueSourceIdentities(identities);
 
   const dataset = buildPublicPracticeDataset(parsedEntries, { endDateKey: getTodayDateKey() });
   await mkdir(path.dirname(outputFile), { recursive: true });
