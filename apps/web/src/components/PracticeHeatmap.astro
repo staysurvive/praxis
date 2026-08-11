@@ -1,7 +1,7 @@
 ---
 import { uiCopy } from '../config/copy';
+import { buildPracticeHeatmapViewModel } from '../features/practice/heatmap-model';
 import { formatDateKey, getTodayDateKey } from '../lib/date';
-import { buildHeatmapCalendar, buildHeatmapMonths } from '../lib/practice';
 import type { PracticeDataset } from '../lib/practice';
 import EmptyState from './EmptyState.astro';
 
@@ -11,23 +11,8 @@ interface Props {
 
 const { dataset } = Astro.props;
 const todayDateKey = getTodayDateKey();
-const cells = buildHeatmapCalendar(dataset, todayDateKey);
-const monthLabels = new Map(
-  buildHeatmapMonths(cells)
-    .slice(1)
-    .map((month) => [month.weekIndex, month.label]),
-);
-const weekLabels = Array.from({ length: cells.length / 7 }, (_, weekIndex) =>
-  monthLabels.get(weekIndex),
-);
-const firstDate = cells.at(0)?.date;
-const visibleEvents = dataset.events.filter(
-  (event) => (!firstDate || event.date >= firstDate) && event.date <= todayDateKey,
-);
-const visibleActiveDays = new Set(visibleEvents.map((event) => event.date)).size;
-const visibleContentCount = new Set(visibleEvents.map((event) => event.contentId)).size;
-const recentEvents = [...visibleEvents].reverse().slice(0, 8);
-const summary = uiCopy.heatmap.summary(visibleEvents.length, visibleActiveDays);
+const { cells, weekLabels, totalEvents, activeDays, contentCount, recentEvents, summary } =
+  buildPracticeHeatmapViewModel(dataset, todayDateKey);
 ---
 
 <section class="heatmap-section" aria-labelledby="practice-heatmap-title">
@@ -40,28 +25,28 @@ const summary = uiCopy.heatmap.summary(visibleEvents.length, visibleActiveDays);
     <dl class="stats-grid grid grid-cols-3 gap-3">
       <div>
         <dt>{uiCopy.heatmap.totalEvents}</dt>
-        <dd>{visibleEvents.length}</dd>
+        <dd>{totalEvents}</dd>
       </div>
       <div>
         <dt>{uiCopy.heatmap.activeDays}</dt>
-        <dd>{visibleActiveDays}</dd>
+        <dd>{activeDays}</dd>
       </div>
       <div>
         <dt>{uiCopy.heatmap.contentCount}</dt>
-        <dd>{visibleContentCount}</dd>
+        <dd>{contentCount}</dd>
       </div>
     </dl>
   </div>
 
   {
-    visibleEvents.length === 0 ? (
+    totalEvents === 0 ? (
       <div class="mt-10">
         <EmptyState description={uiCopy.empty.practice} />
       </div>
     ) : (
       <div class="heatmap-panel mt-10">
         <p class="sr-only">{summary}</p>
-        <p class="heatmap-total">{uiCopy.heatmap.annualTotal(visibleEvents.length)}</p>
+        <p class="heatmap-total">{uiCopy.heatmap.annualTotal(totalEvents)}</p>
         <div
           class="heatmap-scroll"
           role="region"

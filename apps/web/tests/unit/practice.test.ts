@@ -139,16 +139,16 @@ describe('practice event normalization', () => {
     });
   });
 
-  it('labels only the first calendar week of each month', () => {
+  it('records the first calendar week of each month as domain facts', () => {
     const cells = buildHeatmapCalendar(buildPracticeDataset([baseEntry]), '2026-07-24');
     const months = buildHeatmapMonths(cells);
 
     expect(months).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: '7月', weekIndex: 0 }),
-        expect.objectContaining({ label: '8月', weekIndex: 2 }),
-        expect.objectContaining({ label: '9月', weekIndex: 7 }),
-        expect.objectContaining({ label: '7月', weekIndex: 50 }),
+        expect.objectContaining({ month: 7, weekIndex: 0 }),
+        expect.objectContaining({ month: 8, weekIndex: 2 }),
+        expect.objectContaining({ month: 9, weekIndex: 7 }),
+        expect.objectContaining({ month: 7, weekIndex: 50 }),
       ]),
     );
     expect(new Set(months.map((month) => month.weekIndex)).size).toBe(months.length);

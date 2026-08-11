@@ -50,7 +50,7 @@ export interface HeatmapCell {
 }
 
 export interface HeatmapMonth {
-  label: string;
+  month: number;
   weekIndex: number;
 }
 
@@ -219,10 +219,7 @@ export function buildHeatmapMonths(cells: readonly HeatmapCell[]): HeatmapMonth[
     previousMonth = month;
     return [
       {
-        label: new Intl.DateTimeFormat('zh-CN', {
-          month: 'short',
-          timeZone: 'UTC',
-        }).format(parseDateKey(cell.date)),
+        month: Number(cell.date.slice(5, 7)),
         weekIndex: index / 7,
       },
     ];
