@@ -62,6 +62,12 @@ practiceLog:
 `publishedAt` supplies one normalized `publish` event. `updatedAt`, Git history, typo fixes, and formatting edits do
 not create events. An explicit publication event on the same date must be merged rather than double-counted.
 
+The Journey page consumes the normalized public dataset without changing that contract. Its pure feature projection
+joins every event to `ContentSummary` only through `contentId`, reuses the summary's canonical `url`, groups dates
+newest-first, and preserves dataset order within each date because no time-of-day fact exists. Missing content or a
+content/event type mismatch is a deterministic build error; the projection never invents a fallback relationship or
+URL.
+
 The `practiceKinds` registry in `lib/content/domain.ts` owns allowed values; `uiCopy.practiceKinds` owns their Chinese
 labels, and `levelForCount` in `lib/practice.ts` owns heatmap intensity. Initial kinds are `publish`, `learn`,
 `practice`, `reflect`, and `milestone`; new kinds must be added to the shared registry and copy mapping rather than
@@ -122,6 +128,7 @@ normalizePracticeEvents(entries: readonly PracticeSourceEntry[]): NormalizedPrac
 buildPracticeDataset(entries: readonly PracticeSourceEntry[], options?: PracticeDatasetOptions): PracticeDataset;
 buildPublicPracticeDataset(entries: readonly ContentFrontmatter[], options?: PracticeDatasetOptions): PracticeDataset;
 buildPracticeHeatmapViewModel(dataset: PracticeDataset, endDateKey: string): PracticeHeatmapViewModel;
+buildJourneyViewModel(dataset: PracticeDataset, entries: readonly ContentSummary[]): JourneyViewModel;
 ```
 
 ### 3. Contracts (content, artifact, environment)
@@ -155,6 +162,7 @@ buildPracticeHeatmapViewModel(dataset: PracticeDataset, endDateKey: string): Pra
 | `javascript:`, `data:`, or other unsafe link/image protocol | production Markdown policy | Build fails before an executable URL can be emitted |
 | Draft content with practice events | `isPublicStatus` + `buildPublicPracticeDataset` | Entry is absent from public routes, RSS, heatmap totals, events, and JSON |
 | Event date after `endDateKey` | practice projection | Event and its counters are absent from public JSON and heatmap UI |
+| Journey event has no matching public `ContentSummary` or a mismatched content type | Journey view-model | Static build fails with the affected `contentId`; no fallback link is emitted |
 | Empty knowledge section, project projection, or activity list | owning page + `EmptyState` / `PracticeHeatmap` | Safe empty state, no fabricated entry |
 
 ### 5. Good / Base / Bad cases
@@ -178,6 +186,9 @@ buildPracticeHeatmapViewModel(dataset: PracticeDataset, endDateKey: string): Pra
   projections remain deterministic and presentation labels do not leak back into `ContentSummary`.
 - `apps/web/tests/unit/practice-heatmap-model.test.ts`: 371 cells/53 weeks, visible range, empty cells, statistics,
   reverse recent eight, all twelve Chinese month labels, and deterministic projection remain stable.
+- `apps/web/tests/unit/journey-model.test.ts`: empty projection, exact content join, newest-first date groups,
+  within-day ordering, explicit notes, synthetic publication fallback, milestone, deterministic output, and missing or
+  mismatched source failures remain stable.
 - `apps/web/tests/unit/content-markdown.test.ts`: ordinary Markdown renders, while raw HTML, MDX syntax, unsafe
   link/image protocols, and `.mdx` source files fail; fenced code and escaped braces remain valid.
 - `apps/web/tests/unit/content-domain.test.ts`: the five-section registry, public URL resolver, exact compatibility

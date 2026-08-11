@@ -1,0 +1,7 @@
+{"file":".trellis/spec/frontend/index.md","reason":"Owns apps/web boundaries and pre-development checklist."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Defines typed Astro props, presentation ownership, hero, and accessibility rules."}
+{"file":".trellis/spec/frontend/content-model.md","reason":"Defines Practice, ContentSummary, source relationships, and URL ownership."}
+{"file":".trellis/spec/frontend/styling.md","reason":"Defines editorial styling, responsive Heatmap overflow, and theme constraints."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Requires strict typed projections and actionable build failures."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Defines unit, browser, accessibility, responsive, and build gates."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Guides Practice-to-view-model-to-component contract review."}

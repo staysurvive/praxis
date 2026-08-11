@@ -973,18 +973,115 @@ test('projects remain a single page with the one stable detail exception', async
   await expect(page.locator('.content-back')).toHaveAttribute('href', '/projects');
 });
 
-test('journey stays empty and about uses only confirmed site identity', async ({ page }) => {
+test('journey renders a compact, data-backed trajectory with canonical sources', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/journey');
-  await expect(page.getByRole('heading', { level: 1, name: '旅程' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '旅程尚未开始记录' })).toBeVisible();
-  await expect(page.getByRole('link', { name: '浏览知识' })).toHaveAttribute(
-    'href',
-    knowledgeOverviewContextUrl,
-  );
-  await expect(page.getByRole('link', { name: '查看项目' })).toHaveAttribute('href', '/projects');
-  await expect(page.locator('.practice-timeline')).toHaveCount(0);
 
+  const hero = page.locator('[data-page-hero="journey"]');
+  await expect(
+    hero.getByRole('heading', { level: 1, name: uiCopy.journeyPage.title }),
+  ).toBeVisible();
+  await expect(hero.getByText(uiCopy.journeyPage.description, { exact: true })).toBeVisible();
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    uiCopy.journeyPage.description,
+  );
+  await expect(hero.locator('img')).toHaveAttribute('src', editorialHeroArt.journey.src);
+  await expect(hero.locator('img')).toHaveAttribute('alt', '');
+
+  const heroGeometry = await hero.evaluate((element) => ({
+    height: element.getBoundingClientRect().height,
+    viewportHeight: window.innerHeight,
+  }));
+  expect(heroGeometry.height).toBeLessThan(heroGeometry.viewportHeight);
+
+  const facts = hero.locator('.journey-facts');
+  await expect(facts.locator('dt')).toHaveText([
+    uiCopy.journeyPage.totalEvents,
+    uiCopy.journeyPage.activeDays,
+    uiCopy.journeyPage.contentCount,
+  ]);
+  await expect(facts.locator('dd')).toHaveText(['11', '3', '3']);
+
+  const trajectoryAction = hero.getByRole('link', {
+    name: uiCopy.journeyPage.trajectoryAction,
+  });
+  await expect(trajectoryAction).toHaveAttribute('href', '#journey-trajectory');
+  await trajectoryAction.focus();
+  await expect(trajectoryAction).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect.poll(() => new URL(page.url()).hash).toBe('#journey-trajectory');
+  await expect(page.locator('#journey-trajectory')).toBeInViewport();
+
+  const dayGroups = page.locator('.journey-day');
+  await expect(dayGroups).toHaveCount(3);
+  expect(
+    await dayGroups
+      .locator('.journey-day__heading time')
+      .evaluateAll((times) => times.map((time) => time.getAttribute('datetime'))),
+  ).toEqual(['2026-07-26', '2026-07-25', '2026-07-24']);
+  await expect(dayGroups.locator('.journey-day__heading p')).toHaveText([
+    '4 条记录',
+    '3 条记录',
+    '4 条记录',
+  ]);
+  await expect(page.locator('.journey-event')).toHaveCount(11);
+  await expect(page.locator('.journey-event[data-event-kind="milestone"]')).toHaveCount(3);
+  await expect(
+    page.getByText(uiCopy.journeyTimeline.syntheticPublication, { exact: true }),
+  ).toHaveCount(3);
+  await expect(
+    page.locator('.journey-event__description').filter({ hasText: /^发布《/ }),
+  ).toHaveCount(3);
+
+  const sourceLinks = page.locator('.journey-event__source a');
+  await expect(sourceLinks).toHaveCount(11);
+  await expect(
+    page.locator('.journey-event__source a[href="/projects/praxis-foundation"]'),
+  ).toHaveCount(8);
+  await expect(
+    page.locator('.journey-event__source a[href="/knowledge/what-green-gates-miss"]'),
+  ).toHaveCount(2);
+  await expect(
+    page.locator('.journey-event__source a[href="/knowledge/ai-code-security-review"]'),
+  ).toHaveCount(1);
+
+  const projectSources = page.locator('.journey-event__source').filter({
+    has: page.locator('a[href="/projects/praxis-foundation"]'),
+  });
+  await expect(projectSources.locator(':scope > span')).toHaveText(Array(8).fill('来源 · 项目'));
+  await expect(projectSources.locator('a').first()).toHaveAttribute(
+    'aria-label',
+    '查看项目《构建 Praxis：从知到行的第一项长期实践》',
+  );
+
+  const journalSource = page.locator('.journey-event__source').filter({
+    has: page.locator('a[href="/knowledge/what-green-gates-miss"]'),
+  });
+  await expect(journalSource.locator(':scope > span')).toHaveText(
+    Array(2).fill('来源 · 知识 · 日志'),
+  );
+  await expect(journalSource.locator('a').first()).toHaveAttribute(
+    'aria-label',
+    '查看知识中的日志《门禁全绿之后：目检拦下的半角标点》',
+  );
+
+  const journeyHeatmap = page.locator('.heatmap-section--journey');
+  await expect(journeyHeatmap).toHaveCount(1);
+  await expect(
+    journeyHeatmap.getByRole('heading', { name: uiCopy.journeyPage.rhythmTitle }),
+  ).toBeVisible();
+  await expect(journeyHeatmap.locator('.heatmap-cell')).toHaveCount(371);
+  await expect(
+    journeyHeatmap.locator('.heatmap-total, .stats-grid, .practice-details'),
+  ).toHaveCount(0);
+});
+
+test('about uses only confirmed site identity', async ({ page }) => {
   await page.goto('/about');
+
   await expect(page.getByRole('heading', { level: 1, name: '关于 Praxis' })).toBeVisible();
   await expect(page.getByText('一个关于长期思考、真实行动与持续复盘的个人实践站。')).toHaveCount(2);
 });
@@ -1001,7 +1098,6 @@ test('editorial primary pages keep their art while the knowledge namespace share
 
   for (const [pathname, variant, heading] of [
     ['/projects', 'projects', '项目'],
-    ['/journey', 'journey', '旅程'],
     ['/about', 'about', '关于 Praxis'],
   ] as const) {
     await page.goto(pathname);
@@ -1762,6 +1858,41 @@ test('the homepage hero completes the first desktop viewport', async ({ page }) 
   expect(dimensions.heroImageObjectFit).toBe('cover');
 });
 
+test('journey contains its calendar scroll at every target viewport', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name === 'mobile-chromium',
+    'Explicit target viewport coverage runs once in desktop Chromium.',
+  );
+
+  for (const viewport of [
+    { width: 320, height: 800 },
+    { width: 390, height: 844 },
+    { width: 768, height: 1024 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/journey');
+
+    const geometry = await page.locator('.heatmap-scroll').evaluate((scroll) => ({
+      documentClientWidth: document.documentElement.clientWidth,
+      documentScrollWidth: document.documentElement.scrollWidth,
+      calendarClientWidth: scroll.clientWidth,
+      calendarScrollWidth: scroll.scrollWidth,
+      overflowX: getComputedStyle(scroll).overflowX,
+    }));
+
+    expect(geometry.documentScrollWidth, `${viewport.width}px document`).toBeLessThanOrEqual(
+      geometry.documentClientWidth,
+    );
+    expect(geometry.overflowX, `${viewport.width}px calendar`).toBe('auto');
+    if (viewport.width <= 390) {
+      expect(geometry.calendarScrollWidth).toBeGreaterThan(geometry.calendarClientWidth);
+    }
+  }
+});
+
 test('keyboard focus and reduced-motion preferences remain usable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
@@ -1796,6 +1927,9 @@ test('keyboard focus and reduced-motion preferences remain usable', async ({ pag
     orbitPath: 'none',
     glint: 'none',
   });
+
+  await page.goto('/journey');
+  await expect(page.locator('.journey-hero__media img')).toHaveCSS('animation-name', 'none');
 });
 
 test('the knowledge workspace remains readable in forced-colors mode', async ({ page }) => {
@@ -1999,7 +2133,14 @@ test('core content remains readable without JavaScript', async ({ browser }) => 
   await expect(page).toHaveURL(/\/projects$/);
 
   await page.goto('/journey');
-  await expect(page.getByRole('heading', { name: '旅程尚未开始记录' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: uiCopy.journeyPage.title }),
+  ).toBeVisible();
+  await expect(page.locator('.journey-facts dd')).toHaveText(['11', '3', '3']);
+  await expect(page.locator('.heatmap-section--journey')).toHaveCount(1);
+  await expect(page.locator('.journey-day')).toHaveCount(3);
+  await expect(page.locator('.journey-event')).toHaveCount(11);
+  await expect(page.locator('.journey-event__source a')).toHaveCount(11);
   await page.goto('/about');
   await expect(page.getByRole('heading', { level: 1, name: '关于 Praxis' })).toBeVisible();
 

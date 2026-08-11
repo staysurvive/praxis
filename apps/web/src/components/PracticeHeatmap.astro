@@ -7,36 +7,51 @@ import EmptyState from './EmptyState.astro';
 
 interface Props {
   dataset: PracticeDataset;
+  mode?: 'overview' | 'journey';
 }
 
-const { dataset } = Astro.props;
+const { dataset, mode = 'overview' } = Astro.props satisfies Props;
+const isJourney = mode === 'journey';
 const todayDateKey = getTodayDateKey();
 const { cells, weekLabels, totalEvents, activeDays, contentCount, recentEvents, summary } =
   buildPracticeHeatmapViewModel(dataset, todayDateKey);
 ---
 
-<section class="heatmap-section" aria-labelledby="practice-heatmap-title">
-  <div class="grid gap-8 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:items-end">
-    <header>
-      <p class="eyebrow eyebrow--folio">{uiCopy.heatmap.eyebrow}</p>
-      <h2 id="practice-heatmap-title">{uiCopy.heatmap.title}</h2>
-      <p>{uiCopy.heatmap.description}</p>
-    </header>
-    <dl class="stats-grid grid grid-cols-3 gap-3">
-      <div>
-        <dt>{uiCopy.heatmap.totalEvents}</dt>
-        <dd>{totalEvents}</dd>
+<section
+  class:list={['heatmap-section', isJourney && 'heatmap-section--journey']}
+  aria-labelledby="practice-heatmap-title"
+>
+  {
+    isJourney ? (
+      <header>
+        <p class="eyebrow eyebrow--folio">{uiCopy.journeyPage.rhythmEyebrow}</p>
+        <h2 id="practice-heatmap-title">{uiCopy.journeyPage.rhythmTitle}</h2>
+        <p>{uiCopy.journeyPage.rhythmDescription}</p>
+      </header>
+    ) : (
+      <div class="grid gap-8 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:items-end">
+        <header>
+          <p class="eyebrow eyebrow--folio">{uiCopy.heatmap.eyebrow}</p>
+          <h2 id="practice-heatmap-title">{uiCopy.heatmap.title}</h2>
+          <p>{uiCopy.heatmap.description}</p>
+        </header>
+        <dl class="stats-grid grid grid-cols-3 gap-3">
+          <div>
+            <dt>{uiCopy.heatmap.totalEvents}</dt>
+            <dd>{totalEvents}</dd>
+          </div>
+          <div>
+            <dt>{uiCopy.heatmap.activeDays}</dt>
+            <dd>{activeDays}</dd>
+          </div>
+          <div>
+            <dt>{uiCopy.heatmap.contentCount}</dt>
+            <dd>{contentCount}</dd>
+          </div>
+        </dl>
       </div>
-      <div>
-        <dt>{uiCopy.heatmap.activeDays}</dt>
-        <dd>{activeDays}</dd>
-      </div>
-      <div>
-        <dt>{uiCopy.heatmap.contentCount}</dt>
-        <dd>{contentCount}</dd>
-      </div>
-    </dl>
-  </div>
+    )
+  }
 
   {
     totalEvents === 0 ? (
@@ -46,7 +61,7 @@ const { cells, weekLabels, totalEvents, activeDays, contentCount, recentEvents, 
     ) : (
       <div class="heatmap-panel mt-10">
         <p class="sr-only">{summary}</p>
-        <p class="heatmap-total">{uiCopy.heatmap.annualTotal(totalEvents)}</p>
+        {!isJourney && <p class="heatmap-total">{uiCopy.heatmap.annualTotal(totalEvents)}</p>}
         <div
           class="heatmap-scroll"
           role="region"
@@ -97,18 +112,20 @@ const { cells, weekLabels, totalEvents, activeDays, contentCount, recentEvents, 
           <span>{uiCopy.heatmap.more}</span>
         </div>
 
-        <details class="practice-details mt-8">
-          <summary>{uiCopy.heatmap.details}</summary>
-          <ol>
-            {recentEvents.map((event) => (
-              <li>
-                <time datetime={event.date}>{formatDateKey(event.date)}</time>
-                <span>{uiCopy.practiceKinds[event.kind]}</span>
-                {event.note && <p>{event.note}</p>}
-              </li>
-            ))}
-          </ol>
-        </details>
+        {!isJourney && (
+          <details class="practice-details mt-8">
+            <summary>{uiCopy.heatmap.details}</summary>
+            <ol>
+              {recentEvents.map((event) => (
+                <li>
+                  <time datetime={event.date}>{formatDateKey(event.date)}</time>
+                  <span>{uiCopy.practiceKinds[event.kind]}</span>
+                  {event.note && <p>{event.note}</p>}
+                </li>
+              ))}
+            </ol>
+          </details>
+        )}
       </div>
     )
   }
@@ -124,6 +141,10 @@ const { cells, weekLabels, totalEvents, activeDays, contentCount, recentEvents, 
     align-content: center;
     grid-template-columns: minmax(0, 1fr);
     min-block-size: var(--panel-min-block-size);
+  }
+
+  .heatmap-section--journey {
+    min-block-size: 0;
   }
 
   .heatmap-panel {

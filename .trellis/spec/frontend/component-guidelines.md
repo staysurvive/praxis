@@ -64,6 +64,9 @@ const { entry } = Astro.props satisfies Props;
   navigation, and layout metadata. Knowledge pages invoke it; Knowledge components only render its typed props.
 - `features/practice/heatmap-model.ts` owns the 53-week visible window, statistics, recent eight events, month labels,
   and accessible summary. `PracticeHeatmap.astro` may format individual rendered dates but must not recompute totals.
+- `features/journey/model.ts` joins the existing public Practice dataset to `ContentSummary` by `contentId`, groups
+  dates newest-first without reordering events within a date, and projects aggregate/source facts. The Journey page
+  loads both inputs; `JourneyTimeline.astro` only renders the typed projection and localized labels.
 - `ContentSummary` contains domain/content facts plus `id` and canonical `url`; it never grows localized display-label
   fields merely because a component needs them.
 
@@ -84,9 +87,13 @@ const { entry } = Astro.props satisfies Props;
 
 ## Root-page exhibition heroes
 
-`EditorialHero.astro` is the root-page-only visual shell for `/projects`, `/journey`, and `/about`.
+`EditorialHero.astro` is the root-page-only full-viewport visual shell for `/projects` and `/about`.
 It receives `eyebrow`, `title`, `description`, and a typed art `variant`; the associated local image source and dimensions
 live in `src/config/editorial-heroes.ts`. It must preserve one real H1 and expose imagery only as `alt=""` decoration.
+
+`/journey` owns a compact, page-scoped Hero because its first viewport also presents derived trajectory facts and an
+in-page action. It reuses the configured Journey artwork and the same motion/accessibility constraints, but must not
+grow `EditorialHero.astro` into a data-aware multi-mode component.
 
 - Keep `PageHero.astro` for quiet single-page introductions outside the knowledge namespace. Every
   `knowledge/index.astro` overview, `knowledge/[key].astro` section, and article uses the shared

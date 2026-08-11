@@ -1,37 +1,282 @@
 ---
 import EmptyState from '../components/EmptyState.astro';
-import EditorialHero from '../components/EditorialHero.astro';
+import JourneyTimeline from '../components/JourneyTimeline.astro';
+import PracticeHeatmap from '../components/PracticeHeatmap.astro';
 import { uiCopy } from '../config/copy';
+import { editorialHeroArt } from '../config/editorial-heroes';
+import { buildJourneyViewModel } from '../features/journey/model';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { listEntries } from '../lib/content';
 import { getKnowledgeUrl } from '../lib/content/domain';
+import { practiceDataset } from '../lib/practice-data';
+
+const model = buildJourneyViewModel(practiceDataset, await listEntries());
+const art = editorialHeroArt.journey;
 ---
 
 <BaseLayout title={uiCopy.journeyPage.title} description={uiCopy.journeyPage.description}>
-  <EditorialHero
-    eyebrow={uiCopy.journeyPage.eyebrow}
-    title={uiCopy.journeyPage.title}
-    description={uiCopy.journeyPage.description}
-    variant="journey"
-  />
-  <section class="journey-empty">
-    <div class="page-shell">
-      <EmptyState
-        title={uiCopy.journeyPage.emptyTitle}
-        description={uiCopy.journeyPage.emptyDescription}
-        actions={[
-          {
-            label: uiCopy.actions.browseKnowledge,
-            href: getKnowledgeUrl(),
-          },
-          { label: uiCopy.actions.viewProjects, href: '/projects' },
-        ]}
+  <header class="journey-hero rule-scotch--bottom" data-page-hero="journey">
+    <div class="journey-hero__media" aria-hidden="true">
+      <img
+        src={art.src}
+        srcset={art.srcset}
+        sizes="100vw"
+        width={art.width}
+        height={art.height}
+        alt=""
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
       />
+      <div class="journey-hero__veil"></div>
     </div>
-  </section>
+
+    <div class="page-shell journey-hero__content">
+      <p class="eyebrow">{uiCopy.journeyPage.eyebrow}</p>
+      <h1 class="display-title display-title--wide">{uiCopy.journeyPage.title}</h1>
+      <p class="journey-hero__description">{uiCopy.journeyPage.description}</p>
+
+      {
+        model.hasEvents && (
+          <>
+            <dl class="journey-facts">
+              <div>
+                <dt>{uiCopy.journeyPage.totalEvents}</dt>
+                <dd>{model.totalEvents}</dd>
+              </div>
+              <div>
+                <dt>{uiCopy.journeyPage.activeDays}</dt>
+                <dd>{model.activeDays}</dd>
+              </div>
+              <div>
+                <dt>{uiCopy.journeyPage.contentCount}</dt>
+                <dd>{model.contentCount}</dd>
+              </div>
+            </dl>
+            <a class="text-link journey-hero__action" href="#journey-trajectory">
+              {uiCopy.journeyPage.trajectoryAction}
+            </a>
+          </>
+        )
+      }
+    </div>
+  </header>
+
+  {
+    model.hasEvents ? (
+      <>
+        <section class="page-section journey-rhythm">
+          <div class="page-shell">
+            <PracticeHeatmap dataset={practiceDataset} mode="journey" />
+          </div>
+        </section>
+        <section class="page-section journey-trajectory-section">
+          <div class="page-shell">
+            <JourneyTimeline days={model.days} />
+          </div>
+        </section>
+      </>
+    ) : (
+      <section class="journey-empty">
+        <div class="page-shell">
+          <EmptyState
+            title={uiCopy.journeyPage.emptyTitle}
+            description={uiCopy.journeyPage.emptyDescription}
+            actions={[
+              {
+                label: uiCopy.actions.browseKnowledge,
+                href: getKnowledgeUrl(),
+              },
+              { label: uiCopy.actions.viewProjects, href: '/projects' },
+            ]}
+          />
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>
 
 <style>
+  .journey-hero {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    min-block-size: clamp(31rem, 72svh, 43rem);
+    overflow: clip;
+    background: var(--color-bg-surface);
+  }
+
+  .journey-hero__media img,
+  .journey-hero__veil {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .journey-hero__media {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .journey-hero__media img {
+    display: block;
+    object-fit: cover;
+    object-position: 54% center;
+  }
+
+  .journey-hero__veil {
+    background: var(--color-overlay-hero-strong);
+  }
+
+  .journey-hero__content {
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    padding-block: clamp(3.5rem, 8vh, 6rem);
+  }
+
+  .journey-hero__content > p,
+  .journey-hero__content h1 {
+    margin: 0;
+  }
+
+  .journey-hero__content h1 {
+    margin-top: 1rem;
+  }
+
+  .journey-hero__description {
+    max-width: 31rem;
+    margin-top: 1.5rem !important;
+    color: var(--color-fg-muted);
+    font-size: var(--text-lead);
+    line-height: 1.8;
+    text-wrap: pretty;
+  }
+
+  .journey-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: min(100%, 31rem);
+    margin: clamp(1.75rem, 4vw, 2.5rem) 0 0;
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .journey-facts div {
+    padding: 0.85rem 0.85rem 0 0;
+    border-right: 1px solid var(--color-line);
+  }
+
+  .journey-facts div + div {
+    padding-left: 0.85rem;
+  }
+
+  .journey-facts div:last-child {
+    border-right: 0;
+  }
+
+  .journey-facts dt {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-kicker);
+  }
+
+  .journey-facts dd {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.6rem, 4vw, 2.25rem);
+    line-height: 1;
+  }
+
+  .journey-hero__action {
+    margin-top: 1.75rem;
+  }
+
+  .journey-rhythm,
+  .journey-trajectory-section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .journey-empty {
     padding-block: clamp(3.5rem, 8vw, 7rem);
+  }
+
+  @media (max-width: 47.99rem) {
+    .journey-hero {
+      grid-template-rows: auto minmax(11rem, 29svh);
+      min-block-size: 0;
+    }
+
+    .journey-hero__media {
+      position: relative;
+      z-index: 0;
+      grid-row: 2;
+      min-block-size: 11rem;
+    }
+
+    .journey-hero__media img {
+      object-position: 72% center;
+    }
+
+    .journey-hero__veil {
+      display: none;
+    }
+
+    .journey-hero__content {
+      grid-row: 1;
+      padding-block: 2.75rem 2.5rem;
+    }
+
+    .journey-hero__description {
+      font-size: 1.03rem;
+    }
+
+    .journey-facts {
+      margin-top: 1.5rem;
+    }
+
+    .journey-facts div {
+      padding-right: 0.55rem;
+    }
+
+    .journey-facts div + div {
+      padding-left: 0.55rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .journey-hero__media img {
+      animation: journey-art-reveal 720ms var(--ease-out) both;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .journey-hero__veil {
+      background: var(--color-bg);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .journey-hero__media {
+      display: none;
+    }
+
+    .journey-hero {
+      min-block-size: 0;
+    }
+  }
+
+  @keyframes journey-art-reveal {
+    from {
+      opacity: 0.65;
+      transform: scale(1.015);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 </style>

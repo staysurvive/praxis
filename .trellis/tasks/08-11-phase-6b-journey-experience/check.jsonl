@@ -1,0 +1,7 @@
+{"file":".trellis/spec/frontend/index.md","reason":"Check page, feature, component, and content boundary compliance."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Check Astro composition, hero behavior, and accessibility."}
+{"file":".trellis/spec/frontend/content-model.md","reason":"Check Practice semantics and exact source relationship ownership."}
+{"file":".trellis/spec/frontend/routing.md","reason":"Check canonical Knowledge/Project links and route compatibility."}
+{"file":".trellis/spec/frontend/styling.md","reason":"Check token use, responsive Heatmap containment, and both themes."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Check strict projection types and failure behavior."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Run and assess the complete required quality gate."}

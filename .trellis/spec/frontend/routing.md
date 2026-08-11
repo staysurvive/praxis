@@ -30,8 +30,9 @@ online single-hop verification remain an external deployment gate; do not add wi
   fail on section/content or content/content slug collisions.
 - `/projects` renders every public project at a stable slug anchor and inlines Markdown for every project except the
   one historical detail. The remaining `[type]/[slug]` owner emits only that exception.
-- `/journey` is a truthful empty single page until the author confirms real Journey nodes; `/about` consumes only the
-  confirmed site identity. Neither creates a new content type.
+- `/journey` projects the existing public Practice dataset into a truthful trajectory joined to canonical
+  `ContentSummary.url` values; with no events it renders one honest empty state. `/about` consumes only the confirmed
+  site identity. Neither creates a new content type or route family.
 
 ## Navigation and filters
 

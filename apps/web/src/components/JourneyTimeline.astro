@@ -1,0 +1,245 @@
+---
+import { uiCopy } from '../config/copy';
+import type { JourneyDayViewModel } from '../features/journey/model';
+import { formatDateKey } from '../lib/date';
+
+interface Props {
+  days: readonly JourneyDayViewModel[];
+}
+
+const { days } = Astro.props satisfies Props;
+---
+
+<section id="journey-trajectory" class="journey-timeline" aria-labelledby="journey-timeline-title">
+  <header class="journey-timeline__heading">
+    <p class="eyebrow eyebrow--folio">{uiCopy.journeyTimeline.eyebrow}</p>
+    <h2 id="journey-timeline-title">{uiCopy.journeyTimeline.title}</h2>
+    <p>{uiCopy.journeyTimeline.description}</p>
+  </header>
+
+  <ol class="journey-days">
+    {
+      days.map((day) => (
+        <li class="journey-day">
+          <header class="journey-day__heading">
+            <h3>
+              <time datetime={day.date}>{formatDateKey(day.date)}</time>
+            </h3>
+            <p>{uiCopy.journeyTimeline.eventCount(day.events.length)}</p>
+          </header>
+
+          <ol class="journey-events">
+            {day.events.map((event) => {
+              const destinationLabel = uiCopy.journeyTimeline.destination[event.source.destination];
+              const typeLabel = uiCopy.contentTypes[event.source.type];
+              const sourceDetail =
+                event.source.destination === 'project'
+                  ? destinationLabel
+                  : `${destinationLabel} · ${typeLabel}`;
+              const sourceTypeLabel =
+                event.source.destination === 'project' ? undefined : typeLabel;
+
+              return (
+                <li class="journey-event" data-event-kind={event.kind}>
+                  <div class="journey-event__meta">
+                    <strong>{uiCopy.practiceKinds[event.kind]}</strong>
+                    {event.origin === 'publishedAt' && (
+                      <span>{uiCopy.journeyTimeline.syntheticPublication}</span>
+                    )}
+                  </div>
+
+                  {event.note ? (
+                    <p class="journey-event__description">{event.note}</p>
+                  ) : (
+                    event.publicationFallbackTitle && (
+                      <p class="journey-event__description">
+                        {uiCopy.journeyTimeline.publicationFallback(event.publicationFallbackTitle)}
+                      </p>
+                    )
+                  )}
+
+                  <div class="journey-event__source">
+                    <span>
+                      {uiCopy.journeyTimeline.sourceLabel} · {sourceDetail}
+                    </span>
+                    <a
+                      href={event.source.url}
+                      aria-label={uiCopy.journeyTimeline.sourceLinkLabel(
+                        destinationLabel,
+                        sourceTypeLabel,
+                        event.source.title,
+                      )}
+                    >
+                      {event.source.title}
+                    </a>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .journey-timeline {
+    scroll-margin-top: calc(var(--header-height) + 1.5rem);
+  }
+
+  .journey-timeline__heading {
+    max-width: 42rem;
+  }
+
+  .journey-timeline__heading h2,
+  .journey-timeline__heading p {
+    margin: 0;
+  }
+
+  .journey-timeline__heading h2 {
+    margin-top: 1rem;
+    font-family: var(--font-serif);
+    font-size: var(--text-title-1);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+
+  .journey-timeline__heading > p:last-child {
+    margin-top: 1rem;
+    color: var(--color-fg-muted);
+  }
+
+  .journey-days,
+  .journey-events {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .journey-days {
+    margin-top: clamp(2.75rem, 6vw, 4.5rem);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .journey-day {
+    display: grid;
+    grid-template-columns: minmax(8.5rem, 0.28fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    padding-block: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .journey-day__heading h3,
+  .journey-day__heading p {
+    margin: 0;
+  }
+
+  .journey-day__heading h3 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.45;
+  }
+
+  .journey-day__heading p {
+    margin-top: 0.45rem;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-kicker);
+  }
+
+  .journey-event {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, 0.22fr) minmax(0, 1fr) minmax(11rem, 0.45fr);
+    gap: 1rem clamp(1rem, 3vw, 2.5rem);
+    align-items: start;
+    padding-block: 1.35rem;
+    border-top: 1px solid var(--color-line-subtle);
+  }
+
+  .journey-event:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .journey-event:last-child {
+    padding-bottom: 0;
+  }
+
+  .journey-event__meta {
+    display: grid;
+    gap: 0.3rem;
+    color: var(--color-fg-subtle);
+    font-size: var(--text-kicker);
+  }
+
+  .journey-event__meta strong {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+
+  .journey-event[data-event-kind='milestone'] .journey-event__meta strong {
+    color: var(--color-brand-strong);
+  }
+
+  .journey-event__description {
+    margin: 0;
+    color: var(--color-fg-muted);
+    line-height: 1.85;
+  }
+
+  .journey-event__source {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .journey-event__source > span {
+    color: var(--color-fg-subtle);
+    font-size: var(--text-kicker);
+  }
+
+  .journey-event__source a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--color-brand-strong);
+    font-size: var(--text-meta);
+    font-weight: 500;
+    line-height: 1.5;
+    text-decoration: underline;
+    text-decoration-color: var(--color-line-strong);
+    text-underline-offset: 0.3em;
+  }
+
+  .journey-event__source a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  @media (max-width: 63.99rem) {
+    .journey-day {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .journey-event {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.65rem;
+    }
+
+    .journey-event__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.85rem;
+      align-items: baseline;
+    }
+
+    .journey-event__source {
+      margin-top: 0.25rem;
+    }
+  }
+</style>
