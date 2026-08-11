@@ -356,3 +356,29 @@ Spec 更新：frontend/index.md 中 "only production entry" 注释改为多类�
 ### Next Steps
 
 - 生产部署仍等待公开署名、正式域名与现有服务器 Caddy/Compose 接入边界；`07-25-praxis-v0-1-public-release` 保持 `in_progress`，完成线上 smoke 后再归档。
+
+
+## Session 8: Architecture refactor phases 3-5
+
+**Date**: 2026-08-11
+**Task**: Architecture refactor phases 3-5
+**Branch**: `main`
+
+### Summary
+
+Unified authored source and identity rules, extracted Knowledge and Practice Heatmap view-models, removed presentation labels from ContentSummary, preserved public behavior and Practice JSON, and synchronized the resulting contracts into Trellis specs and task records.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f4e1b6e` | (see git log) |
+| `34ba1b4` | (see git log) |
+| `873b257` | (see git log) |
+| `b9e25fc` | (see git log) |
+| `2917e3d` | (see git log) |
+| `6755a8d` | (see git log) |
+
+### Status
+
+[OK] **Completed**
