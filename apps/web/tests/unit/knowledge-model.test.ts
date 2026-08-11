@@ -28,9 +28,6 @@ function createSummary(
     id: `${type}/${data.slug}`,
     ...data,
     url: getPublicContentUrl(data),
-    typeLabel: uiCopy.contentTypes[data.type],
-    stageLabel: uiCopy.stages[data.stage],
-    statusLabel: uiCopy.statuses[data.status],
   };
 }
 
@@ -81,6 +78,10 @@ describe('knowledge index model', () => {
         item: agentArticle.slug,
       }),
     );
+    expect(agentArticle).not.toHaveProperty('typeLabel');
+    expect(agentArticle).not.toHaveProperty('stageLabel');
+    expect(agentArticle).not.toHaveProperty('statusLabel');
+    expect(model.view.recentEntries[0]?.typeLabel).toBe(uiCopy.contentTypes[agentArticle.type]);
     expect(model.view.recentEntries.every((entry) => !entry.isCurrent)).toBe(true);
   });
 

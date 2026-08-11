@@ -1,7 +1,6 @@
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
-import { uiCopy } from '../../config/copy';
 import { getPublicContentUrl, isPublicStatus } from './domain';
 import type { ContentType, KnowledgeSectionKey, Stage, Status } from './domain';
 import { selectKnowledgeSectionEntries, selectRecentKnowledge } from './query';
@@ -22,9 +21,6 @@ export interface ContentFilter {
 export interface ContentSummary extends ContentFrontmatter {
   id: string;
   url: string;
-  typeLabel: string;
-  stageLabel: string;
-  statusLabel: string;
 }
 
 function matchesFilter(entry: ContentCollectionEntry, filter: ContentFilter): boolean {
@@ -52,9 +48,6 @@ export function toContentSummary(entry: ContentCollectionEntry): ContentSummary 
     id: entry.id,
     ...entry.data,
     url: getPublicContentUrl(entry.data),
-    typeLabel: uiCopy.contentTypes[entry.data.type],
-    stageLabel: uiCopy.stages[entry.data.stage],
-    statusLabel: uiCopy.statuses[entry.data.status],
   };
 }
 

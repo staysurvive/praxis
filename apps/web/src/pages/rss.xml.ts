@@ -1,6 +1,7 @@
 import rss from '@astrojs/rss';
 import type { APIRoute } from 'astro';
 
+import { uiCopy } from '../config/copy';
 import { siteConfig } from '../config/site';
 import { listEntries } from '../lib/content';
 
@@ -24,7 +25,7 @@ export const GET: APIRoute = async ({ site }) => {
       description: entry.summary,
       link: entry.url,
       pubDate: new Date(`${entry.publishedAt}T00:00:00.000Z`),
-      categories: [entry.typeLabel, ...entry.tags],
+      categories: [uiCopy.contentTypes[entry.type], ...entry.tags],
       customData: `<guid isPermaLink="false">${entry.contentId}</guid>`,
     })),
   });

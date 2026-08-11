@@ -154,7 +154,7 @@ function buildSidebarEntries(
     title: entry.title,
     summary: entry.summary,
     tags: entry.tags,
-    typeLabel: entry.typeLabel,
+    typeLabel: uiCopy.contentTypes[entry.type],
     updatedAt: entry.updatedAt,
     isCurrent: entry.contentId === currentContentId,
   }));

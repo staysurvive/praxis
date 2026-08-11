@@ -40,7 +40,7 @@ const projects = await Promise.all(
                     <h2>{summary.title}</h2>
                     <p>{summary.summary}</p>
                   </div>
-                  <span class="project-status">{summary.statusLabel}</span>
+                  <span class="project-status">{uiCopy.statuses[summary.status]}</span>
                 </div>
                 {summary.tags.length > 0 && (
                   <ul class="project-tags" aria-label={uiCopy.detail.tags}>
