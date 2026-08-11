@@ -13,18 +13,22 @@ import {
 } from 'lucide-astro';
 
 import { uiCopy } from '../../config/copy';
-import { getKnowledgeUrl } from '../../lib/content/domain';
 import type { KnowledgeSidebarEntry, KnowledgeSidebarSection } from './types';
 
 interface Props {
   sections: readonly KnowledgeSidebarSection[];
   recentEntries: readonly KnowledgeSidebarEntry[];
+  overviewHref: string;
   overviewIsCurrent?: boolean;
 }
 
-const { sections, recentEntries, overviewIsCurrent = false } = Astro.props satisfies Props;
+const {
+  sections,
+  recentEntries,
+  overviewHref,
+  overviewIsCurrent = false,
+} = Astro.props satisfies Props;
 const itemCount = sections.length + recentEntries.length;
-const overviewHref = getKnowledgeUrl();
 const sectionIcons = {
   'agent-app-development': Rocket,
   'llm-principles': BrainCircuit,

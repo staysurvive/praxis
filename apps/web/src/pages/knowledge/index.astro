@@ -1,67 +1,28 @@
 ---
 import KnowledgeWorkspaceOverview from '../../components/knowledge/KnowledgeWorkspaceOverview.astro';
-import type {
-  KnowledgeSidebarEntry,
-  KnowledgeSidebarSection,
-  KnowledgeTocItem,
-} from '../../components/knowledge/types';
-import { uiCopy } from '../../config/copy';
+import { getKnowledgeIndexModel } from '../../features/knowledge/model';
 import KnowledgeDocsLayout from '../../layouts/KnowledgeDocsLayout.astro';
-import { listKnowledgeSectionEntries, listRecentKnowledge } from '../../lib/content';
-import {
-  getKnowledgeNavigationUrl,
-  getKnowledgeUrl,
-  knowledgeSections,
-} from '../../lib/content/domain';
 
-const sectionCounts = new Map(
-  await Promise.all(
-    knowledgeSections.map(
-      async (section) =>
-        [section.key, (await listKnowledgeSectionEntries(section.key)).length] as const,
-    ),
-  ),
-);
-const recentEntries = await listRecentKnowledge();
-const sidebarSections = knowledgeSections.map((section): KnowledgeSidebarSection => ({
-  key: section.key,
-  href: getKnowledgeNavigationUrl({ section: section.key }),
-  number: section.number,
-  label: section.label,
-  description: section.description,
-  topics: section.topics,
-  count: sectionCounts.get(section.key) ?? 0,
-  isCurrent: false,
-}));
-const sidebarEntries = recentEntries.map((entry): KnowledgeSidebarEntry => ({
-  key: entry.contentId,
-  href: getKnowledgeNavigationUrl({
-    section: entry.knowledgeSections?.[0],
-    item: entry.slug,
-  }),
-  title: entry.title,
-  summary: entry.summary,
-  tags: entry.tags,
-  typeLabel: entry.typeLabel,
-  updatedAt: entry.updatedAt,
-  isCurrent: false,
-}));
-const tocItems = [
-  { id: 'workspace-start', text: uiCopy.knowledge.startReadingTitle, depth: 2 },
-  { id: 'workspace-chapters', text: uiCopy.knowledge.browseChaptersTitle, depth: 2 },
-  { id: 'workspace-recent', text: uiCopy.knowledge.recentTitle, depth: 2 },
-] satisfies readonly KnowledgeTocItem[];
+const model = await getKnowledgeIndexModel();
 ---
 
 <KnowledgeDocsLayout
-  title={uiCopy.knowledge.title}
-  description={uiCopy.knowledge.description}
-  canonicalPath={getKnowledgeUrl()}
-  navigationPath={getKnowledgeNavigationUrl()}
-  sidebarSections={sidebarSections}
-  recentEntries={sidebarEntries}
-  tocItems={tocItems}
-  overviewIsCurrent
+  title={model.layout.title}
+  description={model.layout.description}
+  canonicalPath={model.layout.canonicalPath}
+  navigationPath={model.layout.navigationPath}
+  seoType={model.layout.seoType}
+  publishedAt={model.layout.publishedAt}
+  updatedAt={model.layout.updatedAt}
+  tags={model.layout.tags}
+  overviewHref={model.layout.overviewHref}
+  sidebarSections={model.layout.sidebarSections}
+  recentEntries={model.layout.recentEntries}
+  tocItems={model.tocItems}
+  overviewIsCurrent={model.layout.overviewIsCurrent}
 >
-  <KnowledgeWorkspaceOverview sections={sidebarSections} recentEntries={sidebarEntries} />
+  <KnowledgeWorkspaceOverview
+    sections={model.view.sections}
+    recentEntries={model.view.recentEntries}
+  />
 </KnowledgeDocsLayout>

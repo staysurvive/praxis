@@ -1,19 +1,20 @@
 ---
 import { uiCopy } from '../../config/copy';
-import type { ContentSummary } from '../../lib/content';
-import { getKnowledgeNavigationUrl, getKnowledgeUrl } from '../../lib/content/domain';
 import type { KnowledgeSection } from '../../lib/content/domain';
+import type { KnowledgeSectionEntry, KnowledgeSectionNavigation } from './types';
 import ContentCard from '../ContentCard.astro';
 import EmptyState from '../EmptyState.astro';
 
 interface Props {
   section: KnowledgeSection;
-  entries: readonly ContentSummary[];
-  previousSection?: KnowledgeSection;
-  nextSection?: KnowledgeSection;
+  entries: readonly KnowledgeSectionEntry[];
+  previousSection?: KnowledgeSectionNavigation;
+  nextSection?: KnowledgeSectionNavigation;
+  overviewHref: string;
 }
 
-const { section, entries, previousSection, nextSection } = Astro.props satisfies Props;
+const { section, entries, previousSection, nextSection, overviewHref } =
+  Astro.props satisfies Props;
 ---
 
 <article class="knowledge-section-view" data-knowledge-section-view>
@@ -41,14 +42,7 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
       entries.length > 0 ? (
         <div class="knowledge-entry-list">
           {entries.map((entry) => (
-            <ContentCard
-              entry={entry}
-              href={getKnowledgeNavigationUrl({
-                section: entry.knowledgeSections?.[0],
-                item: entry.slug,
-              })}
-              prefetch="hover"
-            />
+            <ContentCard entry={entry} href={entry.navigationHref} prefetch="hover" />
           ))}
         </div>
       ) : (
@@ -58,7 +52,7 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
           actions={[
             {
               label: uiCopy.actions.backToKnowledge,
-              href: getKnowledgeUrl(),
+              href: overviewHref,
             },
           ]}
         />
@@ -75,11 +69,7 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
     <div class="knowledge-section-navigation__links">
       {
         previousSection && (
-          <a
-            href={getKnowledgeNavigationUrl({ section: previousSection.key })}
-            rel="prev"
-            data-astro-prefetch="hover"
-          >
+          <a href={previousSection.href} rel="prev" data-astro-prefetch="hover">
             <span>{uiCopy.knowledge.previousChapter}</span>
             <strong>{previousSection.label}</strong>
           </a>
@@ -87,7 +77,7 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
       }
       <a
         class="knowledge-section-navigation__overview"
-        href={getKnowledgeUrl()}
+        href={overviewHref}
         data-astro-prefetch="hover"
       >
         <span>{uiCopy.knowledge.eyebrow}</span>
@@ -95,11 +85,7 @@ const { section, entries, previousSection, nextSection } = Astro.props satisfies
       </a>
       {
         nextSection && (
-          <a
-            href={getKnowledgeNavigationUrl({ section: nextSection.key })}
-            rel="next"
-            data-astro-prefetch="hover"
-          >
+          <a href={nextSection.href} rel="next" data-astro-prefetch="hover">
             <span>{uiCopy.knowledge.nextChapter}</span>
             <strong>{nextSection.label}</strong>
           </a>

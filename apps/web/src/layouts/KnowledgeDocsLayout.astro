@@ -20,6 +20,7 @@ interface Props {
   publishedAt?: string;
   updatedAt?: string;
   tags?: readonly string[];
+  overviewHref: string;
   sidebarSections: readonly KnowledgeSidebarSection[];
   recentEntries: readonly KnowledgeSidebarEntry[];
   tocItems: readonly KnowledgeTocItem[];
@@ -35,6 +36,7 @@ const {
   publishedAt,
   updatedAt,
   tags = [],
+  overviewHref,
   sidebarSections,
   recentEntries,
   tocItems,
@@ -63,6 +65,7 @@ const {
     <KnowledgeSidebar
       sections={sidebarSections}
       recentEntries={recentEntries}
+      overviewHref={overviewHref}
       overviewIsCurrent={overviewIsCurrent}
     />
     <KnowledgeTableOfContents items={tocItems} />
