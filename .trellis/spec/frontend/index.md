@@ -15,7 +15,7 @@ Authoritative planning references:
 - `.trellis/tasks/07-24-praxis-foundation/implement.md`
 - `.trellis/tasks/07-25-praxis-v0-1-public-release/prd.md`
 - `.trellis/tasks/07-25-praxis-v0-1-public-release/design.md`
-- `.trellis/tasks/08-11-architecture-refactor-phases-3-5/design.md`
+- `.trellis/tasks/archive/2026-08/08-11-architecture-refactor-phases-3-5/design.md`
 
 ## Guide index
 

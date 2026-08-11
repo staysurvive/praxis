@@ -5,4 +5,4 @@
 {"file": ".trellis/spec/frontend/type-safety.md", "reason": "Verify normalized identity and typed projection boundaries."}
 {"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Check that discovery and projection logic have single owners."}
 {"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Check dependency direction and generated-data independence."}
-{"file": ".trellis/tasks/08-11-architecture-refactor-phases-3-5/research/post-refactor-audit.md", "reason": "Final recorded audit and behavioral evidence."}
+{"file": ".trellis/tasks/archive/2026-08/08-11-architecture-refactor-phases-3-5/research/post-refactor-audit.md", "reason": "Final recorded audit and behavioral evidence."}
