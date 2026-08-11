@@ -15,6 +15,7 @@ Authoritative planning references:
 - `.trellis/tasks/07-24-praxis-foundation/implement.md`
 - `.trellis/tasks/07-25-praxis-v0-1-public-release/prd.md`
 - `.trellis/tasks/07-25-praxis-v0-1-public-release/design.md`
+- `.trellis/tasks/08-11-architecture-refactor-phases-3-5/design.md`
 
 ## Guide index
 
@@ -45,8 +46,11 @@ The current implementation uses the following concrete boundaries:
 ```text
 content/projects/praxis.md                  # first production entry (notes/ and journal/ follow the same schema)
 apps/web/src/content.config.ts              # root content loader + schema
+apps/web/src/lib/content/source-reader.ts   # shared authored-source discovery and identity uniqueness
 apps/web/src/lib/content/index.ts           # typed queries and summaries
 apps/web/src/lib/practice.ts                # explicit event normalization
+apps/web/src/features/knowledge/model.ts    # Knowledge page-level view-model projection
+apps/web/src/features/practice/heatmap-model.ts # pure Heatmap view-model projection
 apps/web/scripts/generate-practice-data.ts  # deterministic build artifact
 apps/web/src/components/                    # typed presentational Astro components
 apps/web/src/pages/                         # HTML routes plus RSS, robots, and generated JSON
@@ -72,3 +76,4 @@ export const practiceDataset: PracticeDataset = datasetSchema.parse(rawPracticeD
 - Run the root formatting, lint, type-check, unit-test, build, and browser smoke commands defined by the task.
 - Check both Light and Dark themes, Chinese long-form reading width, keyboard focus, reduced motion, and the custom 404.
 - Verify no page parses raw frontmatter directly and no new type duplicates the unified content schema.
+- Verify `ContentSummary` remains presentation-neutral and page-level derived state stays in focused feature models.

@@ -2,9 +2,22 @@
 
 ## Source of truth
 
-Markdown (`.md`) under the repository root `content/` is the authored source of truth. The custom typed Astro
-loader owns discovery, source-policy enforcement, and schema validation. Pages and components never parse raw
-frontmatter.
+Markdown (`.md`) under the repository root `content/` is the authored source of truth. Shared source primitives own
+file discovery, extension policy, source safety, and normalized identity uniqueness. The custom typed Astro loader
+composes those primitives with Astro's official collection lifecycle and schema validation. Pages and components never
+parse raw frontmatter.
+
+## Source and identity boundary
+
+`source-reader.ts` discovers authored files and asserts unique `contentId` and `type:slug` identities;
+`file-policy.ts` owns `.md`/`.mdx` policy; `identity-normalizer.ts` applies only the schema-established
+`contentId.trim()`, `slug.trim()`, and `isContentType` semantics. These modules do not parse Markdown/frontmatter,
+validate the full schema, resolve routes, query collections, or produce UI presentation.
+
+Both the Astro loader and Practice generator consume these primitives. The loader uses Astro's public `glob` loader
+and `generateId` callback for initial and incremental add/change identity checks. On change it excludes the candidate
+file's previous `DataStore` entry; Astro retains unlink ownership. Do not patch Astro, import private modules, or build a
+second watcher.
 
 ## Entry identity and dimensions
 
@@ -75,6 +88,10 @@ static paths are emitted.
 The practice aggregator consumes the same typed entries and writes a deterministic static JSON artifact. It never calls
 GitHub or derives events from Git history.
 
+`ContentSummary` is `ContentFrontmatter` plus the collection `id` and canonical `url`. Localized type/stage/status
+labels are not content facts; explicit presentation consumers map the raw values through `uiCopy`, while Knowledge
+page-specific labels live in `features/knowledge/model.ts`.
+
 ## Implemented foundation contract
 
 ### 1. Scope / Trigger
@@ -92,20 +109,26 @@ isPublicStatus(status: Status): boolean;
 listEntries(filter?: ContentFilter): Promise<ContentSummary[]>;
 getEntryBySlug(type: ContentType, slug: string): Promise<ContentCollectionEntry | undefined>;
 getEntryByContentId(contentId: string): Promise<ContentCollectionEntry | undefined>;
+normalizeContentIdentity(data: RawContentIdentity, sourcePath: string): SourceIdentity | undefined;
+discoverAuthoredSourceFiles(contentDirectory: URL): Promise<AuthoredSourceFile[]>;
+assertUniqueSourceIdentities(identities: readonly SourceIdentity[]): void;
+markdownContentLoader(): Loader;
 ```
 
-The activity layer in `apps/web/src/lib/practice.ts` exposes:
+The activity and Heatmap projection layers expose:
 
 ```typescript
 normalizePracticeEvents(entries: readonly PracticeSourceEntry[]): NormalizedPracticeEvent[];
 buildPracticeDataset(entries: readonly PracticeSourceEntry[], options?: PracticeDatasetOptions): PracticeDataset;
 buildPublicPracticeDataset(entries: readonly ContentFrontmatter[], options?: PracticeDatasetOptions): PracticeDataset;
-markdownContentLoader(): Loader;
+buildPracticeHeatmapViewModel(dataset: PracticeDataset, endDateKey: string): PracticeHeatmapViewModel;
 ```
 
 ### 3. Contracts (content, artifact, environment)
 
 - Authored input is YAML frontmatter plus Markdown `.md` under `content/`; `contentId` is immutable and `slug` is URL-facing.
+- Source uniqueness compares normalized `contentId` and `type:slug` for initial load, loader add/change, and Practice
+  generation without changing stored identities or public URL semantics.
 - `markdownContentLoader` and `generate-practice-data.ts` scan `content/` for `.mdx` and fail if one is present. The
   loader renders each Markdown body through the production Sätterli policy before the collection is exposed: raw HTML,
   MDX-style expressions, line-leading ESM imports/exports, and unsafe link/image protocols are build errors, never
@@ -126,7 +149,7 @@ markdownContentLoader(): Loader;
 | Unknown type/stage/status or malformed date | `contentSchema` | Build/type-check fails |
 | `updatedAt < publishedAt` | `contentSchema.superRefine` | Build fails with field issue |
 | Duplicate event or repeated initial publish | `contentSchema.superRefine` | Build fails before route generation |
-| Duplicate `contentId` or type/slug across files | `generate-practice-data.ts` | Build fails with relative file path |
+| Duplicate normalized `contentId` or type/slug across files | shared identity validation used by loader + generator | Initial load/generation and incremental add/change fail with source context |
 | `.mdx` file under `content/` | loader + generator file policy | Build fails and instructs the author to use `.md` |
 | Raw HTML, MDX expression, or MDX ESM in a `.md` body | production Markdown policy | Build fails with an actionable source position; content is not silently stripped |
 | `javascript:`, `data:`, or other unsafe link/image protocol | production Markdown policy | Build fails before an executable URL can be emitted |
@@ -149,6 +172,12 @@ markdownContentLoader(): Loader;
   fail with a Zod issue.
 - `apps/web/tests/unit/practice.test.ts`: automatic publish, explicit publish de-duplication, multiple same-day events,
   updatedAt-only changes, draft exclusion, and end-date exclusion preserve expected public counts.
+- `apps/web/tests/unit/content-source-reader.test.ts`: discovery/extension policy, identity normalization, initial
+  collisions, and public `generateId` add/change/replacement semantics remain aligned.
+- `apps/web/tests/unit/knowledge-model.test.ts`: index, section, article, sidebar, current state, navigation, and TOC
+  projections remain deterministic and presentation labels do not leak back into `ContentSummary`.
+- `apps/web/tests/unit/practice-heatmap-model.test.ts`: 371 cells/53 weeks, visible range, empty cells, statistics,
+  reverse recent eight, all twelve Chinese month labels, and deterministic projection remain stable.
 - `apps/web/tests/unit/content-markdown.test.ts`: ordinary Markdown renders, while raw HTML, MDX syntax, unsafe
   link/image protocols, and `.mdx` source files fail; fenced code and escaped braces remain valid.
 - `apps/web/tests/unit/content-domain.test.ts`: the five-section registry, public URL resolver, exact compatibility

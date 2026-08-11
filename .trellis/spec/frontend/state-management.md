@@ -20,7 +20,8 @@ data flow.
 ## Rules
 
 - Do not add a global store, React context, or client cache for static content.
-- Compute derived lists and heatmap totals in the content/practice layer, not separately in each page.
+- Compute shared domain selections in content/practice modules. Compute page-level Knowledge and Heatmap derived state
+  once in their focused feature view-models, not separately in pages or components.
 - Keep filters accessible as links/forms so the core experience works without JavaScript.
 - If a future API island fails, preserve the static page and expose a safe, concise status message.
 

@@ -12,6 +12,8 @@
 
 - Validate Markdown frontmatter with the Astro-supported schema/runtime validator before a page can build; reject
   `.mdx` source files before collection discovery.
+- Normalize source identity through `normalizeContentIdentity()` before uniqueness checks. That primitive may only
+  apply schema-established trims and `isContentType`; it must not duplicate Zod regex, length, refine, or route rules.
 - Treat generated activity JSON as a typed derived artifact; validate its shape at the boundary that reads it.
 - Normalize dates to a documented date-only representation before grouping by day; do not mix locale strings and `Date`
   objects in aggregation logic.
@@ -20,6 +22,8 @@
 ## Content model rules
 
 - `contentId` is stable and independent of `slug`.
+- `ContentSummary` is `ContentFrontmatter` plus collection `id` and canonical `url`; presentation labels are
+  projected from raw domain values by explicit consumers or focused feature models.
 - `journey` is additive optional data; it is not a discriminated union keyed by `stage`.
 - `practiceLog` events have a date, a registered kind, and an optional note. `updatedAt` is not an event.
 - New type/kind support is added to the central registry/schema and shared queries, not via copied collections or branches.

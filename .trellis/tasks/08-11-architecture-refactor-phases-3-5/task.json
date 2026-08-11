@@ -1,0 +1,35 @@
+{
+  "id": "architecture-refactor-phases-3-5",
+  "name": "architecture-refactor-phases-3-5",
+  "title": "Architecture refactor phases 3-5",
+  "description": "Retrospective record for the approved Phase 3 content pipeline, Phase 4 content projection, and Phase 5 Practice Heatmap refactors.",
+  "status": "in_progress",
+  "dev_type": "refactor",
+  "scope": "apps/web content source rules, identity validation, Knowledge projection, ContentSummary presentation boundary, and Practice Heatmap view-model",
+  "package": "frontend",
+  "priority": "P2",
+  "creator": "staysurvive",
+  "assignee": "staysurvive",
+  "createdAt": "2026-08-11",
+  "completedAt": null,
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "apps/web/src/lib/content",
+    "apps/web/src/features/knowledge/model.ts",
+    "apps/web/src/features/practice/heatmap-model.ts",
+    "apps/web/src/components/PracticeHeatmap.astro"
+  ],
+  "notes": "Created retrospectively at the user's request so the already reviewed and committed Phase 3-5 work is fully represented in Trellis.",
+  "meta": {
+    "work_commits": "f4e1b6e,34ba1b4,873b257,b9e25fc,2917e3d",
+    "final_validation": "prettier=pass;diff-check=pass;lint=pass;typecheck=0;unit=116;build=14;e2e=80-pass-8-skipped",
+    "practice_sha256": "6CE7DD3141BB04DF1E07A4B6701C1B4B5E887B1DFB03B84BB22432A29296C682"
+  }
+}

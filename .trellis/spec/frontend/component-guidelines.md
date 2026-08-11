@@ -7,6 +7,7 @@ the component responsible for presentation, not content querying or API calls.
 
 ```astro
 ---
+import { uiCopy } from '../config/copy';
 import type { ContentSummary } from '../lib/content';
 
 interface Props {
@@ -19,19 +20,21 @@ const { entry, compact = false } = Astro.props satisfies Props;
 
 <article class:list={['content-card', compact && 'content-card--compact']}>
   <a href={entry.url}>
-    <span>{entry.typeLabel}</span>
+    <span>{uiCopy.contentTypes[entry.type]}</span>
     <h2>{entry.title}</h2>
   </a>
 </article>
 ```
 
 The implemented local pattern is typed props, semantic markup, and a typed entry supplied by the content access layer.
-For example, `ContentCard.astro` receives a `ContentSummary` and links through its precomputed `url`; it does not
-query the collection or inspect raw frontmatter. `PracticeHeatmap.astro` receives a `PracticeDataset` and renders a
+For example, `ContentCard.astro` receives a presentation-neutral `ContentSummary`, links through its precomputed `url`,
+and maps raw type values through `uiCopy`; it does not query the collection or inspect raw frontmatter.
+`PracticeHeatmap.astro` receives a `PracticeDataset`, delegates derived state to the Heatmap view-model, and renders a
 static accessible summary plus a scrollable grid.
 
 ```astro
 ---
+import { uiCopy } from '../config/copy';
 import type { ContentSummary } from '../lib/content';
 
 interface Props {
@@ -42,7 +45,7 @@ const { entry } = Astro.props satisfies Props;
 ---
 
 <a href={entry.url}>
-  <span>{entry.typeLabel}</span>
+  <span>{uiCopy.contentTypes[entry.type]}</span>
   <h2>{entry.title}</h2>
 </a>
 ```
@@ -54,6 +57,15 @@ const { entry } = Astro.props satisfies Props;
 - Prefer composition and slots over boolean-prop combinations that create many visual modes.
 - Keep page-specific composition in the page/layout; keep reusable components free of route assumptions.
 - Labels, status names, and accessibility text come from the centralized copy configuration or explicit props.
+
+## Projection boundaries
+
+- `features/knowledge/model.ts` owns Knowledge sidebar counts, recent entries, current state, TOC projection, adjacent
+  navigation, and layout metadata. Knowledge pages invoke it; Knowledge components only render its typed props.
+- `features/practice/heatmap-model.ts` owns the 53-week visible window, statistics, recent eight events, month labels,
+  and accessible summary. `PracticeHeatmap.astro` may format individual rendered dates but must not recompute totals.
+- `ContentSummary` contains domain/content facts plus `id` and canonical `url`; it never grows localized display-label
+  fields merely because a component needs them.
 
 ## Client behavior
 

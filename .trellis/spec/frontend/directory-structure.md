@@ -12,8 +12,9 @@ apps/web/
 ├── src/
 │   ├── components/          # reusable presentational Astro components
 │   ├── config/              # site settings and typed UI copy
+│   ├── features/            # narrow Knowledge and Practice view-model projections
 │   ├── layouts/             # document and content layouts
-│   ├── lib/                 # content access, URL, and practice aggregation logic
+│   ├── lib/                 # source, content, URL, and practice domain facts
 │   ├── pages/               # route entry points only
 │   ├── styles/              # tokens, theme layers, and global base styles
 │   └── content.config.ts    # collection/loader schema for root content/
@@ -23,6 +24,10 @@ content/                     # Markdown (.md) authored source of truth
 infra/                       # static artifact and existing Compose/Caddy deployment docs
 ```
 
+Within `src/`, `features/knowledge/model.ts` and `features/practice/heatmap-model.ts` are the only current
+feature-level projection modules. `features/` is not a destination for generic helpers, types, constants, or future
+subsystems.
+
 The generated activity file is intentionally ignored at `apps/web/src/generated/practice-activity.json`; every
 `prebuild`/`pretypecheck` run recreates it from `content/`. The public copy is emitted at
 `apps/web/dist/generated/practice-activity.json`.
@@ -30,8 +35,10 @@ The generated activity file is intentionally ignored at `apps/web/src/generated/
 ## Ownership rules
 
 - `src/pages/` composes loaders and components; it does not parse frontmatter or contain query variants.
-- `src/lib/` owns typed content access, knowledge projections, slug-collision validation, the public URL resolver, and
-  practice-event normalization.
+- `src/lib/` owns authored-source primitives, typed content access/query, identity and slug validation, the public URL
+  resolver, and practice-event/calendar facts.
+- `src/features/` owns focused page-level view-models. Current allowed examples are Knowledge page projection and the
+  Practice Heatmap projection; helpers, constants, schemas, and generic presentation adapters do not move here.
 - `src/components/` renders typed props and does not make network calls.
 - `src/config/` owns `zh-CN` copy, navigation metadata, and site defaults; repeated labels do not live in component markup.
 - `src/styles/` owns semantic CSS tokens and theme primitives; component styles remain local to the component when practical.
@@ -54,6 +61,7 @@ The generated activity file is intentionally ignored at `apps/web/src/generated/
 ## Avoid
 
 - A second content collection for each `type`.
+- Generic `service`, `manager`, `repository`, or display-adapter layers around existing static content queries.
 - A `utils/` dumping ground when a helper belongs to content, routing, styling, or copy ownership.
 - Importing page-only code into the content model or design-token layer.
 - Letting `.env`, `.git`, local dependencies, reports, or generated output enter the Docker build context; keep

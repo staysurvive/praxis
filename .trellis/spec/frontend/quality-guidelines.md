@@ -13,6 +13,10 @@ the offline-capable `check` command.
 - Domain units: type/stage/status filters, the public URL resolver, exact compatibility mappings, knowledge slug
   collision guards, explicit-only multi-section projections, practice-kind registry, publish de-duplication, multiple
   events on a day, and proof that `updatedAt` alone has no effect.
+- Source/identity units: deterministic discovery, extension rejection, normalized `contentId` and `type:slug`
+  collisions, initial loader state, and official `generateId` add/change replacement semantics.
+- View-model units: Knowledge sidebar/count/current/TOC projection and Heatmap 53-week range, visible statistics,
+  recent-eight ordering, localized month labels, empty cells, and deterministic output.
 - Browser smoke: Knowledge disclosure hover/touch/keyboard/no-JavaScript paths, Knowledge empty-section and
   recent-detail round trips, Projects → the one real detail exception,
   Journey/About, all five compatibility pages, plus a missing route/404.
@@ -45,6 +49,7 @@ the offline-capable `check` command.
 - Does the change preserve the unified content model and stable `contentId`?
 - Does it keep `stage` out of permanent URLs?
 - Are copy, tokens, and filters reused from their owning modules?
+- Does `ContentSummary` remain free of presentation labels, with page-specific projections confined to focused models?
 - Are Light and Dark, mobile, keyboard, no-JavaScript, and empty states covered?
 - Is any generated data clearly derived and reproducible from `content/`?
 
@@ -80,7 +85,7 @@ types without publishing those fixtures.
 | Condition | Boundary | Expected result |
 |---|---|---|
 | Invalid frontmatter/date/type | `contentSchema` / build generator | Build fails with source path and field issue |
-| Duplicate `contentId` or type/slug | `generate-practice-data.ts` | Build fails before static output |
+| Duplicate normalized `contentId` or type/slug | shared identity validation used by loader + generator | Initial load/generation and incremental add/change fail before inconsistent content is exposed |
 | Draft contains private practice notes | `buildPublicPracticeDataset` | Notes and counters are absent from public JSON/UI |
 | Unsafe `SITE_URL` | `resolveSiteUrl` | Astro config load fails before generating metadata |
 | Placeholder or local production `SITE_URL` | `resolveProductionSiteUrl` | Docker export fails before generating metadata |

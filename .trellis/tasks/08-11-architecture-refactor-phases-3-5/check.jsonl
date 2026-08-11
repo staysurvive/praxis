@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend quality checklist and source-of-truth boundary."}
+{"file": ".trellis/spec/frontend/content-model.md", "reason": "Verify identity, content, query, and Practice contracts."}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Verify page, view-model, and component ownership."}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Required static, unit, build, E2E, and compatibility gates."}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Verify normalized identity and typed projection boundaries."}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Check that discovery and projection logic have single owners."}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Check dependency direction and generated-data independence."}
+{"file": ".trellis/tasks/08-11-architecture-refactor-phases-3-5/research/post-refactor-audit.md", "reason": "Final recorded audit and behavioral evidence."}
