@@ -403,3 +403,24 @@ Updated the frontend spec and archived task context manifests to their final arc
 ### Status
 
 [OK] **Completed**
+
+
+## Session 10: Phase 6B Journey Experience
+
+**Date**: 2026-08-12
+**Task**: Phase 6B Journey Experience
+**Branch**: `main`
+
+### Summary
+
+Implemented a data-backed Journey projection, compact trajectory UI, Journey Heatmap mode, accessible source-linked timeline, focused regression coverage, responsive browser validation, and synchronized frontend Trellis contracts.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5ee155e` | (see git log) |
+
+### Status
+
+[OK] **Completed**
